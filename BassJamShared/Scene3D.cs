@@ -13,6 +13,30 @@ namespace BassJam
     {
         public Camera3D Camera { get; set; }
 
+        public bool FogEnabled
+        {
+            get { return basicEffect.FogEnabled; }
+            set { basicEffect.FogEnabled = value; }
+        }
+
+        public float FogStart
+        {
+            get { return basicEffect.FogStart; }
+            set { basicEffect.FogStart = value; }
+        }
+
+        public float FogEnd
+        {
+            get { return basicEffect.FogEnd; }
+            set { basicEffect.FogEnd = value; }
+        }
+
+        public PixColor FogColor
+        {
+            get { return new PixColor(basicEffect.FogColor); }
+            set { basicEffect.FogColor = value.ToVector3(); }
+        }
+
         BasicEffect basicEffect;
         VertexBuffer quadVertexBuffer;
         IndexBuffer quadIndexBuffer;

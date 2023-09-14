@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 using PixelEngine;
 using SongFormat;
@@ -118,7 +119,7 @@ namespace BassJam
         float timeScale = 200f;
         float positionFret = 2;
         float targetFocusFret = 2;
-        float cameraDistance = 80;
+        float cameraDistance = 70;
         float targetCameraDistance = 70;
         int minFret = 0;
         int maxFret = 4;
@@ -182,6 +183,11 @@ namespace BassJam
         public override void DrawQuads()
         {
             base.DrawQuads();
+
+            FogEnabled = true;
+            FogStart = 400;
+            FogEnd = cameraDistance + (secondsLong * timeScale);
+            FogColor = PixColor.Black;            
 
             try
             {
