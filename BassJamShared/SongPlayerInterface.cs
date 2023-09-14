@@ -276,7 +276,7 @@ namespace BassJam
 
                     for (int fret = 1; fret < 24; fret++)
                     {
-                        DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings), whiteHalfAlpha);
+                        DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha);
 
                         PixColor color = PixColor.White;
 
