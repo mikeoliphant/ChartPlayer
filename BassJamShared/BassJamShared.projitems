@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e89d1bac-28e4-434d-857a-3be1d35e279c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>BassJamShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+    <None Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BassJamGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BassJamPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SongIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SongListInterface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SongPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SongPlayerInterface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WdlResampler.cs" />
+  </ItemGroup>
+</Project>
