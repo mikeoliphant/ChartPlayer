@@ -534,10 +534,7 @@ namespace BassJam
             float textWidth;
             float textHeight;
 
-            font.MeasureString(text, out textWidth, out textHeight);
-
-            textWidth *= imageScale;
-            textHeight *= imageScale;
+            font.MeasureString(text, imageScale, out textWidth, out textHeight);
 
             float x = fretCenter - (textWidth / 2);
 

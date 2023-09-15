@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SongFormat
 {
@@ -18,6 +19,11 @@ namespace SongFormat
         public SongInstrumentPart GetPart(string instrumentName)
         {
             return InstrumentParts.FirstOrDefault(p => p.InstrumentName == instrumentName);
+        }
+
+        public override string ToString()
+        {
+            return ArtistName + " - " + SongName;
         }
     }
 
@@ -38,6 +44,11 @@ namespace SongFormat
         public string Name { get; set; }
         public float StartTime { get; set; }
         public float EndTime { get; set; }
+
+        public override string ToString()
+        {
+            return Name + "[" + StartTime + "-" + EndTime + "]";
+        }
     }
 
     /// <summary>
@@ -68,6 +79,11 @@ namespace SongFormat
         public string InstrumentName { get; set; }
         public ESongInstrumentType InstrumentType { get; set; }
         public StringTuning Tuning { get; set; }
+
+        public override string ToString()
+        {
+            return InstrumentName;
+        }
     }
 
     /// <summary>
@@ -177,6 +193,11 @@ namespace SongFormat
 
             return null;
         }
+
+        public override string ToString()
+        {
+            return GetTuning();
+        }
     }
 
     /// <summary>
@@ -184,6 +205,7 @@ namespace SongFormat
     /// </summary>
     public class SongInstrumentNotes
     {
+        public List<SongSection> Sections { get; set; } = new List<SongSection>();
         public List<SongChord> Chords { get; set; } = new List<SongChord>();
         public List<SongNote> Notes { get; set; } = new List<SongNote>();
     }

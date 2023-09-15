@@ -11,7 +11,7 @@ namespace BassJam
     public class SongPlayer
     {
         public double PlaybackSampleRate { get; private set; } = 48000;
-        public double CurrentSecond { get; private set; } = 0;
+        public float CurrentSecond { get; private set; } = 0;
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
         public SongInstrumentNotes SongInstrumentNotes { get; private set; }
@@ -22,6 +22,7 @@ namespace BassJam
         WdlResampler resampler;
         double tuningOffsetSemitones = 0;
         double actualPlaybackSampleRate = 48000;
+        float seekTime = -1;
 
         public SongPlayer()
         {
@@ -88,11 +89,17 @@ namespace BassJam
 
         public void SeekTime(float secs)
         {
-            vorbisReader.TimePosition = TimeSpan.FromSeconds(secs);
+            seekTime = secs;
         }
 
         public int ReadSamples(float[] buffer)
         {
+            if (seekTime != -1)
+            {
+                vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
+                seekTime = -1;
+            }
+
             int read = 0;
 
             if (actualPlaybackSampleRate == vorbisReader.SampleRate)
@@ -110,7 +117,7 @@ namespace BassJam
                 read = resampler.ResampleOut(buffer, 0, inAvailable, framesRequested, 2) * 2;
             }
 
-            CurrentSecond = vorbisReader.TimePosition.TotalSeconds;
+            CurrentSecond = (float)vorbisReader.TimePosition.TotalSeconds;
 
             return read;
         }
