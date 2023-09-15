@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SongListInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongPlayerInterface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SongPlayerScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WdlResampler.cs" />
   </ItemGroup>
 </Project>

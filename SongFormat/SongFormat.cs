@@ -21,19 +21,37 @@ namespace SongFormat
         }
     }
 
+    /// <summary>
+    /// Song structure/arrangment information
+    /// </summary>
     public class SongStructure
-    {
-        // Sections (verse, chorus)
-        // Measures/beats
+    {        
+        public List<SongSection> Sections { get; set; } = new List<SongSection>();
         public List<SongBeat> Beats { get; set; } = new List<SongBeat>();
     }
 
+    /// <summary>
+    /// Song section (ie: "verse", "chorus")
+    /// </summary>
+    public class SongSection
+    {
+        public string Name { get; set; }
+        public float StartTime { get; set; }
+        public float EndTime { get; set; }
+    }
+
+    /// <summary>
+    /// An individual beat in a song
+    /// </summary>
     public struct SongBeat
     {
         public float TimeOffset { get; set; }
         public bool IsMeasure { get; set; }
     }
 
+    /// <summary>
+    /// The type of instrument
+    /// </summary>
     public enum ESongInstrumentType
     {
         LeadGuitar,
@@ -42,6 +60,9 @@ namespace SongFormat
         Vocals
     }
 
+    /// <summary>
+    /// Instrument part metadata
+    /// </summary>
     public class SongInstrumentPart
     {
         public string InstrumentName { get; set; }
@@ -49,6 +70,9 @@ namespace SongFormat
         public StringTuning Tuning { get; set; }
     }
 
+    /// <summary>
+    /// Tuning informatino for a stringed instrument
+    /// </summary>
     public class StringTuning
     {
         public List<int> StringSemitoneOffsets { get; set; } = null;
@@ -87,6 +111,10 @@ namespace SongFormat
             return "Custom";
         }
 
+        /// <summary>
+        /// Check if a tuning is offset from stanard tuning (including first-string drop tunings)
+        /// </summary>
+        /// <returns>Whether the tuning is offset from standard</returns>
         public bool IsOffsetFromStandard()
         {
             for (int i = 2; i < StringSemitoneOffsets.Count; i++)
@@ -96,6 +124,11 @@ namespace SongFormat
             return true;
         }
 
+        /// <summary>
+        /// Get note name offset from E standard
+        /// </summary>
+        /// <param name="offset">The offset in semitones</param>
+        /// <returns>The offset note name</returns>
         public static string GetOffsetNote(int offset)
         {
             switch (offset)
@@ -121,6 +154,11 @@ namespace SongFormat
             return null;
         }
 
+        /// <summary>
+        /// Get a dropped note name (prefer flats) offset from E standard
+        /// </summary>
+        /// <param name="offset">The offset in semitones</param>
+        /// <returns>The offset note name</returns>
         public static string GetDropNote(int offset)
         {
             switch (offset)
@@ -141,12 +179,18 @@ namespace SongFormat
         }
     }
 
+    /// <summary>
+    /// Notes and chords for an instrument part
+    /// </summary>
     public class SongInstrumentNotes
     {
         public List<SongChord> Chords { get; set; } = new List<SongChord>();
         public List<SongNote> Notes { get; set; } = new List<SongNote>();
     }
 
+    /// <summary>
+    /// Chord notes/fingering
+    /// </summary>
     public class SongChord
     {
         public string Name { get; set; }
@@ -154,6 +198,9 @@ namespace SongFormat
         public List<int> Frets { get; set;} = new List<int>();
     }
 
+    /// <summary>
+    /// An individual note/chord event in a song
+    /// </summary>
     public struct SongNote
     {
         public float TimeOffset { get; set; } = 0;
@@ -167,9 +214,13 @@ namespace SongFormat
 
         public SongNote()
         {
+
         }
     }
 
+    /// <summary>
+    /// Technique flags
+    /// </summary>
     [Flags]
     public enum ESongNoteTechnique
     {
@@ -189,6 +240,9 @@ namespace SongFormat
         Chord = 1 << 14
     }
 
+    /// <summary>
+    /// Vocal/lyric events in a song
+    /// </summary>
     public struct SongVocal
     {
         public string Vocal { get; set; }
