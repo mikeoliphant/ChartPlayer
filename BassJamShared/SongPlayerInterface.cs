@@ -231,8 +231,6 @@ namespace BassJam
                         DrawFretTimeLine(fret, 0, startTime, endTime, whiteThreeQuartersAlpha);
                     }
 
-                    float startWithMinSustain = startTime - 0.1f;
-
                     minFret = 24;
                     maxFret = 0;
 
@@ -245,7 +243,9 @@ namespace BassJam
                         DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor);
                     }
 
-                    IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithMinSustain) && (n.TimeOffset <= endTime));
+                    float startWithBuffer = startTime - 1;
+
+                    IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithBuffer) && (n.TimeOffset <= endTime));
 
                     SongNote? lastNote = null;
 
@@ -259,7 +259,11 @@ namespace BassJam
                         lastNote = note;
                     }
 
-                    foreach (SongNote note in notes.OrderByDescending(n => n.TimeOffset))
+                    float startWithMinSustain = startTime - 0.15f;
+
+                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset);
+
+                    foreach (SongNote note in notes)
                     {
                         if (note.TimeOffset > endTime)
                         {
