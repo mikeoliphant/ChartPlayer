@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using NVorbis;
 using SongFormat;
@@ -14,6 +15,7 @@ namespace BassJam
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
         public SongInstrumentNotes SongInstrumentNotes { get; private set; }
+        public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
 
         VorbisReader vorbisReader;
@@ -59,6 +61,20 @@ namespace BassJam
                 actualPlaybackSampleRate = PlaybackSampleRate;
             else
                 actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
+
+            SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
+
+            if (vocalPart != null)
+            {
+                using (Stream vocalStream = File.OpenRead(Path.Combine(songPath, vocalPart.InstrumentName + ".json")))
+                {
+                    SongVocals = JsonSerializer.Deserialize<List<SongVocal>>(vocalStream);
+                }
+            }
+            else
+            {
+                SongVocals = new List<SongVocal>();
+            }
 
             vorbisReader = new VorbisReader(Path.Combine(songPath, "song.ogg"));
 

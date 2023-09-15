@@ -27,6 +27,7 @@ namespace BassJam
         SongPlayer songPlayer;
 
         SongData songData;
+        TextBlock vocalText;
 
         public SongPlayerInterface()
         {
@@ -44,6 +45,16 @@ namespace BassJam
             songIndex.IndexSongs();
 
             songList.SetSongs(songIndex.Songs);
+
+            vocalText = new TextBlock
+            {
+                Font = PixGame.Instance.GetFont("LargeFont"),
+                TextColor = PixColor.White,
+                HorizontalPadding = 20,
+                VerticalPadding = 20
+            };
+
+            mainDock.Children.Add(vocalText);
 
             TextTouchButton songsButton = new TextTouchButton("ShowSongs", "Songs");
             songsButton.HorizontalAlignment = EHorizontalAlignment.Left;
@@ -95,6 +106,23 @@ namespace BassJam
             if (PixGame.InputManager.WasClicked("ShowSongs", this))
             {
                 ShowPopup(songList);
+            }
+
+            if (songPlayer != null)
+            {
+                float endTime = (float)songPlayer.CurrentSecond + 2;
+
+                vocalText.StringBuilder.Clear();
+
+                foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
+                {
+                    vocalText.StringBuilder.Append(vocal.Vocal);
+
+                    if (!vocal.Vocal.EndsWith('\n'))
+                    {
+                        vocalText.StringBuilder.Append(' ');
+                    }
+                }
             }
         }
 

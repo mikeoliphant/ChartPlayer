@@ -188,4 +188,10 @@ namespace SongFormat
         Pop = 1 << 13,
         Chord = 1 << 14
     }
+
+    public struct SongVocal
+    {
+        public string Vocal { get; set; }
+        public float TimeOffset { get; set; }
+    }
 }
