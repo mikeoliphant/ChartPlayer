@@ -39,8 +39,6 @@ namespace BassJam
 
             songIndex = new SongIndex(basePath);
 
-            songIndex.IndexSongs();
-
             songList.SetSongs(songIndex.Songs);
 
             VerticalStack topStack = new VerticalStack()

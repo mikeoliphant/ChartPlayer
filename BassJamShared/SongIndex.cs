@@ -26,11 +26,25 @@ namespace BassJam
         public SongIndex(string basePath)
         {
             this.basePath = basePath;
-        }
 
-        public void IndexSongs()
-        {
-            IndexFolder(basePath);
+            string indexFile = Path.Combine(basePath, "index.json");
+
+            if (File.Exists(indexFile))
+            {
+                using (Stream indexStream = File.OpenRead(indexFile))
+                {
+                    Songs = JsonSerializer.Deserialize<List<SongIndexEntry>>(indexStream);
+                }
+            }
+            else
+            {
+                IndexFolder(basePath);
+
+                using (Stream indexStream = File.Create(indexFile))
+                {
+                    JsonSerializer.Serialize(indexStream, Songs);
+                }
+            }
         }
 
         void IndexFolder(string folderPath)
