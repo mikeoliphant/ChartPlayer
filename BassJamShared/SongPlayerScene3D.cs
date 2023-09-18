@@ -13,7 +13,6 @@ namespace BassJam
 
         SongPlayer player;
         float secondsLong;
-        PixColor whiteQuarterAlpha;
         PixColor whiteHalfAlpha;
         PixColor whiteThreeQuartersAlpha;
         float currentTime;
@@ -31,9 +30,6 @@ namespace BassJam
         {
             this.player = player;
             this.secondsLong = secondsLong;
-
-            whiteQuarterAlpha = PixColor.White;
-            whiteQuarterAlpha.A = 64;
 
             whiteHalfAlpha = PixColor.White;
             whiteHalfAlpha.A = 128;
@@ -127,11 +123,14 @@ namespace BassJam
                     int lastHandFret = -1;
                     float lastTime = currentTime;
 
+                    PixColor handPositionColor = PixColor.White;
+                    handPositionColor.A = 32;
+
                     foreach (SongNote note in notes)
                     {
                         if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
                         {
-                            DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, whiteQuarterAlpha);
+                            DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, handPositionColor);
 
                             lastTime = note.TimeOffset;
                         }
@@ -148,7 +147,7 @@ namespace BassJam
 
                     if (lastHandFret != -1)
                     {
-                        DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, whiteQuarterAlpha);
+                        DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
                     }
 
                     float startWithMinSustain = startTime - 0.15f;
@@ -359,7 +358,14 @@ namespace BassJam
                         }
                         else
                         {
-                            DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                            if (note.Techniques.HasFlag(ESongNoteTechnique.Vibrato))
+                            {
+                                DrawVibrato(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(note.String), stringColor);
+                            }
+                            else
+                            {
+                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                            }
                         }
                     }
                 }
@@ -583,6 +589,43 @@ namespace BassJam
                 }
 
                 lastPoint = point;
+            }
+        }
+
+        void DrawVibrato(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color)
+        {
+            float imageScale = .03f;
+
+            fretCenter = GetFretPosition(fretCenter);
+
+            float minX = fretCenter - ((float)image.Width * imageScale);
+            float maxX = fretCenter + ((float)image.Width * imageScale);
+
+            float lastTime = startTime;
+            float lastHeight = heightOffset;
+
+            int numPoints = (int)((endTime - startTime) / 0.01f);
+
+            for (int i = 1; i <= numPoints; i++)
+            {
+                float time = PixUtil.Lerp(startTime, endTime, (float)i / (float)numPoints);
+
+                if (time < currentTime)
+                {
+                    lastTime = currentTime;
+
+                    continue;
+                }
+
+                float height = heightOffset + ((float)Math.Sin((time - startTime) * 50) * 1);
+
+                DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
+                    new Vector3(minX, height, time * -timeScale), color,
+                    new Vector3(maxX, height, time * -timeScale), color,
+                    new Vector3(maxX, lastHeight, lastTime * -timeScale), color);
+
+                lastHeight = height;
+                lastTime = time;
             }
         }
 
