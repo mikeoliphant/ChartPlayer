@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using PixelEngine;
-using SharpDX.MediaFoundation;
 using SongFormat;
 
 namespace BassJam
@@ -14,6 +13,7 @@ namespace BassJam
 
         SongPlayer player;
         float secondsLong;
+        PixColor whiteQuarterAlpha;
         PixColor whiteHalfAlpha;
         PixColor whiteThreeQuartersAlpha;
         float currentTime;
@@ -31,6 +31,9 @@ namespace BassJam
         {
             this.player = player;
             this.secondsLong = secondsLong;
+
+            whiteQuarterAlpha = PixColor.White;
+            whiteQuarterAlpha.A = 64;
 
             whiteHalfAlpha = PixColor.White;
             whiteHalfAlpha.A = 128;
@@ -101,7 +104,7 @@ namespace BassJam
 
                     for (int fret = 0; fret < 24; fret++)
                     {
-                        DrawFretTimeLine(fret, 0, startTime, endTime, whiteThreeQuartersAlpha);
+                        DrawFretTimeLine(fret, 0, startTime, endTime, whiteHalfAlpha);
                     }
 
                     minFret = 24;
@@ -121,15 +124,31 @@ namespace BassJam
                     IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithBuffer) && (n.TimeOffset <= endTime));
 
                     SongNote? lastNote = null;
+                    int lastHandFret = -1;
+                    float lastTime = currentTime;
 
                     foreach (SongNote note in notes)
                     {
+                        if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
+                        {
+                            DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, whiteQuarterAlpha);
+
+                            lastTime = note.TimeOffset;
+                        }
+
+                        lastHandFret = note.HandFret;
+
                         if ((note.TimeOffset > currentTime) && (note.Fret > 0) && (!lastNote.HasValue || (lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
                         {
                             DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
                         }
 
                         lastNote = note;
+                    }
+
+                    if (lastHandFret != -1)
+                    {
+                        DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, whiteQuarterAlpha);
                     }
 
                     float startWithMinSustain = startTime - 0.15f;
@@ -522,6 +541,16 @@ namespace BassJam
             float maxX = fretCenter + ((float)image.Width * imageScale);
 
             DrawQuad(image, new Vector3(minX, heightOffset, startTime), color, new Vector3(minX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, startTime), color);
+        }
+
+        void DrawFlatImage(PixImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, PixColor color)
+        {
+            startFret = GetFretPosition(startFret);
+            endFret = GetFretPosition(endFret);
+            startTime *= -timeScale;
+            endTime *= -timeScale;
+
+            DrawQuad(image, new Vector3(startFret, heightOffset, startTime), color, new Vector3(startFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, startTime), color);
         }
 
         void DrawSkewedFlatImage(PixImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, PixColor color)

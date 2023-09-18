@@ -51,7 +51,7 @@ namespace BassJamSpriteProcessor
 
             processor.PushDirectory("UserInterface");
 
-            //processor.Scale("SingleWhitePixel");
+            processor.Scale("SingleWhitePixel");
 
             processor.TextureScale = 1;
 
