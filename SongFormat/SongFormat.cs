@@ -229,6 +229,7 @@ namespace SongFormat
         public float TimeLength { get; set; } = 0;
         public int Fret { get; set; } = -1;
         public int String { get; set; } = -1;
+        public CentsOffset[] CentsOffsets { get; set; } = null;
         public ESongNoteTechnique Techniques { get; set; } = 0;
         public int HandFret { get; set; } = -1;
         public int SlideFret { get; set; } = -1;
@@ -238,6 +239,12 @@ namespace SongFormat
         {
 
         }
+    }
+
+    public struct CentsOffset
+    {
+        public float TimeOffset { get; set; }
+        public int Cents { get; set; }
     }
 
     /// <summary>
@@ -252,14 +259,15 @@ namespace SongFormat
         PalmMute = 1 << 4,
         FretHandMute = 1 << 5,
         Slide = 1 << 6,
-        Tremolo = 1 << 7,
-        Vibrato = 1 << 8,
-        Harmonic = 1 << 9,
-        PinchHarmonic = 1 << 10,
-        Tap = 1 << 11,
-        Slap = 1 << 12,
-        Pop = 1 << 13,
-        Chord = 1 << 14
+        Bend = 1 << 7,
+        Tremolo = 1 << 8,
+        Vibrato = 1 << 9,
+        Harmonic = 1 << 10,
+        PinchHarmonic = 1 << 11,
+        Tap = 1 << 12,
+        Slap = 1 << 13,
+        Pop = 1 << 14,
+        Chord = 1 << 15
     }
 
     /// <summary>

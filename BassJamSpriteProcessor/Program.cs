@@ -75,6 +75,13 @@ namespace BassJamSpriteProcessor
             processor.ScaleAndShadow("GuitarGreen");
             processor.ScaleAndShadow("GuitarPurple");
 
+            processor.ScaleAndShadow("NoteTrailRed");
+            processor.ScaleAndShadow("NoteTrailYellow");
+            processor.ScaleAndShadow("NoteTrailCyan");
+            processor.ScaleAndShadow("NoteTrailOrange");
+            processor.ScaleAndShadow("NoteTrailGreen");
+            processor.ScaleAndShadow("NoteTrailPurple");
+
             processor.ScaleAndShadow("NoteHammerOn");
             processor.ScaleAndShadow("NotePullOff");
             processor.ScaleAndShadow("NoteMute");

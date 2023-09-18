@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using PixelEngine;
+using SharpDX.MediaFoundation;
 using SongFormat;
 
 namespace BassJam
@@ -222,31 +223,38 @@ namespace BassJam
 
             PixColor stringColor = PixColor.White;
             string imageName = null;
+            string trailImageName = null;
 
             switch (note.String)
             {
                 case 0:
                     imageName = "GuitarRed";
+                    trailImageName = "NoteTrailRed";
                     break;
 
                 case 1:
                     imageName = "GuitarYellow";
+                    trailImageName = "NoteTrailYellow";
                     break;
 
                 case 2:
                     imageName = "GuitarCyan";
+                    trailImageName = "NoteTrailCyan";
                     break;
 
                 case 3:
                     imageName = "GuitarOrange";
+                    trailImageName = "NoteTrailOrange";
                     break;
 
                 case 4:
                     imageName = "GuitarGreen";
+                    trailImageName = "NoteTrailGreen";
                     break;
 
                 case 5:
                     imageName = "GuitarPurple";
+                    trailImageName = "NoteTrailPurple";
                     break;
             }
 
@@ -302,7 +310,7 @@ namespace BassJam
                 if (note.TimeLength > 0)
                 {
                     // Sustain note tail
-                    DrawFlatImage(PixGame.Instance.GetImage(imageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
                 }
 
                 // Note head
@@ -320,11 +328,20 @@ namespace BassJam
 
                     if (isSlide)
                     {
-                        DrawSkewedFlatImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                        //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                        DrawImageTrail(PixGame.Instance.GetImage(trailImageName), stringColor,
+                            new Vector3(note.Fret - 0.5f, GetStringHeight(note.String), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(note.String), noteHeadTime + noteSustain));
                     }
                     else
                     {
-                        DrawFlatImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                        if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
+                        {
+                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, GetStringHeight(note.String), note.CentsOffsets, stringColor);
+                        }
+                        else
+                        {
+                            DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                        }
                     }
                 }
 
@@ -340,12 +357,19 @@ namespace BassJam
                 // Vertical line from fretboard up to note head
                 DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(note.String), whiteHalfAlpha);
 
+                float noteHeadHeight = GetStringHeight(note.String);
+
+                if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
+                {
+                    noteHeadHeight += GetBendOffset(note.TimeOffset, noteSustain, note.CentsOffsets);
+                }
+
                 // Note head
-                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, GetStringHeight(note.String), stringColor);
+                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
 
                 // Note modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, GetStringHeight(note.String), PixColor.White);
+                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, PixColor.White);
             }
 
             if (note.TimeOffset > currentTime)
@@ -359,9 +383,38 @@ namespace BassJam
             return 240.0f - (240.0f / (float)(Math.Pow(2, (double)fret / 12.0)));
         }
 
-        float GetStringHeight(int stringIndex)
+        float GetStringHeight(float str)
         {
-            return 3 + (stringIndex * 4);
+            return 3.0f + (str * 4.0f);
+        }
+
+        float GetCentsOffset(float cents)
+        {
+            return cents / 30.0f;
+        }
+
+        float GetBendOffset(float startTime, float sustain, CentsOffset[] bendOffsets)
+        {
+            if (startTime > currentTime)
+                return 0;
+
+            int lastCents = 0;
+            float lastTime = startTime;
+
+            foreach (CentsOffset offset in bendOffsets)
+            {
+                if (offset.TimeOffset > currentTime)
+                {
+                    float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
+
+                    return GetCentsOffset(PixUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
+                }
+
+                lastCents = offset.Cents;
+                lastTime = offset.TimeOffset;
+            }
+
+            return 0;
         }
 
         void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, PixColor color)
@@ -482,6 +535,74 @@ namespace BassJam
 
             DrawQuad(image, new Vector3(startFret - ((float)image.Width * imageScale), heightOffset, startTime), color, new Vector3(endFret - ((float)image.Width * imageScale), heightOffset, endTime), color,
                 new Vector3(endFret + ((float)image.Width * imageScale), heightOffset, endTime), color, new Vector3(startFret + ((float)image.Width * imageScale), heightOffset, startTime), color);
+        }
+
+        void DrawImageTrail(PixImage image, PixColor color, params Vector3[] trailPoints)
+        {
+            float imageScale = .03f;
+
+            Vector3? lastPoint = null;
+
+            foreach (Vector3 point in trailPoints)
+            {
+                if (lastPoint.HasValue)
+                {
+                    DrawQuad(image, new Vector3(GetFretPosition(lastPoint.Value.X) - ((float)image.Width * imageScale), lastPoint.Value.Y, lastPoint.Value.Z * -timeScale), color,
+                        new Vector3(GetFretPosition(point.X) - ((float)image.Width * imageScale), point.Y, point.Z * -timeScale), color,
+                        new Vector3(GetFretPosition(point.X) + ((float)image.Width * imageScale), point.Y, point.Z * -timeScale), color,
+                        new Vector3(GetFretPosition(lastPoint.Value.X) + ((float)image.Width * imageScale), lastPoint.Value.Y, lastPoint.Value.Z * -timeScale), color);
+                }
+
+                lastPoint = point;
+            }
+        }
+
+        void DrawBend(PixImage image, float fretCenter, float startTime, float sustainTime, float heightOffset, CentsOffset[] bendOffsets, PixColor color)
+        {
+            fretCenter = GetFretPosition(fretCenter);
+
+            float imageScale = .03f;
+
+            float minX = fretCenter - ((float)image.Width * imageScale);
+            float maxX = fretCenter + ((float)image.Width * imageScale);
+
+            float lastTime = startTime;
+            float lastHeight = heightOffset;
+
+            foreach (CentsOffset offset in bendOffsets)
+            {
+                float height = heightOffset + GetCentsOffset(offset.Cents);
+
+                sustainTime -= (offset.TimeOffset - lastTime);
+
+                lastTime = Math.Max(lastTime, currentTime);
+
+                if (offset.TimeOffset > currentTime)
+                {
+                    DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
+                        new Vector3(minX, height, offset.TimeOffset * -timeScale), color,
+                        new Vector3(maxX, height, offset.TimeOffset * -timeScale), color,
+                        new Vector3(maxX, lastHeight, lastTime * -timeScale), color);
+                }
+
+                lastHeight = height;
+                lastTime = offset.TimeOffset;
+            }
+
+            if (sustainTime > 0)
+            {
+                float endTime = lastTime + sustainTime;
+
+                if (endTime > currentTime)
+                {
+                    lastTime = Math.Max(lastTime, currentTime);
+
+                    DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
+                        new Vector3(minX, lastHeight, endTime * -timeScale), color,
+                        new Vector3(maxX, lastHeight, endTime * -timeScale), color,
+                        new Vector3(maxX, lastHeight, lastTime * -timeScale), color);
+                }
+            }
         }
 
         void DrawFlatText(string text, float fretCenter, float timeCenter, float heightOffset, PixColor color, float imageScale)
