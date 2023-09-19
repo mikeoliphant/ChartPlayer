@@ -26,6 +26,8 @@ namespace BassJam
         SongNote? firstNote;
         int numStrings;
 
+        Dictionary<float, bool> nonReapeatDict = new Dictionary<float, bool>();
+
         public SongPlayerScene3D(SongPlayer player, float secondsLong)
         {
             this.player = player;
@@ -38,6 +40,30 @@ namespace BassJam
             whiteThreeQuartersAlpha.A = 192;
 
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
+
+            // Do a pre-pass on the notes to find spot where we want to add note numbers on the fretboard or re-show the full chord
+            SongNote? lastNote = null;
+            float lastTime = currentTime;
+
+            PixColor handPositionColor = PixColor.White;
+            handPositionColor.A = 32;
+
+            foreach (SongNote note in player.SongInstrumentNotes.Notes)
+            {
+                if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
+                {
+                    if ((note.TimeOffset > currentTime) && (!lastNote.HasValue || (lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                    {
+                        nonReapeatDict[note.TimeOffset] = true;
+                    }
+                }
+                else if ((note.TimeOffset > currentTime) && (note.Fret > 0) && (!lastNote.HasValue || (lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                {
+                    nonReapeatDict[note.TimeOffset] = true;
+                }
+
+                lastNote = note;
+            }
         }
 
         public override void Draw()
@@ -119,7 +145,6 @@ namespace BassJam
 
                     IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithBuffer) && (n.TimeOffset <= endTime));
 
-                    SongNote? lastNote = null;
                     int lastHandFret = -1;
                     float lastTime = currentTime;
 
@@ -136,13 +161,6 @@ namespace BassJam
                         }
 
                         lastHandFret = note.HandFret;
-
-                        if ((note.TimeOffset > currentTime) && (note.Fret > 0) && (!lastNote.HasValue || (lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
-                        {
-                            DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
-                        }
-
-                        lastNote = note;
                     }
 
                     if (lastHandFret != -1)
@@ -165,10 +183,24 @@ namespace BassJam
                         {
                             SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
 
+                            PixColor color = PixColor.White;
+                            color.A = 32;
+
+                            int minFret = 24;
+                            int maxFret = 0;
+                            int minString = numStrings - 1;
+                            int maxString = 0;
+
                             for (int str = 0; str < chord.Fingers.Count; str++)
                             {
                                 if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
                                 {
+                                    minFret = Math.Min(minFret, chord.Frets[str]);
+                                    maxFret = Math.Max(maxFret, chord.Frets[str]);
+
+                                    minString = Math.Min(minString, str);
+                                    maxString = Math.Max(maxString, str);
+
                                     SongNote chordNote = new SongNote()
                                     {
                                         TimeOffset = note.TimeOffset,
@@ -179,12 +211,22 @@ namespace BassJam
                                         HandFret = note.HandFret
                                     };
 
-                                    DrawNote(chordNote);
+                                    if (nonReapeatDict.ContainsKey(note.TimeOffset))
+                                    {
+                                        DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
+
+                                        DrawNote(chordNote);
+                                    }
                                 }
                             }
+
+                            DrawVerticalImage(PixGame.Instance.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
                         }
                         else
                         {
+                            if (nonReapeatDict.ContainsKey(note.TimeOffset))
+                                DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
+
                             DrawNote(note);
                         }
                     }
@@ -535,6 +577,15 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, minY, timeCenter), color, new Vector3(minX, maxY, timeCenter), color, new Vector3(maxX, maxY, timeCenter), color, new Vector3(maxX, minY, timeCenter), color);
         }
 
+        void DrawVerticalImage(PixImage image, float startFret, float endFret, float time, float startHeight, float endHeight, PixColor color)
+        {
+            startFret = GetFretPosition(startFret);
+            endFret = GetFretPosition(endFret);
+            time *= -timeScale;
+
+            DrawQuad(image, new Vector3(startFret, startHeight, time), color, new Vector3(startFret, endHeight, time), color, new Vector3(endFret, endHeight, time), color, new Vector3(endFret, startHeight, time), color);
+        }
+
         void DrawFlatImage(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
@@ -604,7 +655,7 @@ namespace BassJam
             float lastTime = startTime;
             float lastHeight = heightOffset;
 
-            int numPoints = (int)((endTime - startTime) / 0.01f);
+            int numPoints = (int)((endTime - startTime) / 0.02f);
 
             for (int i = 1; i <= numPoints; i++)
             {
