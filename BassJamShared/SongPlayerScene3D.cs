@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using PixelEngine;
+using SharpDX.MediaFoundation;
 using SongFormat;
 
 namespace BassJam
@@ -50,16 +51,30 @@ namespace BassJam
 
             foreach (SongNote note in player.SongInstrumentNotes.Notes)
             {
-                if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
+                if (!lastNote.HasValue)
                 {
-                    if ((note.TimeOffset > currentTime) && (!lastNote.HasValue || (lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                    nonReapeatDict[note.TimeOffset] = true;
+                }
+                else
+                {
+                    if (note.HandFret != lastNote.Value.HandFret)
                     {
                         nonReapeatDict[note.TimeOffset] = true;
                     }
-                }
-                else if ((note.TimeOffset > currentTime) && (note.Fret > 0) && (!lastNote.HasValue || (lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
-                {
-                    nonReapeatDict[note.TimeOffset] = true;
+                    else
+                    {
+                        if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
+                        {
+                            if ((lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
+                            {
+                                nonReapeatDict[note.TimeOffset] = true;
+                            }
+                        }
+                        else if ((note.Fret > 0) && ((lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                        {
+                            nonReapeatDict[note.TimeOffset] = true;
+                        }
+                    }
                 }
 
                 lastNote = note;
@@ -170,7 +185,7 @@ namespace BassJam
 
                     float startWithMinSustain = startTime - 0.15f;
 
-                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset);
+                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => n.String);
 
                     foreach (SongNote note in notes)
                     {
@@ -195,8 +210,11 @@ namespace BassJam
                             {
                                 if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
                                 {
-                                    minFret = Math.Min(minFret, chord.Frets[str]);
-                                    maxFret = Math.Max(maxFret, chord.Frets[str]);
+                                    if (chord.Frets[str] > 0)
+                                    {
+                                        minFret = Math.Min(minFret, chord.Frets[str]);
+                                        maxFret = Math.Max(maxFret, chord.Frets[str]);
+                                    }
 
                                     minString = Math.Min(minString, str);
                                     maxString = Math.Max(maxString, str);
@@ -213,18 +231,20 @@ namespace BassJam
 
                                     if (nonReapeatDict.ContainsKey(note.TimeOffset))
                                     {
-                                        DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
+                                        if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
+                                            DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
 
                                         DrawNote(chordNote);
                                     }
                                 }
                             }
 
-                            DrawVerticalImage(PixGame.Instance.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
+                            if ((note.TimeOffset > currentTime) && (maxFret > minFret))
+                                DrawVerticalImage(PixGame.Instance.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
                         }
                         else
                         {
-                            if (nonReapeatDict.ContainsKey(note.TimeOffset))
+                            if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
                                 DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
 
                             DrawNote(note);
@@ -396,7 +416,7 @@ namespace BassJam
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, GetStringHeight(note.String), note.CentsOffsets, stringColor);
+                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, note.String, note.CentsOffsets, stringColor);
                         }
                         else
                         {
@@ -428,11 +448,23 @@ namespace BassJam
 
                 if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                 {
-                    noteHeadHeight += GetBendOffset(note.TimeOffset, noteSustain, note.CentsOffsets);
+                    noteHeadHeight += GetBendOffset(note.TimeOffset, note.TimeLength, note.String, note.CentsOffsets);
                 }
 
                 // Note head
-                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
+                if (!note.Techniques.HasFlag(ESongNoteTechnique.Continued) || (note.TimeOffset < currentTime))
+                {
+                    if (isSlide && (note.TimeOffset < currentTime))
+                    {
+                        float slideFret = PixUtil.Lerp(note.Fret, note.SlideFret, PixUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+
+                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
+                    }
+                    else
+                    {
+                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
+                    }
+                }
 
                 // Note modifier
                 if (modifierImage != null)
@@ -455,12 +487,15 @@ namespace BassJam
             return 3.0f + (str * 4.0f);
         }
 
-        float GetCentsOffset(float cents)
+        float GetCentsOffset(float strng, float cents)
         {
-            return cents / 30.0f;
+            if (strng < 2)
+                return cents / 30.0f;
+
+            return cents / -30.0f;
         }
 
-        float GetBendOffset(float startTime, float sustain, CentsOffset[] bendOffsets)
+        float GetBendOffset(float startTime, float sustain, float strng, CentsOffset[] bendOffsets)
         {
             if (startTime > currentTime)
                 return 0;
@@ -474,14 +509,14 @@ namespace BassJam
                 {
                     float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
 
-                    return GetCentsOffset(PixUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
+                    return GetCentsOffset(strng, PixUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
                 }
 
                 lastCents = offset.Cents;
                 lastTime = offset.TimeOffset;
             }
 
-            return 0;
+            return GetCentsOffset(strng,lastCents);
         }
 
         void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, PixColor color)
@@ -680,9 +715,11 @@ namespace BassJam
             }
         }
 
-        void DrawBend(PixImage image, float fretCenter, float startTime, float sustainTime, float heightOffset, CentsOffset[] bendOffsets, PixColor color)
+        void DrawBend(PixImage image, float fretCenter, float startTime, float sustainTime, float strng, CentsOffset[] bendOffsets, PixColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
+
+            float heightOffset = GetStringHeight(strng);
 
             float imageScale = .03f;
 
@@ -694,7 +731,7 @@ namespace BassJam
 
             foreach (CentsOffset offset in bendOffsets)
             {
-                float height = heightOffset + GetCentsOffset(offset.Cents);
+                float height = heightOffset + GetCentsOffset(strng, offset.Cents);
 
                 sustainTime -= (offset.TimeOffset - lastTime);
 

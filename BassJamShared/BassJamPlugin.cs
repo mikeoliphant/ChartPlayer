@@ -159,7 +159,7 @@ namespace BassJam
 
                 int offset = 0;
 
-                double gain = 0.5f;
+                double gain = 0.25f;
 
                 for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
                 {
