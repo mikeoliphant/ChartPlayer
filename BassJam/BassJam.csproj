@@ -41,6 +41,6 @@
 		<Exec Command="dotnet tool restore" />
 	</Target>
 	<Import Project="..\BassJamShared\BassJamShared.projitems" Label="Shared" />
-	<Import Project="..\SongFormat\SongFormat.projitems" Label="Shared" />
 	<Import Project="..\..\PixelEngine\PixelEngine\PixelEngine.projitems" Label="Shared" />
+	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>

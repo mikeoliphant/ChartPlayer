@@ -11,11 +11,13 @@ namespace BassJam
     {
         PixelEngine.XNAGame xnaGame = null;
 
+        public BassJamSaveState BassJamSaveState { get { return (SaveStateData as BassJamSaveState) ?? new BassJamSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
 
         AudioIOPort stereoInput;
         AudioIOPort stereoOutput;
         float[] interleavedAudio = new float[0];
+        Thread gameThread = null;
 
         public BassJamPlugin()
         {
@@ -36,6 +38,8 @@ namespace BassJam
             EditorHeight = 720;
 
             FileSelector.DoNativeFileSelector = false;
+
+            SaveStateData = new BassJamSaveState();
         }
 
         public override void Initialize()
@@ -64,7 +68,8 @@ namespace BassJam
 
             this.parentWindow = parentWindow;
 
-            new Thread(new ThreadStart(RunGame)).Start();
+            gameThread = new Thread(new ThreadStart(RunGame));
+            gameThread.Start();
         }
 
         public void Debug(String debugStr)
@@ -134,7 +139,12 @@ namespace BassJam
         {
             base.HideEditor();
 
-            xnaGame.Exit();
+            if (xnaGame != null)
+            {
+                xnaGame.Exit();
+
+                gameThread.Join();
+            }
         }
 
         public void SetSongPlayer(SongPlayer songPlayer)
@@ -181,6 +191,15 @@ namespace BassJam
             {
                 Logger.Log("Process failed with: " + ex.ToString());
             }
+        }
+    }
+
+    public class BassJamSaveState : AudioPluginSaveState
+    {
+        public SongPlayerSettings SongPlayerSettings { get; set; } = new SongPlayerSettings();
+
+        public BassJamSaveState()
+        {
         }
     }
 }

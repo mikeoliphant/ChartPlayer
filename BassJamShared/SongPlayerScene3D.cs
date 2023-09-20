@@ -185,7 +185,7 @@ namespace BassJam
 
                     float startWithMinSustain = startTime - 0.15f;
 
-                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => n.String);
+                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
 
                     foreach (SongNote note in notes)
                     {
@@ -216,8 +216,8 @@ namespace BassJam
                                         maxFret = Math.Max(maxFret, chord.Frets[str]);
                                     }
 
-                                    minString = Math.Min(minString, str);
-                                    maxString = Math.Max(maxString, str);
+                                    minString = Math.Min(minString, GetStringOffset(str));
+                                    maxString = Math.Max(maxString, GetStringOffset(str));
 
                                     SongNote chordNote = new SongNote()
                                     {
@@ -245,7 +245,7 @@ namespace BassJam
 
                                 if (nonReapeatDict.ContainsKey(note.TimeOffset) && !String.IsNullOrEmpty(chord.Name))
                                 {
-                                    DrawVerticalText(chord.Name, minFret - 1.5f, GetStringHeight(maxString), note.TimeOffset, PixColor.White, 0.10f);
+                                    DrawVerticalText(chord.Name, minFret - 1.25f, GetStringHeight(maxString), note.TimeOffset, PixColor.White, 0.10f);
                                 }
                             }
                         }
@@ -263,7 +263,7 @@ namespace BassJam
                         PixColor color = stringColors[str];
                         color.A = 192;
 
-                        DrawVerticalHorizontalLine(0, 24, startTime, GetStringHeight(str), color);
+                        DrawVerticalHorizontalLine(0, 24, startTime, GetStringHeight(GetStringOffset(str)), color);
                     }
 
                     for (int fret = 1; fret < 24; fret++)
@@ -390,6 +390,8 @@ namespace BassJam
                 stringColor = PixColor.Lerp(stringColor, PixColor.Black, 0.5f);
             }
 
+            int stringOffset = GetStringOffset(note.String);
+
             if (note.Fret == 0)   // Open string
             {
                 float midAnchorFret = (float)note.HandFret + 1;
@@ -397,15 +399,15 @@ namespace BassJam
                 if (note.TimeLength > 0)
                 {
                     // Sustain note tail
-                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor);
                 }
 
                 // Note head
-                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(note.String), stringColor);
+                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor);
 
                 // Note Modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(note.String), PixColor.White);
+                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), PixColor.White);
             }
             else    // Fretted note
             {
@@ -417,23 +419,23 @@ namespace BassJam
                     {
                         //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
                         DrawImageTrail(PixGame.Instance.GetImage(trailImageName), stringColor,
-                            new Vector3(note.Fret - 0.5f, GetStringHeight(note.String), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(note.String), noteHeadTime + noteSustain));
+                            new Vector3(note.Fret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
                     }
                     else
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, note.String, note.CentsOffsets, stringColor);
+                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
                         }
                         else
                         {
                             if (note.Techniques.HasFlag(ESongNoteTechnique.Vibrato))
                             {
-                                DrawVibrato(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(note.String), stringColor);
+                                DrawVibrato(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(stringOffset), stringColor);
                             }
                             else
                             {
-                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
+                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor);
                             }
                         }
                     }
@@ -443,19 +445,25 @@ namespace BassJam
                 DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha);
 
                 // Small lines for lower strings
-                for (int prevString = 0; prevString < note.String; prevString++)
+                for (int prevString = 0; prevString < stringOffset; prevString++)
                 {
                     DrawVerticalHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha);
                 }
 
                 // Vertical line from fretboard up to note head
-                DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(note.String), whiteHalfAlpha);
+                DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
 
-                float noteHeadHeight = GetStringHeight(note.String);
+                float noteHeadHeight = GetStringHeight(stringOffset);
 
                 if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                 {
-                    noteHeadHeight += GetBendOffset(note.TimeOffset, note.TimeLength, note.String, note.CentsOffsets);
+                    float bendOffset = GetBendOffset(note.TimeOffset, note.TimeLength, note.String, note.CentsOffsets);
+
+                    if (BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.InvertStrings)
+                        noteHeadHeight -= bendOffset;
+                    else
+                        noteHeadHeight += bendOffset;
+
                 }
 
                 // Note head
@@ -487,6 +495,14 @@ namespace BassJam
         float GetFretPosition(float fret)
         {
             return scaleLength - (scaleLength / (float)(Math.Pow(2, (double)fret / 12.0)));
+        }
+
+        int GetStringOffset(int str)
+        {
+            if (BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.InvertStrings)
+                return numStrings - str - 1;
+
+            return str;
         }
 
         float GetStringHeight(float str)

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
 using Asio;
+using AudioPlugSharp;
 
 namespace BassJam
 {
@@ -20,10 +22,17 @@ namespace BassJam
         {
             PluginDisplay.SetPlugin(audioHost.Plugin);
 
-            if (PluginDisplay.ShowAudioSettingsWindow())
+            if ((audioHost.AsioDriver == null) && PluginDisplay.ShowAudioSettingsWindow())
             {
-                audioHost.SetAsioDriver(new AsioDriver(PluginDisplay.AsioDeviceName));
+                audioHost.SetAsioDriver(PluginDisplay.AsioDeviceName);
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            audioHost.Exit();
+
+            base.OnClosing(e);
         }
     }
 }

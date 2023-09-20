@@ -18,11 +18,11 @@ namespace BassJam
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
         public bool Paused { get; set; } = false;
+        public bool RetuneToEStandard { get; set; } = false;
 
         VorbisReader vorbisReader;
         WdlResampler resampler;
         double tuningOffsetSemitones = 0;
-        double actualPlaybackSampleRate = 48000;
         float seekTime = -1;
 
         public SongPlayer()
@@ -37,8 +37,6 @@ namespace BassJam
         public void SetPlaybackSampleRate(double playbackRate)
         {
             this.PlaybackSampleRate = playbackRate;
-
-            UpdateSampleRate();
         }
 
         public void SetSong(string songPath, SongData song, SongInstrumentPart part)
@@ -61,8 +59,6 @@ namespace BassJam
 
             tuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
 
-            UpdateSampleRate();
-
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
 
             if (vocalPart != null)
@@ -83,22 +79,11 @@ namespace BassJam
             {
                 throw new InvalidOperationException("Song has no audio file");
             }
-
-            resampler.SetRates(vorbisReader.SampleRate, actualPlaybackSampleRate);
         }
 
         public void SeekTime(float secs)
         {
             seekTime = secs;
-        }
-
-        void UpdateSampleRate()
-        {
-            if (tuningOffsetSemitones == 0)
-                actualPlaybackSampleRate = PlaybackSampleRate;
-            else
-                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
-
         }
 
         public int ReadSamples(float[] buffer)
@@ -109,6 +94,11 @@ namespace BassJam
 
                 return buffer.Length;
             }
+
+            double actualPlaybackSampleRate = PlaybackSampleRate;
+
+            if (RetuneToEStandard && (tuningOffsetSemitones != 0))
+                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
 
             if (seekTime != -1)
             {
@@ -127,6 +117,8 @@ namespace BassJam
                 float[] inBuffer;
                 int inBufferOffset;
                 int framesRequested = buffer.Length / 2;
+
+                resampler.SetRates(vorbisReader.SampleRate, actualPlaybackSampleRate);
 
                 int inNeeded = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
                 int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, inNeeded * 2) / 2;

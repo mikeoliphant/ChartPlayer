@@ -1,19 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Xml.Serialization;
 using Asio;
 using AudioPlugSharp;
-using SharpDX.MediaFoundation.DirectX;
 
 namespace BassJam
 {
-    public class AudioPlugSharpHost<T> : IAudioHost where T: IAudioPlugin, IAudioPluginProcessor, IAudioPluginEditor
+    public class HostSettings
+    {
+        public string AsioDeviceName { get; set; }
+    }
+
+    public class AudioPlugSharpHost<T> : IAudioHost where T : IAudioPlugin, IAudioPluginProcessor, IAudioPluginEditor
     {
         public T Plugin { get; private set; }
 
+        public HostSettings HostSettings { get; private set; } = new HostSettings();
         public double SampleRate { get; private set; }
         public uint MaxAudioBufferSize { get; private set; }
         public uint CurrentAudioBufferSize { get; private set; }
@@ -22,7 +24,10 @@ namespace BassJam
         public long CurrentProjectSample { get; private set; }
         public bool IsPlaying { get; private set; }
 
-        AsioDriver asioDriver;
+        public AsioDriver AsioDriver { get; private set; } = null;
+
+        string saveFolder;
+        string hostSettingsFile;
 
         public AudioPlugSharpHost(T plugin)
         {
@@ -31,28 +36,99 @@ namespace BassJam
             (plugin as IAudioPlugin).Host = this;
 
             plugin.Initialize();
-        }
 
-        public void SetAsioDriver(AsioDriver driver)
-        {
-            if (asioDriver != null)
+            saveFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Plugin.PluginName);
+
+            hostSettingsFile = Path.Combine(saveFolder, "HostSettings.xml");
+
+            if (File.Exists(hostSettingsFile))
             {
-                asioDriver.Stop();
+                try
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(HostSettings));
+
+                    using (Stream inputStream = File.OpenRead(hostSettingsFile))
+                    {
+                        HostSettings = serializer.Deserialize(inputStream) as HostSettings;
+                    }
+
+                    using (Stream saveStream = File.OpenRead(Path.Combine(saveFolder, "SaveData")))
+                    {
+                        byte[] data = new byte[saveStream.Length];
+
+                        saveStream.Read(data);
+
+                        plugin.RestoreState(data);
+                    }
+                }
+                catch { }
             }
 
-            this.asioDriver = driver;
+            if (!String.IsNullOrEmpty(HostSettings.AsioDeviceName))
+            {
+                SetAsioDriver(HostSettings.AsioDeviceName);
+            }
+        }
 
-            SampleRate = driver.SampleRate;
-            MaxAudioBufferSize = CurrentAudioBufferSize = (uint)driver.PreferredBufferSize();
+        public void Exit()
+        {
+            byte[] data = Plugin.SaveState();
+
+            try
+            {
+                if (!Directory.Exists(saveFolder))
+                {
+                    Directory.CreateDirectory(saveFolder);
+                }
+
+                XmlSerializer serializer = new XmlSerializer(typeof(HostSettings));
+
+                using (Stream hostStream = File.Create(hostSettingsFile))
+                {
+                    serializer.Serialize(hostStream, HostSettings);
+                }
+
+                using (Stream saveStream = File.Create(Path.Combine(saveFolder, "SaveData")))
+                {
+                    saveStream.Write(data);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            Plugin.HideEditor();
+
+            if (AsioDriver != null)
+            {
+                AsioDriver.Stop();
+                AsioDriver.Release();
+            }
+        }
+
+        public void SetAsioDriver(string asioDeviceName)
+        {
+            HostSettings.AsioDeviceName = asioDeviceName;
+
+            if (AsioDriver != null)
+            {
+                AsioDriver.Stop();
+            }
+
+            this.AsioDriver = new AsioDriver(asioDeviceName);
+
+            SampleRate = AsioDriver.SampleRate;
+            MaxAudioBufferSize = CurrentAudioBufferSize = (uint)AsioDriver.PreferredBufferSize();
             BitsPerSample = EAudioBitsPerSample.Bits32;            
 
             Plugin.InitializeProcessing();
 
             Plugin.SetMaxAudioBufferSize(MaxAudioBufferSize, BitsPerSample, forceCopy: true);
 
-            asioDriver.ProcessAction = AsioProcess;
+            AsioDriver.ProcessAction = AsioProcess;
 
-            asioDriver.Start();
+            AsioDriver.Start();
         }
 
         unsafe void AsioProcess(IntPtr[] inputBuffers, IntPtr[] outputBuffers)
@@ -66,7 +142,7 @@ namespace BassJam
                 for (int channel = 0; channel < port.NumChannels; channel++)
                 {
                     double[] inputBuf = port.GetAudioBuffers()[channel];
-                    int* asioPtr = (int*)inputBuffers[inputCount % asioDriver.NumInputChannels];    // recyle inputs if we don't have enough
+                    int* asioPtr = (int*)inputBuffers[inputCount % AsioDriver.NumInputChannels];    // recyle inputs if we don't have enough
 
                     for (int i = 0; i < CurrentAudioBufferSize; i++)
                     {
@@ -85,14 +161,14 @@ namespace BassJam
 
             for (int output = 0; output < Plugin.OutputPorts.Length; output++)
             {
-                if (outputCount >= asioDriver.NumOutputChannels)
+                if (outputCount >= AsioDriver.NumOutputChannels)
                     break;
 
                 AudioIOPort port = Plugin.OutputPorts[output];
 
                 for (int channel = 0; channel < port.NumChannels; channel++)
                 {
-                    if (outputCount >= asioDriver.NumOutputChannels)
+                    if (outputCount >= AsioDriver.NumOutputChannels)
                         break;
 
                     double[] outputBuf = port.GetAudioBuffers()[channel];

@@ -11,9 +11,9 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BassJamShared", "BassJamSha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassJamPlugin", "BassJamPlugin\BassJamPlugin.csproj", "{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PixelEngine", "..\PixelEngine\PixelEngine\PixelEngine.shproj", "{E75B4727-6E5A-413B-B5A4-2AAF87D3F9A3}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "..\OpenSongChart\SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,11 +91,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		BassJamShared\BassJamShared.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
+		..\OpenSongChart\SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		..\PixelEngine\PixelEngine\PixelEngine.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
+		..\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
 		BassJamShared\BassJamShared.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		..\OpenSongChart\SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		..\PixelEngine\PixelEngine\PixelEngine.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		..\PixelEngine\PixelEngine\PixelEngine.projitems*{e75b4727-6e5a-413b-b5a4-2aaf87d3f9a3}*SharedItemsImports = 13
 		BassJamShared\BassJamShared.projitems*{e89d1bac-28e4-434d-857a-3be1d35e279c}*SharedItemsImports = 13

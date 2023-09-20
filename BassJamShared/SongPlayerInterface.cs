@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -69,10 +70,19 @@ namespace BassJam
 
             topStack.Children.Add(vocalText);
 
+            HorizontalStack bottomButtonStack = new HorizontalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Left,
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                ChildSpacing = PixUI.DefaultScale * 2
+            };
+            mainDock.Children.Add(bottomButtonStack);
+
             TextTouchButton songsButton = new TextTouchButton("ShowSongs", "Songs");
-            songsButton.HorizontalAlignment = EHorizontalAlignment.Left;
-            songsButton.VerticalAlignment = EVerticalAlignment.Bottom;
-            mainDock.Children.Add(songsButton);
+            bottomButtonStack.Children.Add(songsButton);
+
+            TextTouchButton optionsButton = new TextTouchButton("ShowOptions", "Options");
+            bottomButtonStack.Children.Add(optionsButton);
         }
 
         public void ResizeScreen()
@@ -101,6 +111,7 @@ namespace BassJam
                     {
                         songPlayer = new SongPlayer();
                         songPlayer.SetPlaybackSampleRate(BassJamGame.Instance.Plugin.Host.SampleRate);
+                        songPlayer.RetuneToEStandard = BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.RetuneToEStandard;
 
                         songPlayer.SetSong(songPath, songData, part);
 
@@ -131,6 +142,11 @@ namespace BassJam
                 ShowPopup(songList);
             }
 
+            if (PixGame.InputManager.WasClicked("ShowOptions", this))
+            {
+                ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+            }
+            
             if (PixGame.InputManager.WasPressed("PauseGame"))
             {
                 if (songPlayer != null)
@@ -157,6 +173,14 @@ namespace BassJam
             }
 
             vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+        }
+
+        void ApplySettings()
+        {
+            if (songPlayer != null)
+            {
+                songPlayer.RetuneToEStandard = BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.RetuneToEStandard;
+            }
         }
 
         public override void PostDraw()
