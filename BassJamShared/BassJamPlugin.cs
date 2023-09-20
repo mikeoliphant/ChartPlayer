@@ -72,6 +72,16 @@ namespace BassJam
             Logger.Log(debugStr);
         }
 
+        public override void InitializeProcessing()
+        {
+            base.InitializeProcessing();
+
+            if (SongPlayer != null)
+            {
+                SongPlayer.SetPlaybackSampleRate(Host.SampleRate);
+            }
+        }
+
         unsafe void RunGame()
         {
             Logger.Log("Starting Game");

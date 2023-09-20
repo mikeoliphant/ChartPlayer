@@ -34,6 +34,9 @@ namespace BassJam
             UpdateWhenPaused = false;
 
             mainDock = new Dock();
+            mainDock.HorizontalPadding = PixUI.DefaultScale * 5;
+            mainDock.VerticalPadding = PixUI.DefaultScale * 5;
+
 
             Element = mainDock;
 
@@ -70,6 +73,15 @@ namespace BassJam
             songsButton.HorizontalAlignment = EHorizontalAlignment.Left;
             songsButton.VerticalAlignment = EVerticalAlignment.Bottom;
             mainDock.Children.Add(songsButton);
+        }
+
+        public void ResizeScreen()
+        {
+            if (scene3D != null)
+            {
+                scene3D.Camera.ViewportWidth = PixGame.Instance.ScreenWidth;
+                scene3D.Camera.ViewportHeight = PixGame.Instance.ScreenHeight;
+            }
         }
 
         public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType)
@@ -117,6 +129,14 @@ namespace BassJam
             if (PixGame.InputManager.WasClicked("ShowSongs", this))
             {
                 ShowPopup(songList);
+            }
+
+            if (PixGame.InputManager.WasPressed("PauseGame"))
+            {
+                if (songPlayer != null)
+                {
+                    songPlayer.Paused = !songPlayer.Paused;
+                }
             }
 
             if (songPlayer != null)
@@ -200,7 +220,7 @@ namespace BassJam
 
         protected override void GetContentSize(out float width, out float height)
         {
-            width = (float)PixGame.Instance.ScreenWidth * .7f;
+            width = (float)PixGame.Instance.ScreenWidth * .9f;
             height = (float)PixGame.Instance.ScreenHeight * .1f;
         }
 

@@ -21,7 +21,7 @@ namespace BassJam
         float positionFret = 2;
         float targetFocusFret = 2;
         float cameraDistance = 70;
-        float targetCameraDistance = 70;
+        float targetCameraDistance = 64;
         int minFret = 0;
         int maxFret = 4;
         SongNote? firstNote;
@@ -94,7 +94,7 @@ namespace BassJam
                 if (fretDist < 0)
                     fretDist = 0;
 
-                targetCameraDistance = 66 + (Math.Max(fretDist, 4) * 3);
+                targetCameraDistance = 60 + (Math.Max(fretDist, 4) * 3);
 
                 float targetPositionFret = ((float)maxFret + (float)minFret) / 2;
 
@@ -108,7 +108,7 @@ namespace BassJam
                     targetPositionFret = targetFocusFret + 5;
                 }
 
-                positionFret = PixUtil.Lerp(positionFret, PixUtil.Clamp(targetPositionFret, 5, 24) - 1, 0.01f);
+                positionFret = PixUtil.Lerp(positionFret, PixUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
 
                 cameraDistance = PixUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
@@ -240,7 +240,14 @@ namespace BassJam
                             }
 
                             if ((note.TimeOffset > currentTime) && (maxFret > minFret))
+                            {
                                 DrawVerticalImage(PixGame.Instance.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
+
+                                if (nonReapeatDict.ContainsKey(note.TimeOffset) && !String.IsNullOrEmpty(chord.Name))
+                                {
+                                    DrawVerticalText(chord.Name, minFret - 1.5f, GetStringHeight(maxString), note.TimeOffset, PixColor.White, 0.10f);
+                                }
+                            }
                         }
                         else
                         {
@@ -475,11 +482,11 @@ namespace BassJam
                 firstNote = note;
         }
 
+        float scaleLength = 300.0f;
+
         float GetFretPosition(float fret)
         {
-            //  s – (s / (2 ^ (n / 12)))
-
-            return 240.0f - (240.0f / (float)(Math.Pow(2, (double)fret / 12.0)));
+            return scaleLength - (scaleLength / (float)(Math.Pow(2, (double)fret / 12.0)));
         }
 
         float GetStringHeight(float str)

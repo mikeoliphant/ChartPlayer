@@ -17,6 +17,7 @@ namespace BassJam
         public SongInstrumentNotes SongInstrumentNotes { get; private set; }
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
+        public bool Paused { get; set; } = false;
 
         VorbisReader vorbisReader;
         WdlResampler resampler;
@@ -36,8 +37,10 @@ namespace BassJam
         public void SetPlaybackSampleRate(double playbackRate)
         {
             this.PlaybackSampleRate = playbackRate;
+
+            UpdateSampleRate();
         }
-        
+
         public void SetSong(string songPath, SongData song, SongInstrumentPart part)
         {
             this.Song = song;
@@ -58,10 +61,7 @@ namespace BassJam
 
             tuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
 
-            if (tuningOffsetSemitones == 0)
-                actualPlaybackSampleRate = PlaybackSampleRate;
-            else
-                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
+            UpdateSampleRate();
 
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
 
@@ -92,8 +92,24 @@ namespace BassJam
             seekTime = secs;
         }
 
+        void UpdateSampleRate()
+        {
+            if (tuningOffsetSemitones == 0)
+                actualPlaybackSampleRate = PlaybackSampleRate;
+            else
+                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
+
+        }
+
         public int ReadSamples(float[] buffer)
         {
+            if (Paused)
+            {
+                Array.Clear(buffer);
+
+                return buffer.Length;
+            }
+
             if (seekTime != -1)
             {
                 vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);

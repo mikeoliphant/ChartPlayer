@@ -82,7 +82,7 @@ namespace BassJam
         {
             if (currentInstrument != type)
             {
-                tuningColumn.SortPropertyName = type.ToString() + "Tuning";
+                tuningColumn.PropertyName = type.ToString() + "Tuning";
 
                 if (currentInstrument != type)
                 {
@@ -340,7 +340,7 @@ namespace BassJam
         {
             DisplayColumns.Add(column);
 
-            headerStack.Children.Add(new TextTouchButton(column.PropertyName, column.DisplayName) { HorizontalPadding = PixUI.DefaultScale });
+            headerStack.Children.Add(new TextTouchButton(column.DisplayName, column.DisplayName) { HorizontalPadding = PixUI.DefaultScale });
 
             UpdateColumnLayout();
 
@@ -362,7 +362,7 @@ namespace BassJam
 
         void UpdateColumnLayout()
         {
-            float widthRemaining = ContentLayout.Width - (ListDisplay.ItemXOffset * 2);
+            float widthRemaining = ContentLayout.Width;
             int numDivideColumns = 0;
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
@@ -373,7 +373,7 @@ namespace BassJam
                 }
                 else
                 {
-                    column.DisplayWidth = column.RequestedDisplayWidth;
+                    column.DisplayWidth = column.RequestedDisplayWidth + (ListDisplay.ItemXOffset * 2);
                     widthRemaining -= column.DisplayWidth;
                 }
             }
@@ -483,7 +483,7 @@ namespace BassJam
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
             {
-                if (inputManager.WasClicked(column.PropertyName))
+                if (inputManager.WasClicked(column.DisplayName))
                 {
                     Sort(column, toggleReverse: true);
 

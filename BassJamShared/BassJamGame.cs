@@ -87,10 +87,18 @@ namespace BassJam
             PixGame.InputManager.AddMapping("FirstItem", new KeyMapping(PixInputKey.Home));
             PixGame.InputManager.AddMapping("LastItem", new KeyMapping(PixInputKey.End));
 
+            PixGame.InputManager.AddMapping("PauseGame", new KeyMapping(PixInputKey.Space));
 
             AddGameState("SongPlayer", new SongPlayerInterface());
 
             SetGameState("SongPlayer");
+        }
+
+        public override void ResizeScreen(int newWidth, int newHeight, bool gameSizeOnly)
+        {
+            base.ResizeScreen(newWidth, newHeight, gameSizeOnly);
+
+            SongPlayerInterface.Instance.ResizeScreen();
         }
     }
 }
