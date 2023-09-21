@@ -86,11 +86,11 @@ namespace BassJam
             seekTime = secs;
         }
 
-        public int ReadSamples(float[] buffer)
+        public int ReadSamples(Span<float> buffer)
         {
             if (Paused)
             {
-                Array.Clear(buffer);
+                buffer.Clear();
 
                 return buffer.Length;
             }

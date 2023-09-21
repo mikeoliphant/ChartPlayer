@@ -220,7 +220,7 @@ namespace BassJam
         /// do NOT call with nsamples_in greater than the value returned from resamplerprpare()! the extra samples will be ignored.
         /// returns number of samples successfully outputted to out
         /// </summary>
-        public int ResampleOut(WDL_ResampleSample[] outBuffer, int outBufferIndex, int nsamples_in, int nsamples_out, int nch)
+        public int ResampleOut(Span<WDL_ResampleSample> outBuffer, int outBufferIndex, int nsamples_in, int nsamples_out, int nch)
         {
             if (nch > WDL_RESAMPLE_MAX_NCH || nch < 1)
             {
@@ -363,7 +363,11 @@ namespace BassJam
                         int ipos = (int)srcpos;
                         if (ipos >= rsinbuf_availtemp) break; // quit decoding, not enough input samples
 
-                        Array.Copy(m_rsinbuf, localin + ipos * nch, outBuffer, outptr, nch);
+//                        Array.Copy(m_rsinbuf, localin + ipos * nch, outBuffer, outptr, nch);
+                        for (int c = 0; c < nch; c++)
+                        {
+                            outBuffer[outptr + c] = m_rsinbuf[localin + ipos + c];
+                        }
                         outptr += nch;
                         srcpos += drspos;
                         ret++;
@@ -535,7 +539,7 @@ namespace BassJam
         }
 
         // SincSample(WDL_ResampleSample *outptr, WDL_ResampleSample *inptr, double fracpos, int nch, WDL_SincFilterSample *filter, int filtsz)
-        private void SincSample(WDL_ResampleSample[] outBuffer, int outBufferIndex, WDL_ResampleSample[] inBuffer, int inBufferIndex, double fracpos, int nch, WDL_SincFilterSample[] filter, int filterIndex, int filtsz)
+        private void SincSample(Span<WDL_ResampleSample> outBuffer, int outBufferIndex, ReadOnlySpan<WDL_ResampleSample> inBuffer, int inBufferIndex, double fracpos, int nch, ReadOnlySpan<WDL_SincFilterSample> filter, int filterIndex, int filtsz)
         {
             int oversize = m_lp_oversize;
             fracpos *= oversize;
@@ -561,7 +565,7 @@ namespace BassJam
         }
 
         // SincSample1(WDL_ResampleSample* outptr, WDL_ResampleSample* inptr, double fracpos, WDL_SincFilterSample* filter, int filtsz)
-        private void SincSample1(WDL_ResampleSample[] outBuffer, int outBufferIndex, WDL_ResampleSample[] inBuffer, int inBufferIndex, double fracpos, WDL_SincFilterSample[] filter, int filterIndex, int filtsz)
+        private void SincSample1(Span<WDL_ResampleSample> outBuffer, int outBufferIndex, ReadOnlySpan<WDL_ResampleSample> inBuffer, int inBufferIndex, double fracpos, ReadOnlySpan<WDL_SincFilterSample> filter, int filterIndex, int filtsz)
         {
             int oversize = m_lp_oversize;
             fracpos *= oversize;
@@ -584,7 +588,7 @@ namespace BassJam
         }
 
         // SincSample2(WDL_ResampleSample* outptr, WDL_ResampleSample* inptr, double fracpos, WDL_SincFilterSample* filter, int filtsz)
-        private void SincSample2(WDL_ResampleSample[] outptr, int outBufferIndex, WDL_ResampleSample[] inBuffer, int inBufferIndex, double fracpos, WDL_SincFilterSample[] filter, int filterIndex, int filtsz)
+        private void SincSample2(Span<WDL_ResampleSample> outptr, int outBufferIndex, ReadOnlySpan<WDL_ResampleSample> inBuffer, int inBufferIndex, double fracpos, ReadOnlySpan<WDL_SincFilterSample> filter, int filterIndex, int filtsz)
         {
             int oversize = m_lp_oversize;
             fracpos *= oversize;
@@ -673,7 +677,7 @@ namespace BassJam
 
             }
 
-            public void Apply(WDL_ResampleSample[] inBuffer, int inIndex, WDL_ResampleSample[] outBuffer, int outIndex, int ns, int span, int w)
+            public void Apply(ReadOnlySpan<WDL_ResampleSample> inBuffer, int inIndex, Span<WDL_ResampleSample> outBuffer, int outIndex, int ns, int span, int w)
             {
                 double b0 = m_b0, b1 = m_b1, b2 = m_b2, a1 = m_a1, a2 = m_a2;
 

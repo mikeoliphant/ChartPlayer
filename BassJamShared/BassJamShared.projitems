@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BassJamGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BassJamPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SampleHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongIndex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongListInterface.cs" />
