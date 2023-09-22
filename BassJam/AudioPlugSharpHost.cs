@@ -111,24 +111,31 @@ namespace BassJam
         {
             HostSettings.AsioDeviceName = asioDeviceName;
 
-            if (AsioDriver != null)
+            try
             {
-                AsioDriver.Stop();
+                if (AsioDriver != null)
+                {
+                    AsioDriver.Stop();
+                }
+
+                this.AsioDriver = new AsioDriver(asioDeviceName);
+
+                AsioDriver.ProcessAction = AsioProcess;
+
+                SampleRate = AsioDriver.SampleRate;
+                MaxAudioBufferSize = CurrentAudioBufferSize = (uint)AsioDriver.PreferredBufferSize();
+                BitsPerSample = EAudioBitsPerSample.Bits32;
+
+                Plugin.InitializeProcessing();
+
+                Plugin.SetMaxAudioBufferSize(MaxAudioBufferSize, BitsPerSample, forceCopy: true);
+
+                AsioDriver.Start();
             }
-
-            this.AsioDriver = new AsioDriver(asioDeviceName);
-
-            SampleRate = AsioDriver.SampleRate;
-            MaxAudioBufferSize = CurrentAudioBufferSize = (uint)AsioDriver.PreferredBufferSize();
-            BitsPerSample = EAudioBitsPerSample.Bits32;            
-
-            Plugin.InitializeProcessing();
-
-            Plugin.SetMaxAudioBufferSize(MaxAudioBufferSize, BitsPerSample, forceCopy: true);
-
-            AsioDriver.ProcessAction = AsioProcess;
-
-            AsioDriver.Start();
+            catch (Exception ex)
+            {
+                HostSettings.AsioDeviceName = null;
+            }
         }
 
         unsafe void AsioProcess(IntPtr[] inputBuffers, IntPtr[] outputBuffers)

@@ -13,6 +13,7 @@ namespace BassJam
 
         public BassJamSaveState BassJamSaveState { get { return (SaveStateData as BassJamSaveState) ?? new BassJamSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
+        public SampleHistory<double> SampleHistory { get; private set; } = new SampleHistory<double>();
 
         AudioIOPort stereoInput;
         AudioIOPort stereoOutput;
@@ -85,6 +86,8 @@ namespace BassJam
             {
                 SongPlayer.SetPlaybackSampleRate(Host.SampleRate);
             }
+
+            SampleHistory.SetSize((int)Host.SampleRate);
         }
 
         unsafe void RunGame()
@@ -169,6 +172,8 @@ namespace BassJam
 
                 var input = stereoInput.GetAudioBuffer(0);
 
+                SampleHistory.CopyFrom(input);
+
                 var left = stereoOutput.GetAudioBuffer(0);
                 var right = stereoOutput.GetAudioBuffer(1);
 
@@ -183,8 +188,8 @@ namespace BassJam
 
                 for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
                 {
-                    left[i] = ((double)interleavedAudio[offset++] * gain) + input[i];
-                    right[i] = ((double)interleavedAudio[offset++] * gain) + input[i];
+                    left[i] = ((double)interleavedAudio[offset++] * gain);// + input[i];
+                    right[i] = ((double)interleavedAudio[offset++] * gain);// + input[i];
                 }
             }
             catch (Exception ex)

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using PixelEngine;
+using SharpDX.DXGI;
 using SharpDX.MediaFoundation;
+using SharpDX.MediaFoundation.DirectX;
 using SongFormat;
 
 namespace BassJam
@@ -297,6 +299,21 @@ namespace BassJam
 
         void DrawNote(SongNote note)
         {
+            bool isDetected = false;
+
+            if (note.TimeOffset <= currentTime)
+            {
+                if ((note.String > -1) && (note.Fret > -1))
+                {
+                    isDetected = NoteDetect(note);
+
+                    if (isDetected)
+                    {
+
+                    }
+                }
+            }
+
             if (note.Fret == 0)
             {
                 minFret = Math.Min(minFret, note.HandFret + 2);
@@ -345,7 +362,8 @@ namespace BassJam
                     break;
             }
 
-            stringColor = PixColor.Lerp(PixColor.White, stringColors[note.String], 0.25f);
+            if (!isDetected)
+                stringColor = PixColor.Lerp(PixColor.White, stringColors[note.String], 0.25f);
 
             float noteHeadTime = Math.Max(note.TimeOffset, currentTime);
             float noteSustain = note.TimeLength - (noteHeadTime - note.TimeOffset);
@@ -403,11 +421,15 @@ namespace BassJam
                 }
 
                 // Note head
-                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor);
+
+                if (isDetected)
+                    DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
+
+                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
 
                 // Note Modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), PixColor.White);
+                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), PixColor.White, 0.08f);
             }
             else    // Fretted note
             {
@@ -418,7 +440,8 @@ namespace BassJam
                     if (isSlide)
                     {
                         //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
-                        DrawImageTrail(PixGame.Instance.GetImage(trailImageName), stringColor,
+
+                        DrawImageTrail(PixGame.Instance.GetImage(trailImageName), stringColor, 0.03f,
                             new Vector3(note.Fret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
                     }
                     else
@@ -473,17 +496,23 @@ namespace BassJam
                     {
                         float slideFret = PixUtil.Lerp(note.Fret, note.SlideFret, PixUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
 
-                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
+                        if (isDetected)
+                            DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
+
+                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                     else
                     {
-                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor);
+                        if (isDetected)
+                            DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
+
+                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                 }
 
                 // Note modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, PixColor.White);
+                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, PixColor.White, 0.08f);
             }
 
             if (note.TimeOffset > currentTime)
@@ -605,13 +634,11 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, height, startTime), color, new Vector3(minX, height, endTime), color, new Vector3(maxX, height, endTime), color, new Vector3(maxX, height, startTime), color);
         }
 
-        void DrawVerticalImage(PixImage image, float startFret, float endFret, float time, float heightOffset, PixColor color)
+        void DrawVerticalImage(PixImage image, float startFret, float endFret, float time, float heightOffset, PixColor color, float imageScale)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
             time *= -timeScale;
-
-            float imageScale = .03f;
 
             float minY = heightOffset + ((float)image.Height * imageScale);
             float maxY = heightOffset - ((float)image.Height * imageScale);
@@ -619,12 +646,10 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
 
-        void DrawVerticalImage(PixImage image, float fretCenter, float timeCenter, float heightOffset, PixColor color)
+        void DrawVerticalImage(PixImage image, float fretCenter, float timeCenter, float heightOffset, PixColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
-
-            float imageScale = 0.08f;
 
             float minX = fretCenter - ((float)image.Width * imageScale);
             float maxX = fretCenter + ((float)image.Width * imageScale);
@@ -681,10 +706,8 @@ namespace BassJam
                 new Vector3(endFret + ((float)image.Width * imageScale), heightOffset, endTime), color, new Vector3(startFret + ((float)image.Width * imageScale), heightOffset, startTime), color);
         }
 
-        void DrawImageTrail(PixImage image, PixColor color, params Vector3[] trailPoints)
+        void DrawImageTrail(PixImage image, PixColor color, float imageScale, params Vector3[] trailPoints)
         {
-            float imageScale = .03f;
-
             Vector3? lastPoint = null;
 
             foreach (Vector3 point in trailPoints)
@@ -861,6 +884,106 @@ namespace BassJam
                     new Vector3(x + ((float)glyph.Width * imageScale), y + ((float)glyph.Height * imageScale), timeCenter), color, new Vector3(x + ((float)glyph.Width * imageScale), y, timeCenter), color);
 
                 x += (glyph.Width + font.Spacing) * imageScale;
+            }
+        }
+
+        static double A4Frequency = 440.0;
+        static int A4MidiNoteNum = 69;
+        static double HalfStepRatio = Math.Pow(2.0, (1.0 / 12.0));
+
+        static int[] GuitarStringNotes = { 40, 45, 50, 55, 59, 64 };
+        static int[] BassStringNotes = { 28, 33, 38, 43 };
+
+        const int FFTSize = 8192;
+        Complex[] fftData = new Complex[FFTSize];
+        float[] fftOutput = new float[FFTSize / 2];
+
+        static double GetMidiNoteFrequency(int midiNoteNum)
+        {
+            int noteDiff = A4MidiNoteNum - midiNoteNum;
+
+            return A4Frequency / Math.Pow(HalfStepRatio, noteDiff);
+        }
+
+        double GetNoteFrequency(int strng, int fret)
+        {
+            if (numStrings == 6)
+            {
+                return GetMidiNoteFrequency(GuitarStringNotes[strng] + fret);
+            }
+            else
+            {
+                return GetMidiNoteFrequency(BassStringNotes[strng] + fret);
+            }
+        }
+
+        float GetPower(double frequency)
+        {
+            double bin = (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
+            
+            int low = (int)Math.Floor(bin);
+
+            double partial = bin - low;
+
+            return (float)PixUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
+        }
+
+        bool NoteDetect(SongNote note)
+        {
+            SampleHistory<double> history = BassJamGame.Instance.Plugin.SampleHistory;
+
+            double frequency = GetNoteFrequency(note.String, note.Fret);
+
+            history.Process(ConvertToComplex, fftData.Length);
+
+            FastFourierTransform.FFT(true, (int)Math.Log(fftData.Length, 2.0), fftData);
+
+            for (int i = 0; i < fftData.Length / 2; i++)
+            {
+                float fft = Math.Abs(fftData[i].X + fftData[i].Y);
+                float fftMirror = Math.Abs(fftData[fftData.Length - i - 1].X + fftData[fftData.Length - i - 1].Y);
+
+                fftOutput[i] = (fft + fftMirror) * (0.5f + (i / (fftData.Length * 2)));
+
+                //if (Settings["OUTPUT_MODE"][0] == "dB")
+                //    output[i] = 20 * Math.Log10(fft + fftMirror) - 20 * Math.Log10(input.Length); // Estimates gain of FFT bin
+                //else
+                //{
+                //    if (fft + fftMirror <= int.Parse(Settings["MAG_LIMIT"][0]))
+                //        output[i] = (fft + fftMirror) * (0.5 + (i / (fftPoints * 2)));
+                //    else
+                //        output[i] = int.Parse(Settings["MAG_LIMIT"][0]);
+                //}
+                //if (Settings["SQUARE"][0] == "Yes")
+                //    output[i] = Math.Pow(output[i], 2) / 100;
+            }
+
+            float power = GetPower(frequency);
+
+            double scale = BassJamGame.Instance.Plugin.Host.SampleRate / (double)fftData.Length;
+
+            double bin = (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
+
+            int low = (int)Math.Floor(bin);
+
+            if (power > 0.001)
+            {
+                var sorted = fftOutput.Select((x, i) => (x, i)).OrderByDescending(x => x.x);
+
+                bool detected = sorted.Take(3).Where(x => (x.i == low) || (x.i == (low + 1))).Any();
+
+                return detected;
+            }
+
+            return false;
+        }
+
+        void ConvertToComplex(ReadOnlySpan<double> samples, int offset)
+        {
+            for (int pos = 0; pos < samples.Length; pos++)
+            {
+                fftData[pos + offset].X = (float)samples[pos] * (float)FastFourierTransform.HammingWindow(pos + offset, fftData.Length);
+                fftData[pos + offset].Y = 0;
             }
         }
     }
