@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualBasic.Logging;
 using Microsoft.Xna.Framework;
 using PixelEngine;
-using SharpDX.DXGI;
-using SharpDX.MediaFoundation;
-using SharpDX.MediaFoundation.DirectX;
 using SongFormat;
 
 namespace BassJam
@@ -28,6 +26,7 @@ namespace BassJam
         int maxFret = 4;
         SongNote? firstNote;
         int numStrings;
+        bool isDetected = false;
 
         Dictionary<float, bool> nonReapeatDict = new Dictionary<float, bool>();
 
@@ -196,6 +195,13 @@ namespace BassJam
                             break;
                         }
 
+                        isDetected = false;
+
+                        if (note.TimeOffset <= currentTime)
+                        {
+                            isDetected = NoteDetect(note);
+                        }
+
                         if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
                         {
                             SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
@@ -299,19 +305,9 @@ namespace BassJam
 
         void DrawNote(SongNote note)
         {
-            bool isDetected = false;
-
-            if (note.TimeOffset <= currentTime)
+            if (isDetected)
             {
-                if ((note.String > -1) && (note.Fret > -1))
-                {
-                    isDetected = NoteDetect(note);
 
-                    if (isDetected)
-                    {
-
-                    }
-                }
             }
 
             if (note.Fret == 0)
@@ -363,7 +359,10 @@ namespace BassJam
             }
 
             if (!isDetected)
+            {
                 stringColor = PixColor.Lerp(PixColor.White, stringColors[note.String], 0.25f);
+                stringColor = PixColor.Lerp(stringColor, PixColor.Black, 0.25f);
+            }
 
             float noteHeadTime = Math.Max(note.TimeOffset, currentTime);
             float noteSustain = note.TimeLength - (noteHeadTime - note.TimeOffset);
@@ -417,7 +416,7 @@ namespace BassJam
                 if (note.TimeLength > 0)
                 {
                     // Sustain note tail
-                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor);
+                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
 
                 // Note head
@@ -458,7 +457,7 @@ namespace BassJam
                             }
                             else
                             {
-                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor);
+                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .03f);
                             }
                         }
                     }
@@ -669,13 +668,11 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, startHeight, time), color, new Vector3(startFret, endHeight, time), color, new Vector3(endFret, endHeight, time), color, new Vector3(endFret, startHeight, time), color);
         }
 
-        void DrawFlatImage(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color)
+        void DrawFlatImage(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             startTime *= -timeScale;
             endTime *= -timeScale;
-
-            float imageScale = .03f;
 
             float minX = fretCenter - ((float)image.Width * imageScale);
             float maxX = fretCenter + ((float)image.Width * imageScale);
@@ -919,7 +916,7 @@ namespace BassJam
 
         float GetPower(double frequency)
         {
-            double bin = (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
+            double bin = GetBin(frequency);
             
             int low = (int)Math.Floor(bin);
 
@@ -928,11 +925,55 @@ namespace BassJam
             return (float)PixUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
         }
 
+        double GetBin(double frequency)
+        {
+            return (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
+        }
+
         bool NoteDetect(SongNote note)
         {
-            SampleHistory<double> history = BassJamGame.Instance.Plugin.SampleHistory;
+            if (note.ChordID != -1)
+            {
+                SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
 
-            double frequency = GetNoteFrequency(note.String, note.Fret);
+                int numNotes = 0;
+
+                for (int str = 0; str < chord.Fingers.Count; str++)
+                {
+                    if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
+                    {
+                        numNotes++;
+                    }
+                }
+
+                double[] freqs = new double[numNotes];
+
+                int pos = 0;
+
+                for (int str = 0; str < chord.Fingers.Count; str++)
+                {
+                    if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
+                    {
+                        freqs[pos++] = GetNoteFrequency(str, chord.Frets[str]);
+                    }
+                }
+
+                bool detected = NoteDetect(freqs);
+
+                if (detected)
+                {
+
+                }
+
+                return detected;
+            }
+
+            return NoteDetect(GetNoteFrequency(note.String, note.Fret));
+        }
+
+        bool NoteDetect(params double[] frequencies)
+        {
+            SampleHistory<double> history = BassJamGame.Instance.Plugin.SampleHistory;
 
             history.Process(ConvertToComplex, fftData.Length);
 
@@ -944,35 +985,38 @@ namespace BassJam
                 float fftMirror = Math.Abs(fftData[fftData.Length - i - 1].X + fftData[fftData.Length - i - 1].Y);
 
                 fftOutput[i] = (fft + fftMirror) * (0.5f + (i / (fftData.Length * 2)));
-
-                //if (Settings["OUTPUT_MODE"][0] == "dB")
-                //    output[i] = 20 * Math.Log10(fft + fftMirror) - 20 * Math.Log10(input.Length); // Estimates gain of FFT bin
-                //else
-                //{
-                //    if (fft + fftMirror <= int.Parse(Settings["MAG_LIMIT"][0]))
-                //        output[i] = (fft + fftMirror) * (0.5 + (i / (fftPoints * 2)));
-                //    else
-                //        output[i] = int.Parse(Settings["MAG_LIMIT"][0]);
-                //}
-                //if (Settings["SQUARE"][0] == "Yes")
-                //    output[i] = Math.Pow(output[i], 2) / 100;
             }
 
-            float power = GetPower(frequency);
+            int maxFrequencyBin = (int)GetBin((numStrings == 6) ? 2637 : 330);  // Max note frequency
 
-            double scale = BassJamGame.Instance.Plugin.Host.SampleRate / (double)fftData.Length;
+            float totPower = 0;
 
-            double bin = (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
-
-            int low = (int)Math.Floor(bin);
-
-            if (power > 0.001)
+            foreach (double freq in frequencies)
             {
-                var sorted = fftOutput.Select((x, i) => (x, i)).OrderByDescending(x => x.x);
+                totPower += GetPower(freq);
+            }
 
-                bool detected = sorted.Take(3).Where(x => (x.i == low) || (x.i == (low + 1))).Any();
+            if (totPower > .001)
+            {
+                var sorted = fftOutput.Take(maxFrequencyBin).Select((x, i) => (x, i)).OrderByDescending(x => x.x).Take(frequencies.Length * 3);
 
-                return detected;
+                int numInTop = 0;
+
+                foreach (double freq in frequencies)
+                {
+                    int bin = (int)GetBin(freq);
+
+                    if (sorted.Where(x => (x.i == bin) || (x.i == (bin + 1))).Any())
+                    {
+                        numInTop++;
+                    }
+                }
+
+
+                if (frequencies.Length == 1)
+                    return (numInTop == 1);
+
+                return (numInTop >= frequencies.Length - 1);
             }
 
             return false;
