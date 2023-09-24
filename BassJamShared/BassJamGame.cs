@@ -56,7 +56,6 @@ namespace BassJam
 
             //PixGame.Instance.SingleWhitePixelImage = PixGame.Instance.GetImage("SingleWhitePixel");
 
-            //AddScaledFont("MainFont", "HelvetiPixel", 1);  // pentacom on bintfontmaker2
             AddFont("MainFont", GetFont("MainFont-1"));
             AddFont("LargeFont", GetFont("LargeFont-1"));
 

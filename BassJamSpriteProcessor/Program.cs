@@ -42,9 +42,8 @@ namespace BassJamSpriteProcessor
 
             processor.PushDirectory("SrcFonts");
 
-            processor.CreateFontFromJson("HelvetiPixel");
-            //processor.ScaleFont("HelvetiPixel", 1, 0);
             processor.ScaleAndParseFont("MainFont", 1, 0.1f);
+
             processor.ScaleAndParseFont("LargeFont", 1, 0.1f);
 
             processor.PopDirectory();
