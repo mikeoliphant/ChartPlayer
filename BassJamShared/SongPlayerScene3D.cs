@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Xna.Framework;
-using PixelEngine;
+using UILayout;
 using SongFormat;
 
 namespace BassJam
 {
     public class SongPlayerScene3D : Scene3D
     {
-        static PixColor[] stringColors = new PixColor[] { PixColor.Red, PixColor.Yellow, new PixColor(0, .6f, 1.0f, 1.0f), PixColor.Orange, new PixColor(.1f, .8f, 0), new PixColor(.8f, 0, .8f) };
+        static UIColor[] stringColors = new UIColor[] { UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
 
         SongPlayer player;
         float secondsLong;
-        PixColor whiteHalfAlpha;
-        PixColor whiteThreeQuartersAlpha;
+        UIColor whiteHalfAlpha;
+        UIColor whiteThreeQuartersAlpha;
         float currentTime;
         float timeScale = 200f;
         float positionFret = 2;
@@ -35,10 +35,10 @@ namespace BassJam
             this.player = player;
             this.secondsLong = secondsLong;
 
-            whiteHalfAlpha = PixColor.White;
+            whiteHalfAlpha = UIColor.White;
             whiteHalfAlpha.A = 128;
 
-            whiteThreeQuartersAlpha = PixColor.White;
+            whiteThreeQuartersAlpha = UIColor.White;
             whiteThreeQuartersAlpha.A = 192;
 
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
@@ -47,7 +47,7 @@ namespace BassJam
             SongNote? lastNote = null;
             float lastTime = currentTime;
 
-            PixColor handPositionColor = PixColor.White;
+            UIColor handPositionColor = UIColor.White;
             handPositionColor.A = 32;
 
             foreach (SongNote note in player.SongInstrumentNotes.Notes)
@@ -109,9 +109,9 @@ namespace BassJam
                     targetPositionFret = targetFocusFret + 5;
                 }
 
-                positionFret = PixUtil.Lerp(positionFret, PixUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
+                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
 
-                cameraDistance = PixUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
+                cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
                 float fretOffset = (10 - positionFret) / 4.0f;
 
@@ -129,7 +129,7 @@ namespace BassJam
             FogEnabled = true;
             FogStart = 400;
             FogEnd = cameraDistance + (secondsLong * timeScale);
-            FogColor = PixColor.Black;
+            FogColor = UIColor.Black;
 
             try
             {
@@ -148,7 +148,7 @@ namespace BassJam
                     minFret = 24;
                     maxFret = 0;
 
-                    PixColor lineColor = PixColor.White;
+                    UIColor lineColor = UIColor.White;
 
                     foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
                     {
@@ -164,14 +164,14 @@ namespace BassJam
                     int lastHandFret = -1;
                     float lastTime = currentTime;
 
-                    PixColor handPositionColor = PixColor.White;
+                    UIColor handPositionColor = UIColor.White;
                     handPositionColor.A = 32;
 
                     foreach (SongNote note in notes)
                     {
                         if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
                         {
-                            DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, handPositionColor);
+                            DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, handPositionColor);
 
                             lastTime = note.TimeOffset;
                         }
@@ -181,7 +181,7 @@ namespace BassJam
 
                     if (lastHandFret != -1)
                     {
-                        DrawFlatImage(PixGame.Instance.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
+                        DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
                     }
 
                     float startWithMinSustain = startTime - 0.15f;
@@ -206,7 +206,7 @@ namespace BassJam
                         {
                             SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
 
-                            PixColor color = PixColor.White;
+                            UIColor color = UIColor.White;
                             color.A = 32;
 
                             int minFret = 24;
@@ -240,7 +240,7 @@ namespace BassJam
                                     if (nonReapeatDict.ContainsKey(note.TimeOffset))
                                     {
                                         if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
-                                            DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
+                                            DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
 
                                         DrawNote(chordNote);
                                     }
@@ -249,18 +249,18 @@ namespace BassJam
 
                             if ((note.TimeOffset > currentTime) && (maxFret > minFret))
                             {
-                                DrawVerticalImage(PixGame.Instance.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
+                                DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), minFret - 1, maxFret, note.TimeOffset, 0, GetStringHeight(maxString + 1), color);
 
                                 if (nonReapeatDict.ContainsKey(note.TimeOffset) && !String.IsNullOrEmpty(chord.Name))
                                 {
-                                    DrawVerticalText(chord.Name, minFret - 1.25f, GetStringHeight(maxString), note.TimeOffset, PixColor.White, 0.10f);
+                                    DrawVerticalText(chord.Name, minFret - 1.25f, GetStringHeight(maxString), note.TimeOffset, UIColor.White, 0.10f);
                                 }
                             }
                         }
                         else
                         {
                             if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
-                                DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, PixColor.White, 0.12f);
+                                DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
 
                             DrawNote(note);
                         }
@@ -268,7 +268,7 @@ namespace BassJam
 
                     for (int str = 0; str < numStrings; str++)
                     {
-                        PixColor color = stringColors[str];
+                        UIColor color = stringColors[str];
                         color.A = 192;
 
                         DrawVerticalHorizontalLine(0, 24, startTime, GetStringHeight(GetStringOffset(str)), color);
@@ -278,7 +278,7 @@ namespace BassJam
                     {
                         DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha);
 
-                        PixColor color = PixColor.White;
+                        UIColor color = UIColor.White;
 
                         if (firstNote.HasValue && (fret >= firstNote.Value.HandFret) && (fret < (firstNote.Value.HandFret + 4)))
                         {
@@ -299,7 +299,7 @@ namespace BassJam
             }
             catch (Exception ex)
             {
-                (PixGame.Instance.CurrentGameState as PopupGameState).ShowContinuePopup("Draw error: \n\n" + ex.ToString());
+                Layout.Current.ShowContinuePopup("Draw error: \n\n" + ex.ToString());
             }
         }
 
@@ -321,7 +321,7 @@ namespace BassJam
                 maxFret = Math.Max(maxFret, note.HandFret + 2);
             }
 
-            PixColor stringColor = PixColor.White;
+            UIColor stringColor = UIColor.White;
             string imageName = null;
             string trailImageName = null;
 
@@ -360,8 +360,8 @@ namespace BassJam
 
             if (!isDetected)
             {
-                stringColor = PixColor.Lerp(PixColor.White, stringColors[note.String], 0.25f);
-                stringColor = PixColor.Lerp(stringColor, PixColor.Black, 0.25f);
+                stringColor = UIColor.Lerp(UIColor.White, stringColors[note.String], 0.25f);
+                stringColor = UIColor.Lerp(stringColor, UIColor.Black, 0.25f);
             }
 
             float noteHeadTime = Math.Max(note.TimeOffset, currentTime);
@@ -370,7 +370,7 @@ namespace BassJam
             if (noteSustain < 0)
                 noteSustain = 0;
 
-            PixImage modifierImage = null;
+            UIImage modifierImage = null;
 
             bool isMuted = false;
             bool isSlide = false;
@@ -378,21 +378,21 @@ namespace BassJam
 
             if (note.Techniques.HasFlag(ESongNoteTechnique.HammerOn))
             {
-                modifierImage = PixGame.Instance.GetImage("NoteHammerOn");
+                modifierImage = Layout.Current.GetImage("NoteHammerOn");
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.PullOff))
             {
-                modifierImage = PixGame.Instance.GetImage("NotePullOff");
+                modifierImage = Layout.Current.GetImage("NotePullOff");
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
             {
-                modifierImage = PixGame.Instance.GetImage("NoteMute");
+                modifierImage = Layout.Current.GetImage("NoteMute");
 
                 isMuted = true;
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute))
             {
-                modifierImage = PixGame.Instance.GetImage("NoteMute");
+                modifierImage = Layout.Current.GetImage("NoteMute");
 
                 isMuted = true;
             }
@@ -404,7 +404,7 @@ namespace BassJam
 
             if (isMuted)
             {
-                stringColor = PixColor.Lerp(stringColor, PixColor.Black, 0.5f);
+                stringColor = UIColor.Lerp(stringColor, UIColor.Black, 0.5f);
             }
 
             int stringOffset = GetStringOffset(note.String);
@@ -416,19 +416,19 @@ namespace BassJam
                 if (note.TimeLength > 0)
                 {
                     // Sustain note tail
-                    DrawFlatImage(PixGame.Instance.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
+                    DrawFlatImage(Layout.Current.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
 
                 // Note head
 
                 if (isDetected)
-                    DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
+                    DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
 
-                DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
+                DrawVerticalImage(Layout.Current.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
 
                 // Note Modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), PixColor.White, 0.08f);
+                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
             }
             else    // Fretted note
             {
@@ -440,24 +440,24 @@ namespace BassJam
                     {
                         //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
 
-                        DrawImageTrail(PixGame.Instance.GetImage(trailImageName), stringColor, 0.03f,
+                        DrawImageTrail(Layout.Current.GetImage(trailImageName), stringColor, 0.03f,
                             new Vector3(note.Fret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
                     }
                     else
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
+                            DrawBend(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
                         }
                         else
                         {
                             if (note.Techniques.HasFlag(ESongNoteTechnique.Vibrato))
                             {
-                                DrawVibrato(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(stringOffset), stringColor);
+                                DrawVibrato(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(stringOffset), stringColor);
                             }
                             else
                             {
-                                DrawFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .03f);
+                                DrawFlatImage(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .03f);
                             }
                         }
                     }
@@ -493,25 +493,25 @@ namespace BassJam
                 {
                     if (isSlide && (note.TimeOffset < currentTime))
                     {
-                        float slideFret = PixUtil.Lerp(note.Fret, note.SlideFret, PixUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+                        float slideFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
 
                         if (isDetected)
-                            DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
+                            DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
+                        DrawVerticalImage(Layout.Current.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                     else
                     {
                         if (isDetected)
-                            DrawVerticalImage(PixGame.Instance.GetImage("GuitarDetected"), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
+                            DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                        DrawVerticalImage(PixGame.Instance.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
+                        DrawVerticalImage(Layout.Current.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                 }
 
                 // Note modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, PixColor.White, 0.08f);
+                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
             }
 
             if (note.TimeOffset > currentTime)
@@ -560,7 +560,7 @@ namespace BassJam
                 {
                     float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
 
-                    return GetCentsOffset(strng, PixUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
+                    return GetCentsOffset(strng, MathUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
                 }
 
                 lastCents = offset.Cents;
@@ -570,13 +570,13 @@ namespace BassJam
             return GetCentsOffset(strng,lastCents);
         }
 
-        void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, PixColor color)
+        void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
             time *= -timeScale;
 
-            PixImage image = PixGame.Instance.GetImage("HorizontalFretLine");
+            UIImage image = Layout.Current.GetImage("HorizontalFretLine");
 
             float imageScale = .08f;
 
@@ -586,13 +586,13 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, heightOffset, minZ), color, new Vector3(startFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, minZ), color);
         }
 
-        void DrawVerticalHorizontalLine(float startFret, float endFret, float time, float heightOffset, PixColor color)
+        void DrawVerticalHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
             time *= -timeScale;
 
-            PixImage image = PixGame.Instance.GetImage("HorizontalFretLine");
+            UIImage image = Layout.Current.GetImage("HorizontalFretLine");
 
             float imageScale = .02f;
 
@@ -602,12 +602,12 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
 
-        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, PixColor color)
+        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, UIColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
             time *= -timeScale;
 
-            PixImage image = PixGame.Instance.GetImage("VerticalFretLine");
+            UIImage image = Layout.Current.GetImage("VerticalFretLine");
 
             float imageScale = .03f;
 
@@ -617,13 +617,13 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, startHeight, time), color, new Vector3(minX, endEndHeight, time), color, new Vector3(maxX, endEndHeight, time), color, new Vector3(maxX, startHeight, time), color);
         }
 
-        void DrawFretTimeLine(float fretCenter, float height, float startTime, float endTime, PixColor color)
+        void DrawFretTimeLine(float fretCenter, float height, float startTime, float endTime, UIColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
             startTime *= -timeScale;
             endTime *= -timeScale;
 
-            PixImage image = PixGame.Instance.GetImage("VerticalFretLine");
+            UIImage image = Layout.Current.GetImage("VerticalFretLine");
 
             float imageScale = 0.03f;
 
@@ -633,7 +633,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, height, startTime), color, new Vector3(minX, height, endTime), color, new Vector3(maxX, height, endTime), color, new Vector3(maxX, height, startTime), color);
         }
 
-        void DrawVerticalImage(PixImage image, float startFret, float endFret, float time, float heightOffset, PixColor color, float imageScale)
+        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float heightOffset, UIColor color, float imageScale)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -645,7 +645,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
 
-        void DrawVerticalImage(PixImage image, float fretCenter, float timeCenter, float heightOffset, PixColor color, float imageScale)
+        void DrawVerticalImage(UIImage image, float fretCenter, float timeCenter, float heightOffset, UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
@@ -659,7 +659,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, minY, timeCenter), color, new Vector3(minX, maxY, timeCenter), color, new Vector3(maxX, maxY, timeCenter), color, new Vector3(maxX, minY, timeCenter), color);
         }
 
-        void DrawVerticalImage(PixImage image, float startFret, float endFret, float time, float startHeight, float endHeight, PixColor color)
+        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -668,7 +668,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, startHeight, time), color, new Vector3(startFret, endHeight, time), color, new Vector3(endFret, endHeight, time), color, new Vector3(endFret, startHeight, time), color);
         }
 
-        void DrawFlatImage(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color, float imageScale)
+        void DrawFlatImage(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             startTime *= -timeScale;
@@ -680,7 +680,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, heightOffset, startTime), color, new Vector3(minX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, startTime), color);
         }
 
-        void DrawFlatImage(PixImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, PixColor color)
+        void DrawFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -690,7 +690,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(startFret, heightOffset, startTime), color, new Vector3(startFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, startTime), color);
         }
 
-        void DrawSkewedFlatImage(PixImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, PixColor color)
+        void DrawSkewedFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -703,7 +703,7 @@ namespace BassJam
                 new Vector3(endFret + ((float)image.Width * imageScale), heightOffset, endTime), color, new Vector3(startFret + ((float)image.Width * imageScale), heightOffset, startTime), color);
         }
 
-        void DrawImageTrail(PixImage image, PixColor color, float imageScale, params Vector3[] trailPoints)
+        void DrawImageTrail(UIImage image, UIColor color, float imageScale, params Vector3[] trailPoints)
         {
             Vector3? lastPoint = null;
 
@@ -721,7 +721,7 @@ namespace BassJam
             }
         }
 
-        void DrawVibrato(PixImage image, float fretCenter, float startTime, float endTime, float heightOffset, PixColor color)
+        void DrawVibrato(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, UIColor color)
         {
             float imageScale = .03f;
 
@@ -737,7 +737,7 @@ namespace BassJam
 
             for (int i = 1; i <= numPoints; i++)
             {
-                float time = PixUtil.Lerp(startTime, endTime, (float)i / (float)numPoints);
+                float time = MathUtil.Lerp(startTime, endTime, (float)i / (float)numPoints);
 
                 if (time < currentTime)
                 {
@@ -758,7 +758,7 @@ namespace BassJam
             }
         }
 
-        void DrawBend(PixImage image, float fretCenter, float startTime, float sustainTime, float strng, CentsOffset[] bendOffsets, PixColor color)
+        void DrawBend(UIImage image, float fretCenter, float startTime, float sustainTime, float strng, CentsOffset[] bendOffsets, UIColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
 
@@ -808,17 +808,17 @@ namespace BassJam
             }
         }
 
-        void DrawFlatText(string text, float fretCenter, float timeCenter, float heightOffset, PixColor color, float imageScale)
+        void DrawFlatText(string text, float fretCenter, float timeCenter, float heightOffset, UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
 
-            PixFont font = PixGame.Instance.GetFont("LargeFont");
+            UIFont font = Layout.Current.GetFont("LargeFont");
 
             float textWidth;
             float textHeight;
 
-            font.MeasureString(text, out textWidth, out textHeight);
+            font.SpriteFont.MeasureString(text, out textWidth, out textHeight);
 
             textWidth *= imageScale;
             textHeight *= imageScale;
@@ -833,32 +833,32 @@ namespace BassJam
 
                 char c = text[i];
 
-                PixFontGlyph glyph = font.GetGlyph(c);
+                SpriteFontGlyph glyph = font.SpriteFont.GetGlyph(c);
 
                 drawRect.X = glyph.X;
                 drawRect.Y = glyph.Y;
                 drawRect.Width = glyph.Width;
                 drawRect.Height = glyph.Height;
 
-                DrawQuad(font.FontImage, drawRect, new Vector3(x, heightOffset, z), color, new Vector3(x, heightOffset, z + ((float)glyph.Height * imageScale)), color,
+                DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, heightOffset, z), color, new Vector3(x, heightOffset, z + ((float)glyph.Height * imageScale)), color,
                     new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z + ((float)glyph.Height * imageScale)), color,
                     new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z), color);
 
-                x += (glyph.Width + font.Spacing) * imageScale;
+                x += (glyph.Width + font.SpriteFont.Spacing) * imageScale;
             }
         }
 
-        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, PixColor color, float imageScale)
+        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
 
-            PixFont font = PixGame.Instance.GetFont("LargeFont");
+            UIFont font = Layout.Current.GetFont("LargeFont");
 
             float textWidth;
             float textHeight;
 
-            font.MeasureString(text, imageScale, out textWidth, out textHeight);
+            font.SpriteFont.MeasureString(text, imageScale, out textWidth, out textHeight);
 
             float x = fretCenter - (textWidth / 2);
 
@@ -870,17 +870,17 @@ namespace BassJam
 
                 char c = text[i];
 
-                PixFontGlyph glyph = font.GetGlyph(c);
+                SpriteFontGlyph glyph = font.SpriteFont.GetGlyph(c);
 
                 drawRect.X = glyph.X;
                 drawRect.Y = glyph.Y;
                 drawRect.Width = glyph.Width;
                 drawRect.Height = glyph.Height;
 
-                DrawQuad(font.FontImage, drawRect, new Vector3(x, y, timeCenter), color, new Vector3(x, y + ((float)glyph.Height * imageScale), timeCenter), color,
+                DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, y, timeCenter), color, new Vector3(x, y + ((float)glyph.Height * imageScale), timeCenter), color,
                     new Vector3(x + ((float)glyph.Width * imageScale), y + ((float)glyph.Height * imageScale), timeCenter), color, new Vector3(x + ((float)glyph.Width * imageScale), y, timeCenter), color);
 
-                x += (glyph.Width + font.Spacing) * imageScale;
+                x += (glyph.Width + font.SpriteFont.Spacing) * imageScale;
             }
         }
 
@@ -922,7 +922,7 @@ namespace BassJam
 
             double partial = bin - low;
 
-            return (float)PixUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
+            return (float)MathUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
         }
 
         double GetBin(double frequency)

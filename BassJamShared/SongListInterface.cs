@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PixelEngine;
+using UILayout;
 using SongFormat;
 
 namespace BassJam
@@ -14,13 +14,10 @@ namespace BassJam
         ItemDisplayColum<SongIndexEntry> tuningColumn;
 
         public SongListDisplay()
-            : base(PixColor.Black)
+            : base(UIColor.Black)
         {
-            HorizontalPadding = PixUI.DefaultScale * 5;
-            VerticalPadding = PixUI.DefaultScale * 5;
-
-            ListDisplay.BackgroundColor = PixColor.Black;
-            ListDisplay.ItemOutlineUnpressed = null;
+            Padding = new LayoutPadding(5);
+            ListDisplay.BackgroundColor = UIColor.Black;
             ListDisplay.SelectAction = SongSelected;
 
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
@@ -29,18 +26,18 @@ namespace BassJam
             float width = 0;
             float height = 0;
 
-            ListDisplay.Font.MeasureString("Eb Drop Db", out width, out height);
+            ListDisplay.Font.SpriteFont.MeasureString("Eb Drop Db", out width, out height);
             AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "BassGuitarTuning", RequestedDisplayWidth = width });
 
-            //LeftInputStack.AddInput(new DialogInput { Text = "All Songs", ButtonName = "ShowAllSongs", Action = ShowAllSongs });
-            //LeftInputStack.AddInput(new DialogInput { Text = "Select Tag", ButtonName = "SelectTag", Action = SelectTag });
-            LeftInputStack.AddInput(new DialogInput { Text = "Lead", ButtonName = "SelectLead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", ButtonName = "SelectRhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Bass", ButtonName = "SelectBass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Close", ButtonName = "MenuBack", Action = Close });
+            //LeftInputStack.AddInput(new DialogInput { Text = "Lead", ButtonName = "SelectLead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
+            //LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", ButtonName = "SelectRhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
+            //LeftInputStack.AddInput(new DialogInput { Text = "Bass", ButtonName = "SelectBass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
+            //LeftInputStack.AddInput(new DialogInput { Text = "Close", ButtonName = "MenuBack", Action = Close });
 
-            //RightInputStack.AddInput(new DialogInput { Text = "Scan Files", ButtonName = "ScanFiles", Action = ShowScanDialog });
-            //RightInputStack.AddInput(new DialogInput { Text = "Load From File", ButtonName = "LoadFromFile", Action = LoadFile });
+            LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
+            LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
+            LeftInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
+            LeftInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
             SetSortColumn("Title");
         }
@@ -103,7 +100,7 @@ namespace BassJam
 
         public void Close()
         {
-            SongPlayerInterface.Instance.ClosePopup();
+            Layout.Current.ClosePopup(this);
         }
     }
 
@@ -156,20 +153,12 @@ namespace BassJam
 
         public object GetSortValue(T obj)
         {
-#if NETFX_CORE
-            return obj.GetType().GetTypeInfo().GetDeclaredProperty(SortPropertyName ?? PropertyName).GetValue(srcObject, null);
-#else            
             return obj.GetType().GetProperty(SortPropertyName ?? PropertyName).GetValue(obj, null);
-#endif
         }
 
         public object GetValue(T obj)
         {
-#if NETFX_CORE
-            return obj.GetType().GetTypeInfo().GetDeclaredProperty(PropertyName).GetValue(srcObject, null);
-#else            
             return obj.GetType().GetProperty(PropertyName).GetValue(obj, null);
-#endif
         }
 
         public string GetDisplayValue(T obj)
@@ -234,21 +223,18 @@ namespace BassJam
         {
             foreach (ItemDisplayColum<T> column in parentDisplay.DisplayColumns)
             {
-#if UNITY
-                PixGame.Instance.UIGraphicsContext.DrawText(column.GetDisplayValue((T)Items[item]), Font, (int)(x + column.DisplayOffset), (int)y, ID, TextColor, FontScale);
-#else
-                PixGame.Instance.UIGraphicsContext.DrawText(column.GetDisplayValue((T)Items[item]), Font, (int)(x + column.DisplayOffset), (int)y, PixUI.MidgroundDepth, TextColor, FontScale);
-#endif
+                Layout.Current.GraphicsContext.DrawText(column.GetDisplayValue((T)Items[item]), Font, (int)(x + column.DisplayOffset), (int)y, TextColor, FontScale);
             }
         }
     }
 
-    public class MultiColumnItemDisplay<T> : Dock, IPopupDialog
+    public class MultiColumnItemDisplay<T> : Dock, IPopup
     {
         public MultiColumnItemDisplaySwipeList<T> ListDisplay { get; private set; }
         internal List<ItemDisplayColum<T>> DisplayColumns { get; private set; }
         public DialogInputStack LeftInputStack { get; private set; }
         public DialogInputStack RightInputStack { get; private set; }
+        public Action CloseAction { get; set; }
 
         List<T> items;
         Dock topDock;
@@ -257,7 +243,7 @@ namespace BassJam
         ItemDisplayColum<T> lastSortColumn;
         bool lastSortReverse;
 
-        public MultiColumnItemDisplay(PixColor backgroundColor)
+        public MultiColumnItemDisplay(UIColor backgroundColor)
         {
             DisplayColumns = new List<ItemDisplayColum<T>>();
 
@@ -292,28 +278,28 @@ namespace BassJam
             });
 
             // Make sure the bottom dock covers scrolling
-            bottomDock.Children.Add(new UIElement { Height = PixUI.DefaultScale * 15 });
+            bottomDock.Children.Add(new UIElement { DesiredHeight = 15 });
 
             HorizontalStack leftButtonStack = new HorizontalStack
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalPadding = PixUI.DefaultScale * 5,
                 VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = PixUI.DefaultScale * 2
+                Padding = new LayoutPadding(0, 5),
+                ChildSpacing = 2
             };
 
-            LeftInputStack = new DialogInputStack(leftButtonStack, false);
+            LeftInputStack = new DialogInputStack(this, leftButtonStack);
             bottomDock.Children.Add(LeftInputStack);
 
             HorizontalStack rightButtonStack = new HorizontalStack
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalPadding = PixUI.DefaultScale * 5,
                 VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = PixUI.DefaultScale * 2
+                Padding = new LayoutPadding(0, 5),
+                ChildSpacing = 2
             };
 
-            RightInputStack = new DialogInputStack(rightButtonStack, false) { HorizontalAlignment = EHorizontalAlignment.Right };
+            RightInputStack = new DialogInputStack(this, rightButtonStack) { HorizontalAlignment = EHorizontalAlignment.Right };
             bottomDock.Children.Add(RightInputStack);
         }
 
@@ -340,11 +326,12 @@ namespace BassJam
         {
             DisplayColumns.Add(column);
 
-            headerStack.Children.Add(new TextTouchButton(column.DisplayName, column.DisplayName) { HorizontalPadding = PixUI.DefaultScale });
+            //headerStack.Children.Add(new TextButton(column.DisplayName, column.DisplayName) { Padding = new LayoutPadding(1, 0) });
+            headerStack.Children.Add(new TextButton(column.DisplayName) { Padding = new LayoutPadding(1, 0) });
 
             UpdateColumnLayout();
 
-            PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
+            //PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
         }
 
         public ItemDisplayColum<T> GetColumn(string displayOrPropertyName)
@@ -362,7 +349,7 @@ namespace BassJam
 
         void UpdateColumnLayout()
         {
-            float widthRemaining = ContentLayout.Width;
+            float widthRemaining = ContentBounds.Width;
             int numDivideColumns = 0;
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
@@ -400,7 +387,7 @@ namespace BassJam
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
             {
-                headerStack.Children[columnPos].Width = column.DisplayWidth;
+                headerStack.Children[columnPos].DesiredWidth = column.DisplayWidth;
 
                 columnPos++;
             }
@@ -461,16 +448,18 @@ namespace BassJam
 
         public void Randomize()
         {
-            PixGame.Random.RandomizeList(items);
+            //PixGame.Random.RandomizeList(items);
+
+            throw new NotImplementedException();
 
             ListDisplay.FirstItem();
         }
 
-        public override void HandleInput(PixInputManager inputManager)
+        public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
 
-            int wheelDelta = inputManager.GetMouseWheelDelta();
+            int wheelDelta = inputManager.MouseWheelDelta;
 
             if (wheelDelta > 0)
             {
@@ -483,7 +472,7 @@ namespace BassJam
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
             {
-                if (inputManager.WasClicked(column.DisplayName))
+                if (inputManager.WasClicked(column.DisplayName, this))
                 {
                     Sort(column, toggleReverse: true);
 
@@ -491,32 +480,32 @@ namespace BassJam
                 }
             }
 
-            if (PixGame.InputManager.WasPressed("NextPage"))
+            if (inputManager.WasPressed("NextPage"))
             {
                 ListDisplay.NextPage();
             }
 
-            if (PixGame.InputManager.WasPressed("PreviousPage"))
+            if (inputManager.WasPressed("PreviousPage"))
             {
                 ListDisplay.PreviousPage();
             }
 
-            if (PixGame.InputManager.WasPressed("NextItem"))
+            if (inputManager.WasPressed("NextItem"))
             {
                 ListDisplay.NextItem();
             }
 
-            if (PixGame.InputManager.WasPressed("PreviousItem"))
+            if (inputManager.WasPressed("PreviousItem"))
             {
                 ListDisplay.PreviousItem();
             }
 
-            if (PixGame.InputManager.WasPressed("FirstItem"))
+            if (inputManager.WasPressed("FirstItem"))
             {
                 ListDisplay.FirstItem();
             }
 
-            if (PixGame.InputManager.WasPressed("LastItem"))
+            if (inputManager.WasPressed("LastItem"))
             {
                 ListDisplay.LastItem();
             }

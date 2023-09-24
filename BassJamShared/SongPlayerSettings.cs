@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using PixelEngine;
+using UILayout;
 
 namespace BassJam
 {
@@ -20,45 +20,45 @@ namespace BassJam
         SongPlayerSettings newSettings = new SongPlayerSettings();
 
         public SongPlayerSettingsInterface(SongPlayerSettings settings)
-            : base(PopupGameState.DefaultPopupNinePatch)
+            : base(Layout.DefaultOutlineNinePatch)
         {
             oldSettings = settings;
 
             CopySettings(oldSettings, newSettings);
 
-            VerticalStack vStack = new VerticalStack() { ChildSpacing = PixUI.DefaultScale * 5, VerticalAlignment = EVerticalAlignment.Stretch };
+            VerticalStack vStack = new VerticalStack() { ChildSpacing = 5, VerticalAlignment = EVerticalAlignment.Stretch };
             SetContents(vStack);
 
             HorizontalStack invertStack = new HorizontalStack()
             {
-                ChildSpacing = PixUI.DefaultScale * 5
+                ChildSpacing = 5
             };
             vStack.Children.Add(invertStack);
 
             invertStack.Children.Add(new TextBlock("String Orientation:"));
 
-            TextToggleButton invertStringsButton = new TextToggleButton("InvertStrings", "Low On Top", "Low On Bottom");
+            TextToggleButton invertStringsButton = new TextToggleButton("Low On Top", "Low On Bottom");
             invertStack.Children.Add(invertStringsButton);
 
-            invertStringsButton.SetPressed(newSettings.InvertStrings);
-            invertStringsButton.Update(0);
+            //invertStringsButton.SetPressed(newSettings.InvertStrings);
+            //invertStringsButton.Update(0);
 
             HorizontalStack retuneStack = new HorizontalStack()
             {
-                ChildSpacing = PixUI.DefaultScale * 5
+                ChildSpacing = 5
             };
             vStack.Children.Add(retuneStack);
 
             retuneStack.Children.Add(new TextBlock("Re-tune to E Standard:"));
 
-            TextToggleButton retuneButton = new TextToggleButton("DoRetune", "Yes", "No");
+            TextToggleButton retuneButton = new TextToggleButton("Yes", "No");
             retuneStack.Children.Add(retuneButton);
 
-            retuneButton.SetPressed(newSettings.RetuneToEStandard);
-            retuneButton.Update(0);
+            //retuneButton.SetPressed(newSettings.RetuneToEStandard);
+            //retuneButton.Update(0);
 
-            AddInput(new DialogInput { Text = "Apply", ButtonName = "MenuSelect", Action = Apply, CloseOnInput = true });
-            AddInput(new DialogInput { Text = "Cancel", ButtonName = "MenuBack", CloseOnInput = true });
+            AddInput(new DialogInput { Text = "Apply", Action = Apply, CloseOnInput = true });
+            AddInput(new DialogInput { Text = "Cancel", CloseOnInput = true });
         }
 
         void CopySettings(SongPlayerSettings fromSettings, SongPlayerSettings toSettings)
@@ -69,7 +69,7 @@ namespace BassJam
             }
         }
 
-        public override void HandleInput(PixInputManager inputManager)
+        public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
 
@@ -77,14 +77,14 @@ namespace BassJam
             {
                 newSettings.InvertStrings = !newSettings.InvertStrings;
 
-                PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
+                UpdateContentLayout();
             }
 
             if (inputManager.WasClicked("DoRetune", this))
             {
                 newSettings.RetuneToEStandard = !newSettings.RetuneToEStandard;
 
-                PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
+                UpdateContentLayout();
             }
         }
 

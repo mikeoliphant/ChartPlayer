@@ -1,103 +1,85 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
-using PixelEngine;
+using Microsoft.Xna.Framework;
+using UILayout;
 
 namespace BassJam
 {
-    public class BassJamGame : PixGame2D
+    public class BassJamGame : MonoGameLayout
     {
-        public static new BassJamGame Instance { get { return PixGame2D.Instance as BassJamGame; } }
+        public static new BassJamGame Instance { get; private set; }
+
+        public int ScreenWidth { get; private set; }
+        public int ScreenHeight { get; private set; }
 
         public BassJamPlugin Plugin { get; set; }
 
-        public BassJamGame(int screenWidth, int screenHeight) : base(screenWidth, screenHeight)
+        public BassJamGame(Game host)
+            : base(host)
         {
-        }
+            Instance = this;
+            //}
 
-        public override void Initialize()
-        {
-            base.Initialize();
+            //public override void Initialize()
+            //{
+            //    base.Initialize();
 
-            GameHost.InactiveSleepTime = TimeSpan.Zero;
-        }
+            //    GameHost.InactiveSleepTime = TimeSpan.Zero;
+            //}
 
-        protected override void InitializeStorageManager()
-        {
-            string storageFolder = @"C:\tmp\BassJam";
+            //public override void LoadContent()
+            //{
+            //    base.LoadContent();
+            LoadImageManifest("ImageManifest.xml");
 
-            if (!Directory.Exists(storageFolder))
-            {
-                Directory.CreateDirectory(storageFolder);
-            }
-
-            StorageManager = new SimpleStorageManager(storageFolder);
-        }
-
-        public override void LoadContent()
-        {
-            base.LoadContent();
-
-            ImageManifest manifest = new ImageManifest();
-
-            try
-            {
-                manifest = DeserializeXml(Path.Combine(DefaultImagePath, "ImageManifest.xml"), typeof(ImageManifest)) as ImageManifest;
-
-                LoadImageManifest(manifest);
-            }
-            catch (Exception ex)
-            {
-                //LogHandler.Instance.WriteLog("Content load failed: {0}", ex.ToString());
-
-                Exit();
-            }
-
-            PixUI.DefaultScale = 1; // InterfaceSettings.Instance.UserInterfaceScale;
+            //PixUI.DefaultScale = 1; // InterfaceSettings.Instance.UserInterfaceScale;
 
             //PixGame.Instance.SingleWhitePixelImage = PixGame.Instance.GetImage("SingleWhitePixel");
 
             AddFont("MainFont", GetFont("MainFont-1"));
             AddFont("LargeFont", GetFont("LargeFont-1"));
 
-            DefaultFont = GetFont("MainFont");
-            DefaultFont.Spacing = -1;
-            DefaultFont.EmptyLinePercent = 0.5f;
+            UIFont.DefaultFont = GetFont("MainFont");
+            UIFont.DefaultFont.SpriteFont.Spacing = -1;
+            UIFont.DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
 
-            AddImage("PopupOutline", PixImageGen.CreateRectangleImage(4, 4, PixColor.White, PixColor.Black));
+            //AddImage("PopupOutline", UIImageGen.CreateRectangleImage(4, 4, UIColor.White, UIColor.Black));
 
-            PopupGameState.DefaultPopupNinePatch = GetImage("PopupBackground");
+            DefaultOutlineNinePatch = GetImage("PopupBackground");
 
-            PixUI.DefaultPressedNinePatch = GetImage("PanelBackgroundLightest");
-            PixUI.DefaultUnpressedNinePatch = GetImage("PanelBackgroundLight");
+            DefaultPressedNinePatch = GetImage("PanelBackgroundLightest");
+            DefaultUnpressedNinePatch = GetImage("PanelBackgroundLight");
 
-            float DefaultPadding = PixUI.DefaultScale * 4;
+            float DefaultPadding = 4;
 
-            TextTouchButton.DefaultTextHorizontalPadding = DefaultPadding * 2;
-            TextTouchButton.DefaultTextVerticalPadding = PixUI.DefaultScale;
-            ImageTouchButton.DefaultImageHorizontalPadding = DefaultPadding * 2;
-            ImageTouchButton.DefaultImageVerticalPadding = DefaultPadding * 2;
+            //TextTouchButton.DefaultTextHorizontalPadding = DefaultPadding * 2;
+            //TextTouchButton.DefaultTextVerticalPadding = PixUI.DefaultScale;
+            //ImageTouchButton.DefaultImageHorizontalPadding = DefaultPadding * 2;
+            //ImageTouchButton.DefaultImageVerticalPadding = DefaultPadding * 2;
 
-            PixGame.InputManager.AddDefaultMappings();
+            //PixGame.InputManager.AddDefaultMappings();
 
-            PixGame.InputManager.AddMapping("PreviousPage", new KeyMapping(PixInputKey.PageUp) { DoRepeat = true });
-            PixGame.InputManager.AddMapping("NextPage", new KeyMapping(PixInputKey.PageDown) { DoRepeat = true });
-            PixGame.InputManager.AddMapping("NextItem", new KeyMapping(PixInputKey.Down) { DoRepeat = true });
-            PixGame.InputManager.AddMapping("PreviousItem", new KeyMapping(PixInputKey.Up) { DoRepeat = true });
-            PixGame.InputManager.AddMapping("FirstItem", new KeyMapping(PixInputKey.Home));
-            PixGame.InputManager.AddMapping("LastItem", new KeyMapping(PixInputKey.End));
+            InputManager.AddMapping("PreviousPage", new KeyMapping(InputKey.PageUp) { DoRepeat = true });
+            InputManager.AddMapping("NextPage", new KeyMapping(InputKey.PageDown) { DoRepeat = true });
+            InputManager.AddMapping("NextItem", new KeyMapping(InputKey.Down) { DoRepeat = true });
+            InputManager.AddMapping("PreviousItem", new KeyMapping(InputKey.Up) { DoRepeat = true });
+            InputManager.AddMapping("FirstItem", new KeyMapping(InputKey.Home));
+            InputManager.AddMapping("LastItem", new KeyMapping(InputKey.End));
 
-            PixGame.InputManager.AddMapping("PauseGame", new KeyMapping(PixInputKey.Space));
+            InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
-            AddGameState("SongPlayer", new SongPlayerInterface());
+            RootUIElement = new SongPlayerInterface();
+            //AddGameState("SongPlayer", new SongPlayerInterface());
 
-            SetGameState("SongPlayer");
+            //SetGameState("SongPlayer");
         }
 
-        public override void ResizeScreen(int newWidth, int newHeight, bool gameSizeOnly)
-        {
-            base.ResizeScreen(newWidth, newHeight, gameSizeOnly);
+        //public override void ResizeScreen(int newWidth, int newHeight, bool gameSizeOnly)
+        //{
+        //    base.ResizeScreen(newWidth, newHeight, gameSizeOnly);
 
-            SongPlayerInterface.Instance.ResizeScreen();
-        }
+        //    SongPlayerInterface.Instance.ResizeScreen();
+        //}
     }
 }

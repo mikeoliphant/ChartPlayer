@@ -31,6 +31,9 @@
 		<Folder Include="Asio\" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="AudioPlugSharp, Culture=neutral, processorArchitecture=MSIL">
 			<SpecificVersion>False</SpecificVersion>
 			<HintPath>..\..\AudioPlugSharp\x64\Release\AudioPlugSharp.dll</HintPath>
@@ -41,6 +44,5 @@
 		<Exec Command="dotnet tool restore" />
 	</Target>
 	<Import Project="..\BassJamShared\BassJamShared.projitems" Label="Shared" />
-	<Import Project="..\..\PixelEngine\PixelEngine\PixelEngine.projitems" Label="Shared" />
 	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>

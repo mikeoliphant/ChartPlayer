@@ -5,12 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Xna.Framework;
-using PixelEngine;
+using UILayout;
 using SongFormat;
 
 namespace BassJam
 {
-    public class SongPlayerInterface : PopupGameState
+    public class SongPlayerInterface : Dock
     {
         public static SongPlayerInterface Instance { get; private set; }
 
@@ -31,15 +31,7 @@ namespace BassJam
         {
             Instance = this;
 
-            DrawScene = true;
-            UpdateWhenPaused = false;
-
-            mainDock = new Dock();
-            mainDock.HorizontalPadding = PixUI.DefaultScale * 5;
-            mainDock.VerticalPadding = PixUI.DefaultScale * 5;
-
-
-            Element = mainDock;
+            Padding = new LayoutPadding(5);
 
             songIndex = new SongIndex(basePath);
 
@@ -56,16 +48,15 @@ namespace BassJam
             {
                 HorizontalAlignment = EHorizontalAlignment.Center,
                 VerticalAlignment = EVerticalAlignment.Top,
-                VerticalPadding = 20
+                Padding = new LayoutPadding(0, 20)
             };
             topStack.Children.Add(sectionInterface);
 
             vocalText = new TextBlock
             {
-                Font = PixGame.Instance.GetFont("LargeFont"),
-                TextColor = PixColor.White,
-                HorizontalPadding = 20,
-                VerticalPadding = 20
+                TextFont = BassJamGame.Instance.GetFont("LargeFont"),
+                TextColor = UIColor.White,
+                Padding = new LayoutPadding(20)
             };
 
             topStack.Children.Add(vocalText);
@@ -74,14 +65,14 @@ namespace BassJam
             {
                 HorizontalAlignment = EHorizontalAlignment.Left,
                 VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = PixUI.DefaultScale * 2
+                ChildSpacing = 2
             };
             mainDock.Children.Add(bottomButtonStack);
 
-            TextTouchButton songsButton = new TextTouchButton("ShowSongs", "Songs");
+            TextButton songsButton = new TextButton("Songs");
             bottomButtonStack.Children.Add(songsButton);
 
-            TextTouchButton optionsButton = new TextTouchButton("ShowOptions", "Options");
+            TextButton optionsButton = new TextButton("Options");
             bottomButtonStack.Children.Add(optionsButton);
         }
 
@@ -89,8 +80,8 @@ namespace BassJam
         {
             if (scene3D != null)
             {
-                scene3D.Camera.ViewportWidth = PixGame.Instance.ScreenWidth;
-                scene3D.Camera.ViewportHeight = PixGame.Instance.ScreenHeight;
+                scene3D.Camera.ViewportWidth = BassJamGame.Instance.ScreenWidth;
+                scene3D.Camera.ViewportHeight = BassJamGame.Instance.ScreenHeight;
             }
         }
 
@@ -129,25 +120,25 @@ namespace BassJam
             }
             catch (Exception ex)
             {
-                (PixGame.Instance.CurrentGameState as PopupGameState).ShowContinuePopup("Failed to create song player: " + ex.ToString(), null);
+                Layout.Current.ShowContinuePopup("Failed to create song player: " + ex.ToString(), null);
             }
         }
 
-        public override void Update(float secondsElapsed)
+        public override void HandleInput(InputManager inputManager)
         {
-            base.Update(secondsElapsed);
+            base.HandleInput(inputManager);
 
-            if (PixGame.InputManager.WasClicked("ShowSongs", this))
+            if (inputManager.WasClicked("ShowSongs", this))
             {
-                ShowPopup(songList);
+                Layout.Current.ShowPopup(songList);
             }
 
-            if (PixGame.InputManager.WasClicked("ShowOptions", this))
+            if (inputManager.WasClicked("ShowOptions", this))
             {
-                ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+                Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
             }
             
-            if (PixGame.InputManager.WasPressed("PauseGame"))
+            if (inputManager.WasPressed("PauseGame"))
             {
                 if (songPlayer != null)
                 {
@@ -159,20 +150,20 @@ namespace BassJam
             {
                 float endTime = (float)songPlayer.CurrentSecond + 2;
 
-                vocalText.StringBuilder.Clear();
+                //vocalText.StringBuilder.Clear();
 
-                foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
-                {
-                    vocalText.StringBuilder.Append(vocal.Vocal);
+                //foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
+                //{
+                //    vocalText.StringBuilder.Append(vocal.Vocal);
 
-                    if (!vocal.Vocal.EndsWith('\n'))
-                    {
-                        vocalText.StringBuilder.Append(' ');
-                    }
-                }
+                //    if (!vocal.Vocal.EndsWith('\n'))
+                //    {
+                //        vocalText.StringBuilder.Append(' ');
+                //    }
+                //}
             }
 
-            vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+            //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
         }
 
         void ApplySettings()
@@ -183,13 +174,13 @@ namespace BassJam
             }
         }
 
-        public override void PostDraw()
-        {
-            base.PostDraw();
+        //public override void PostDraw()
+        //{
+        //    base.PostDraw();
 
-            if (scene3D != null)
-                scene3D.Draw();
-        }
+        //    if (scene3D != null)
+        //        scene3D.Draw();
+        //}
     }
 
     public class SongSectionInterface : Dock
@@ -244,16 +235,16 @@ namespace BassJam
 
         protected override void GetContentSize(out float width, out float height)
         {
-            width = (float)PixGame.Instance.ScreenWidth * .9f;
-            height = (float)PixGame.Instance.ScreenHeight * .1f;
+            width = (float)BassJamGame.Instance.ScreenWidth * .9f;
+            height = (float)BassJamGame.Instance.ScreenHeight * .1f;
         }
 
-        public override bool HandleTouch(PixTouch touch)
+        public override bool HandleTouch(in Touch touch)
         {
-            if (touch.TouchState != EPixTouchState.Pressed)
+            if (touch.TouchState != ETouchState.Pressed)
                 return false;
 
-            float time = endTime * ((touch.Position.X - ContentLayout.Offset.X) / ContentLayout.Width);
+            float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
 
             foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
             {
@@ -273,9 +264,7 @@ namespace BassJam
             if (songPlayer == null)
                 return;
 
-            Rectangle drawRect;
-
-            PixColor color = PixColor.Orange;
+            UIColor color = UIColor.Orange;
 
             float currentTime = songPlayer.CurrentSecond;
 
@@ -291,15 +280,13 @@ namespace BassJam
                 float startPercent = section.StartTime / endTime;
                 float endPercent = section.EndTime / endTime;
 
-                int startX = (int)(ContentLayout.Offset.X + (ContentLayout.Width * startPercent));
+                int startX = (int)(ContentBounds.X + (ContentBounds.Width * startPercent));
 
-                int endX = (int)(ContentLayout.Offset.X + (ContentLayout.Width * endPercent));
+                int endX = (int)(ContentBounds.X + (ContentBounds.Width * endPercent));
 
-                float height = ContentLayout.Height * ((float)sectionDensity[i] / (float)maxDensity);
+                float height = ContentBounds.Height * ((float)sectionDensity[i] / (float)maxDensity);
 
-                drawRect = new Rectangle((int)startX, (int)(ContentLayout.Bottom - (int)height), endX - startX - 2, (int)height);
-
-                PixGame.Instance.UIScene.DrawRectangle(ref drawRect, 0.5f, color);
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF((int)startX, (int)(ContentBounds.Bottom - (int)height), endX - startX - 2, (int)height), color);
             }
         }
     }

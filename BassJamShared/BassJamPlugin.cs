@@ -3,14 +3,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using AudioPlugSharp;
-using PixelEngine;
 
 namespace BassJam
 {
     public class BassJamPlugin : AudioPluginBase
     {
-        PixelEngine.XNAGame xnaGame = null;
-
         public BassJamSaveState BassJamSaveState { get { return (SaveStateData as BassJamSaveState) ?? new BassJamSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<double> SampleHistory { get; private set; } = new SampleHistory<double>();
@@ -37,8 +34,6 @@ namespace BassJam
             HasUserInterface = true;
             EditorWidth = 1024;
             EditorHeight = 720;
-
-            FileSelector.DoNativeFileSelector = false;
 
             SaveStateData = new BassJamSaveState();
         }

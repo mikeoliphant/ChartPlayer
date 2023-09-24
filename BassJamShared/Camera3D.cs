@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using PixelEngine;
 
 namespace BassJam
 {
@@ -16,7 +15,7 @@ namespace BassJam
         public bool IsOrthographic { get; set; }
         public float OrthographicScale { get; set; }
 
-        public float FieldOfView { get; set; } = PixUtil.ToRadians(45);
+        public float FieldOfView { get; set; } = (float)Math.PI / 4.0f;
         public float NearPlane { get; set; } = 1;
         public float FarPlane { get; set; } = 10000;
 
@@ -26,8 +25,8 @@ namespace BassJam
 
         public Camera3D()
         {
-            ViewportWidth = PixGame.Instance.ScreenWidth;
-            ViewportHeight = PixGame.Instance.ScreenHeight;
+            ViewportWidth = BassJamGame.Instance.ScreenWidth;
+            ViewportHeight = BassJamGame.Instance.ScreenHeight;
 
             OrthographicScale = 1;
         }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using PixelEngine;
+using UILayout;
 
 namespace BassJam
 {
@@ -31,10 +31,10 @@ namespace BassJam
             set { basicEffect.FogEnd = value; }
         }
 
-        public PixColor FogColor
+        public UIColor FogColor
         {
-            get { return new PixColor(basicEffect.FogColor); }
-            set { basicEffect.FogColor = value.ToVector3(); }
+            get { return new UIColor(new System.Numerics.Vector3(basicEffect.FogColor.X, basicEffect.FogColor.Y, basicEffect.FogColor.Z)); }
+            set { basicEffect.FogColor = value.NativeColor.ToVector3(); }
         }
 
         BasicEffect basicEffect;
@@ -50,12 +50,12 @@ namespace BassJam
             Camera.Up = Vector3.Up;
             Camera.Forward = new Vector3(0, 0, -1);
 
-            basicEffect = new BasicEffect(PixGame.Instance.GameHost.GraphicsDevice);
+            basicEffect = new BasicEffect(MonoGameLayout.Current.Host.GraphicsDevice);
             basicEffect.VertexColorEnabled = true;
             basicEffect.TextureEnabled = true;
 
-            quadVertexBuffer = new VertexBuffer(PixGame.Instance.GameHost.GraphicsDevice, typeof(VertexPositionColorTexture), 4, BufferUsage.WriteOnly);
-            quadIndexBuffer = new IndexBuffer(PixGame.Instance.GameHost.GraphicsDevice, IndexElementSize.SixteenBits, 6, BufferUsage.WriteOnly);
+            quadVertexBuffer = new VertexBuffer(MonoGameLayout.Current.Host.GraphicsDevice, typeof(VertexPositionColorTexture), 4, BufferUsage.WriteOnly);
+            quadIndexBuffer = new IndexBuffer(MonoGameLayout.Current.Host.GraphicsDevice, IndexElementSize.SixteenBits, 6, BufferUsage.WriteOnly);
 
             ushort[] indices = new ushort[] { 0, 1, 2, 0, 2, 3 };
             quadIndexBuffer.SetData(indices);
@@ -67,86 +67,85 @@ namespace BassJam
             basicEffect.View = Camera.GetViewMatrix();
             basicEffect.World = Matrix.Identity;
 
-            //PixGame.Instance.GameHost.GraphicsDevice.RasterizerState = new RasterizerState { MultiSampleAntiAlias = true };
-            PixGame.Instance.GameHost.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-            PixGame.Instance.GameHost.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            MonoGameLayout.Current.Host.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+            MonoGameLayout.Current.Host.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             DrawQuads();
         }
 
         public virtual void DrawQuads()
         {
-            DrawQuad(PixGame.Instance.GetImage("GuitarOrange"), new Vector3(-1, -1, 0), PixColor.White, new Vector3(-1, 1, 0), PixColor.Yellow, new Vector3(1, 1, 0), PixColor.Blue, new Vector3(1, -1, 0), PixColor.Red); 
+            DrawQuad(Layout.Current.GetImage("GuitarOrange"), new Vector3(-1, -1, 0), UIColor.White, new Vector3(-1, 1, 0), UIColor.Yellow, new Vector3(1, 1, 0), UIColor.Blue, new Vector3(1, -1, 0), UIColor.Red); 
         }
 
-        public void DrawQuad(PixImage image, Vector3 bottomLeft, PixColor blColor, Vector3 topLeft, PixColor tlColor,
-            Vector3 topRight, PixColor trColor, Vector3 bottomRight, PixColor brColor)
+        public void DrawQuad(UIImage image, Vector3 bottomLeft, UIColor blColor, Vector3 topLeft, UIColor tlColor,
+            Vector3 topRight, UIColor trColor, Vector3 bottomRight, UIColor brColor)
         {
             verts[0] = new VertexPositionColorTexture
             {
                 Position = bottomLeft,
-                Color = blColor.ToNativeColor(),
+                Color = blColor.NativeColor,
                 TextureCoordinate = new Vector2((float)image.XOffset / (float)image.ActualWidth, (float)(image.YOffset + image.Height) / (float)image.ActualHeight)
             };
             verts[1] = new VertexPositionColorTexture
             {
                 Position = topLeft,
-                Color = tlColor.ToNativeColor(),
+                Color = tlColor.NativeColor,
                 TextureCoordinate = new Vector2((float)image.XOffset / (float)image.ActualWidth, (float)image.YOffset / (float)image.ActualHeight)
             };
             verts[2] = new VertexPositionColorTexture
             {
                 Position = topRight,
-                Color = trColor.ToNativeColor(),
+                Color = trColor.NativeColor,
                 TextureCoordinate = new Vector2((float)(image.XOffset + image.Width) / (float)image.ActualWidth, (float)image.YOffset / (float)image.ActualHeight)
             };
             verts[3] = new VertexPositionColorTexture
             {
                 Position = bottomRight,
-                Color = brColor.ToNativeColor(),
+                Color = brColor.NativeColor,
                 TextureCoordinate = new Vector2((image.XOffset + image.Width) / (float)image.ActualWidth, (float)(image.YOffset + image.Height) / (float)image.ActualHeight)
             };
 
             DrawQuad(image, verts);
         }
 
-        public void DrawQuad(PixImage image, Rectangle srcRectangle, Vector3 bottomLeft, PixColor blColor, Vector3 topLeft, PixColor tlColor,
-            Vector3 topRight, PixColor trColor, Vector3 bottomRight, PixColor brColor)
+        public void DrawQuad(UIImage image, Rectangle srcRectangle, Vector3 bottomLeft, UIColor blColor, Vector3 topLeft, UIColor tlColor,
+            Vector3 topRight, UIColor trColor, Vector3 bottomRight, UIColor brColor)
         {
             verts[0] = new VertexPositionColorTexture
             {
                 Position = bottomLeft,
-                Color = blColor.ToNativeColor(),
+                Color = blColor.NativeColor,
                 TextureCoordinate = new Vector2((float)(image.XOffset + srcRectangle.Left) / (float)image.ActualWidth, (float)(image.YOffset + srcRectangle.Bottom) / (float)image.ActualHeight)
             };
             verts[1] = new VertexPositionColorTexture
             {
                 Position = topLeft,
-                Color = tlColor.ToNativeColor(),
+                Color = tlColor.NativeColor,
                 TextureCoordinate = new Vector2((float)(image.XOffset + srcRectangle.Left) / (float)image.ActualWidth, (float)(image.YOffset + srcRectangle.Top) / (float)image.ActualHeight)
             };
             verts[2] = new VertexPositionColorTexture
             {
                 Position = topRight,
-                Color = trColor.ToNativeColor(),
+                Color = trColor.NativeColor,
                 TextureCoordinate = new Vector2((float)(image.XOffset + srcRectangle.Right) / (float)image.ActualWidth, (float)(image.YOffset + srcRectangle.Top) / (float)image.ActualHeight)
             };
             verts[3] = new VertexPositionColorTexture
             {
                 Position = bottomRight,
-                Color = brColor.ToNativeColor(),
+                Color = brColor.NativeColor,
                 TextureCoordinate = new Vector2((image.XOffset + srcRectangle.Right) / (float)image.ActualWidth, (float)(image.YOffset + srcRectangle.Bottom) / (float)image.ActualHeight)
             };
 
             DrawQuad(image, verts);
         }
 
-        public void DrawQuad(PixImage image, VertexPositionColorTexture[] vertices)
+        public void DrawQuad(UIImage image, VertexPositionColorTexture[] vertices)
         {
             quadVertexBuffer.SetData(vertices);
 
-            PixGame.Instance.GameHost.GraphicsDevice.SetVertexBuffer(quadVertexBuffer);
-            PixGame.Instance.GameHost.GraphicsDevice.Indices = quadIndexBuffer;
+            MonoGameLayout.Current.Host.GraphicsDevice.SetVertexBuffer(quadVertexBuffer);
+            MonoGameLayout.Current.Host.GraphicsDevice.Indices = quadIndexBuffer;
 
             basicEffect.Texture = image.Texture;
 
@@ -154,10 +153,10 @@ namespace BassJam
             {
                 pass.Apply();
 
-                PixGame.Instance.GameHost.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+                MonoGameLayout.Current.Host.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
             }
 
-            PixGame.Instance.GameHost.GraphicsDevice.SetVertexBuffer(null);
+            MonoGameLayout.Current.Host.GraphicsDevice.SetVertexBuffer(null);
         }
     }
 }

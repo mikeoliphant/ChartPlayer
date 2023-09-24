@@ -19,6 +19,9 @@
 		<PackageReference Include="NVorbis" Version="0.10.5" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="AudioPlugSharp, Culture=neutral, processorArchitecture=MSIL">
 			<SpecificVersion>False</SpecificVersion>
 			<HintPath>..\..\AudioPlugSharp\x64\Release\AudioPlugSharp.dll</HintPath>
@@ -32,6 +35,5 @@
 		<Exec Command="copy $(SolutionDir)..\AudioPlugSharp\x64\Release\AudioPlugSharpVst.vst3 $(TargetDir)$(TargetName)Bridge.vst3&#xD;&#xA;copy $(SolutionDir)..\AudioPlugSharp\x64\$(ConfigurationName)\wpf.runtimeconfig.json $(TargetDir)$(TargetName)Bridge.runtimeconfig.json&#xD;&#xA;copy $(SolutionDir)..\AudioPlugSharp\x64\$(ConfigurationName)\AudioPlugSharpVst.deps.json $(TargetDir)$(TargetName)Bridge.deps.json&#xD;&#xA;copy $(SolutionDir)..\AudioPlugSharp\x64\$(ConfigurationName)\Ijwhost.dll $(TargetDir)" />
 	</Target>
 	<Import Project="..\BassJamShared\BassJamShared.projitems" Label="Shared" />
-	<Import Project="..\..\PixelEngine\PixelEngine\PixelEngine.projitems" Label="Shared" />
 	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>
