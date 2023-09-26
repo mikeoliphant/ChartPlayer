@@ -19,8 +19,6 @@ namespace BassJam
         SongListDisplay songList = new SongListDisplay();
         SongIndex songIndex;
 
-        Dock mainDock;
-        SongPlayerScene3D scene3D = null;
         SongPlayer songPlayer;
         SongSectionInterface sectionInterface;
 
@@ -42,7 +40,7 @@ namespace BassJam
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Top
             };
-            mainDock.Children.Add(topStack);
+            Children.Add(topStack);
 
             sectionInterface = new SongSectionInterface()
             {
@@ -67,22 +65,23 @@ namespace BassJam
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2
             };
-            mainDock.Children.Add(bottomButtonStack);
+            Children.Add(bottomButtonStack);
 
-            TextButton songsButton = new TextButton("Songs");
+            TextButton songsButton = new TextButton("Songs")
+            {
+                ClickAction = delegate { Layout.Current.ShowPopup(songList); }
+            };
             bottomButtonStack.Children.Add(songsButton);
 
-            TextButton optionsButton = new TextButton("Options");
+            TextButton optionsButton = new TextButton("Options")
+            {
+                ClickAction = delegate { Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings }); }
+            };
             bottomButtonStack.Children.Add(optionsButton);
         }
 
         public void ResizeScreen()
         {
-            if (scene3D != null)
-            {
-                scene3D.Camera.ViewportWidth = BassJamGame.Instance.ScreenWidth;
-                scene3D.Camera.ViewportHeight = BassJamGame.Instance.ScreenHeight;
-            }
         }
 
         public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType)
@@ -112,7 +111,7 @@ namespace BassJam
 
                         sectionInterface.SetSongPlayer(songPlayer);
 
-                        scene3D = new SongPlayerScene3D(songPlayer, 3);
+                        BassJamGame.Instance.Scene3D = new SongPlayerScene3D(songPlayer, 3);
 
                         break;
                     }
@@ -127,16 +126,6 @@ namespace BassJam
         public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
-
-            if (inputManager.WasClicked("ShowSongs", this))
-            {
-                Layout.Current.ShowPopup(songList);
-            }
-
-            if (inputManager.WasClicked("ShowOptions", this))
-            {
-                Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
-            }
             
             if (inputManager.WasPressed("PauseGame"))
             {
@@ -173,14 +162,6 @@ namespace BassJam
                 songPlayer.RetuneToEStandard = BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.RetuneToEStandard;
             }
         }
-
-        //public override void PostDraw()
-        //{
-        //    base.PostDraw();
-
-        //    if (scene3D != null)
-        //        scene3D.Draw();
-        //}
     }
 
     public class SongSectionInterface : Dock
@@ -235,12 +216,15 @@ namespace BassJam
 
         protected override void GetContentSize(out float width, out float height)
         {
-            width = (float)BassJamGame.Instance.ScreenWidth * .9f;
-            height = (float)BassJamGame.Instance.ScreenHeight * .1f;
+            width = Layout.Current.Bounds.Width * .9f;
+            height = Layout.Current.Bounds.Height * .1f;
         }
 
         public override bool HandleTouch(in Touch touch)
         {
+            if (songPlayer == null)
+                return false;
+
             if (touch.TouchState != ETouchState.Pressed)
                 return false;
 

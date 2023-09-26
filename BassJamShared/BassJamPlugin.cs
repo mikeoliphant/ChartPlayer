@@ -3,6 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using AudioPlugSharp;
+using Microsoft.Xna.Framework;
+using UILayout;
 
 namespace BassJam
 {
@@ -16,6 +18,7 @@ namespace BassJam
         AudioIOPort stereoOutput;
         float[] interleavedAudio = new float[0];
         Thread gameThread = null;
+        MonoGameHost gameHost = null;
 
         public BassJamPlugin()
         {
@@ -91,31 +94,31 @@ namespace BassJam
 
             try
             {
-                PixelEngine.PixGame.DebugAction = Debug;
-
                 int screenWidth = (int)EditorWidth;
                 int screenHeight = (int)EditorHeight;
 
+                BassJamGame game;
+
                 Logger.Log("Create BassJam Game");
 
-                BassJamGame game = new BassJamGame(screenWidth, screenHeight);
-                game.Plugin = this;
-
-                using (xnaGame = new PixelEngine.XNAGame(screenWidth, screenHeight, false))
+                using (gameHost = new MonoGameHost(screenWidth, screenHeight, fullscreen: false))
                 {
-                    xnaGame.IsTrialMode = false;
-                    xnaGame.IsMouseVisible = true;
+                    game = new BassJamGame();
+                    game.Plugin = this;
 
-                    xnaGame.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
-                    xnaGame.Window.IsBorderless = true;
 
-                    SetParent(xnaGame.Window.Handle, parentWindow);
+                    gameHost.IsMouseVisible = true;
 
-                    Logger.Log("Start XNA game");
-                    xnaGame.StartGame(game);
+                    gameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
+                    gameHost.Window.IsBorderless = true;
+
+                    SetParent(gameHost.Window.Handle, parentWindow);
+
+                    Logger.Log("Start game");
+                    gameHost.StartGame(game);
                 }
 
-                game = null;
+                gameHost = null;
             }
             catch (Exception ex)
             {
@@ -127,9 +130,9 @@ namespace BassJam
         {
             base.ResizeEditor(newWidth, newHeight);
 
-            if (xnaGame != null)
+            if (gameHost != null)
             {
-                xnaGame.RequestResize((int)newWidth, (int)newHeight);
+                gameHost.RequestResize((int)newWidth, (int)newHeight);
             }
         }
 
@@ -137,9 +140,9 @@ namespace BassJam
         {
             base.HideEditor();
 
-            if (xnaGame != null)
+            if (gameHost != null)
             {
-                xnaGame.Exit();
+                gameHost.Exit();
 
                 gameThread.Join();
             }

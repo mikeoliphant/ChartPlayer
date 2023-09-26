@@ -29,11 +29,6 @@ namespace BassJam
             ListDisplay.Font.SpriteFont.MeasureString("Eb Drop Db", out width, out height);
             AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "BassGuitarTuning", RequestedDisplayWidth = width });
 
-            //LeftInputStack.AddInput(new DialogInput { Text = "Lead", ButtonName = "SelectLead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
-            //LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", ButtonName = "SelectRhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
-            //LeftInputStack.AddInput(new DialogInput { Text = "Bass", ButtonName = "SelectBass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
-            //LeftInputStack.AddInput(new DialogInput { Text = "Close", ButtonName = "MenuBack", Action = Close });
-
             LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
@@ -326,12 +321,15 @@ namespace BassJam
         {
             DisplayColumns.Add(column);
 
-            //headerStack.Children.Add(new TextButton(column.DisplayName, column.DisplayName) { Padding = new LayoutPadding(1, 0) });
-            headerStack.Children.Add(new TextButton(column.DisplayName) { Padding = new LayoutPadding(1, 0) });
+            headerStack.Children.Add(new TextButton(column.DisplayName)
+            {
+                Padding = new LayoutPadding(1, 0),
+                ClickAction = delegate {
+                    Sort(column, toggleReverse: true);
+                }
+            });
 
             UpdateColumnLayout();
-
-            //PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
         }
 
         public ItemDisplayColum<T> GetColumn(string displayOrPropertyName)

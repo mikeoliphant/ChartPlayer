@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Drawing;
-using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using UILayout;
 
 namespace BassJam
@@ -10,55 +9,34 @@ namespace BassJam
     {
         public static new BassJamGame Instance { get; private set; }
 
-        public int ScreenWidth { get; private set; }
-        public int ScreenHeight { get; private set; }
-
         public BassJamPlugin Plugin { get; set; }
+        public Scene3D Scene3D { get; set; }
 
-        public BassJamGame(Game host)
-            : base(host)
+        public BassJamGame()
         {
             Instance = this;
-            //}
+        }
 
-            //public override void Initialize()
-            //{
-            //    base.Initialize();
+        public override void SetHost(Game host)
+        {
+            base.SetHost(host);
 
-            //    GameHost.InactiveSleepTime = TimeSpan.Zero;
-            //}
+            Host.InactiveSleepTime = TimeSpan.Zero;
 
-            //public override void LoadContent()
-            //{
-            //    base.LoadContent();
             LoadImageManifest("ImageManifest.xml");
 
-            //PixUI.DefaultScale = 1; // InterfaceSettings.Instance.UserInterfaceScale;
-
-            //PixGame.Instance.SingleWhitePixelImage = PixGame.Instance.GetImage("SingleWhitePixel");
-
-            AddFont("MainFont", GetFont("MainFont-1"));
-            AddFont("LargeFont", GetFont("LargeFont-1"));
+            GraphicsContext.SingleWhitePixelImage = GetImage("SingleWhitePixel");
 
             UIFont.DefaultFont = GetFont("MainFont");
             UIFont.DefaultFont.SpriteFont.Spacing = -1;
             UIFont.DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
 
-            //AddImage("PopupOutline", UIImageGen.CreateRectangleImage(4, 4, UIColor.White, UIColor.Black));
+            TextBlock.DefaultColor = UIColor.White;
 
             DefaultOutlineNinePatch = GetImage("PopupBackground");
 
             DefaultPressedNinePatch = GetImage("PanelBackgroundLightest");
             DefaultUnpressedNinePatch = GetImage("PanelBackgroundLight");
-
-            float DefaultPadding = 4;
-
-            //TextTouchButton.DefaultTextHorizontalPadding = DefaultPadding * 2;
-            //TextTouchButton.DefaultTextVerticalPadding = PixUI.DefaultScale;
-            //ImageTouchButton.DefaultImageHorizontalPadding = DefaultPadding * 2;
-            //ImageTouchButton.DefaultImageVerticalPadding = DefaultPadding * 2;
-
-            //PixGame.InputManager.AddDefaultMappings();
 
             InputManager.AddMapping("PreviousPage", new KeyMapping(InputKey.PageUp) { DoRepeat = true });
             InputManager.AddMapping("NextPage", new KeyMapping(InputKey.PageDown) { DoRepeat = true });
@@ -70,16 +48,19 @@ namespace BassJam
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
             RootUIElement = new SongPlayerInterface();
-            //AddGameState("SongPlayer", new SongPlayerInterface());
-
-            //SetGameState("SongPlayer");
         }
 
-        //public override void ResizeScreen(int newWidth, int newHeight, bool gameSizeOnly)
-        //{
-        //    base.ResizeScreen(newWidth, newHeight, gameSizeOnly);
+        public override void Draw()
+        {
+            if (Scene3D != null)
+            {
+                Scene3D.Camera.ViewportWidth = (int)Layout.Current.Bounds.Width;
+                Scene3D.Camera.ViewportHeight = (int)Layout.Current.Bounds.Height;
 
-        //    SongPlayerInterface.Instance.ResizeScreen();
-        //}
+                Scene3D.Draw();
+            }
+
+            base.Draw();
+        }
     }
 }

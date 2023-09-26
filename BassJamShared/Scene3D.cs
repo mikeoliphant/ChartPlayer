@@ -75,7 +75,6 @@ namespace BassJam
 
         public virtual void DrawQuads()
         {
-            DrawQuad(Layout.Current.GetImage("GuitarOrange"), new Vector3(-1, -1, 0), UIColor.White, new Vector3(-1, 1, 0), UIColor.Yellow, new Vector3(1, 1, 0), UIColor.Blue, new Vector3(1, -1, 0), UIColor.Red); 
         }
 
         public void DrawQuad(UIImage image, Vector3 bottomLeft, UIColor blColor, Vector3 topLeft, UIColor tlColor,

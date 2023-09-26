@@ -25,9 +25,6 @@ namespace BassJam
 
         public Camera3D()
         {
-            ViewportWidth = BassJamGame.Instance.ScreenWidth;
-            ViewportHeight = BassJamGame.Instance.ScreenHeight;
-
             OrthographicScale = 1;
         }
 

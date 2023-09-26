@@ -154,7 +154,7 @@ namespace BassJam
                     {
                         lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
 
-                        DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor);
+                        DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, .08f);
                     }
 
                     float startWithBuffer = startTime - 1;
@@ -271,7 +271,7 @@ namespace BassJam
                         UIColor color = stringColors[str];
                         color.A = 192;
 
-                        DrawVerticalHorizontalLine(0, 24, startTime, GetStringHeight(GetStringOffset(str)), color);
+                        DrawFretHorizontalLine(0, 24, startTime, GetStringHeight(GetStringOffset(str)), color, .04f);
                     }
 
                     for (int fret = 1; fret < 24; fret++)
@@ -464,12 +464,12 @@ namespace BassJam
                 }
 
                 // Note "shadow" on fretboard
-                DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha);
+                DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha, 0.08f);
 
                 // Small lines for lower strings
                 for (int prevString = 0; prevString < stringOffset; prevString++)
                 {
-                    DrawVerticalHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha);
+                    DrawFretHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha, .04f);
                 }
 
                 // Vertical line from fretboard up to note head
@@ -570,36 +570,18 @@ namespace BassJam
             return GetCentsOffset(strng,lastCents);
         }
 
-        void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color)
+        void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color, float imageScale)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
             time *= -timeScale;
 
             UIImage image = Layout.Current.GetImage("HorizontalFretLine");
-
-            float imageScale = .08f;
 
             float minZ = time + ((float)image.Height * imageScale);
             float maxZ = time - ((float)image.Height * imageScale);
 
             DrawQuad(image, new Vector3(startFret, heightOffset, minZ), color, new Vector3(startFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, minZ), color);
-        }
-
-        void DrawVerticalHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color)
-        {
-            startFret = GetFretPosition(startFret);
-            endFret = GetFretPosition(endFret);
-            time *= -timeScale;
-
-            UIImage image = Layout.Current.GetImage("HorizontalFretLine");
-
-            float imageScale = .02f;
-
-            float minY = heightOffset + ((float)image.Height * imageScale);
-            float maxY = heightOffset - ((float)image.Height * imageScale);
-
-            DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
 
         void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, UIColor color)
