@@ -420,7 +420,6 @@ namespace BassJam
                 }
 
                 // Note head
-
                 if (isDetected)
                     DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
 
@@ -621,8 +620,8 @@ namespace BassJam
             endFret = GetFretPosition(endFret);
             time *= -timeScale;
 
-            float minY = heightOffset + ((float)image.Height * imageScale);
-            float maxY = heightOffset - ((float)image.Height * imageScale);
+            float minY = heightOffset - ((float)image.Height * imageScale);
+            float maxY = heightOffset + ((float)image.Height * imageScale);
 
             DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
