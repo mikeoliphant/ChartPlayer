@@ -23,7 +23,7 @@ namespace BassJam
         SongSectionInterface sectionInterface;
 
         SongData songData;
-        TextBlock vocalText;
+        StringBuilderTextBlock vocalText;
 
         public SongPlayerInterface()
         {
@@ -50,7 +50,7 @@ namespace BassJam
             };
             topStack.Children.Add(sectionInterface);
 
-            vocalText = new TextBlock
+            vocalText = new StringBuilderTextBlock
             {
                 TextFont = BassJamGame.Instance.GetFont("LargeFont"),
                 TextColor = UIColor.White,
@@ -139,17 +139,17 @@ namespace BassJam
             {
                 float endTime = (float)songPlayer.CurrentSecond + 2;
 
-                //vocalText.StringBuilder.Clear();
+                vocalText.StringBuilder.Clear();
 
-                //foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
-                //{
-                //    vocalText.StringBuilder.Append(vocal.Vocal);
+                foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
+                {
+                    vocalText.StringBuilder.Append(vocal.Vocal);
 
-                //    if (!vocal.Vocal.EndsWith('\n'))
-                //    {
-                //        vocalText.StringBuilder.Append(' ');
-                //    }
-                //}
+                    if (!vocal.Vocal.EndsWith('\n'))
+                    {
+                        vocalText.StringBuilder.Append(' ');
+                    }
+                }
             }
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
