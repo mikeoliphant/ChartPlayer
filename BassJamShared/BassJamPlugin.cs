@@ -153,9 +153,9 @@ namespace BassJam
             this.SongPlayer = songPlayer;
         }
 
-        public override void SetMaxAudioBufferSize(uint maxSamples, EAudioBitsPerSample bitsPerSample, bool forceCopy)
+        public override void SetMaxAudioBufferSize(uint maxSamples, EAudioBitsPerSample bitsPerSample)
         {
-            base.SetMaxAudioBufferSize(maxSamples, bitsPerSample, forceCopy);
+            base.SetMaxAudioBufferSize(maxSamples, bitsPerSample);
 
             Array.Resize(ref interleavedAudio, (int)maxSamples * 2);
         }

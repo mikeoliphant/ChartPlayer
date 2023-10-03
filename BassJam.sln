@@ -5,8 +5,6 @@ VisualStudioVersion = 17.7.34003.232
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassJam", "BassJam\BassJam.csproj", "{197584B3-F240-40AB-9E35-DBD2AC539AC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BassJamSpriteProcessor", "BassJamSpriteProcessor\BassJamSpriteProcessor.csproj", "{6CF111C4-9213-4B4B-B86D-3058EC924BE5}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BassJamShared", "BassJamShared\BassJamShared.shproj", "{E89D1BAC-28E4-434D-857A-3BE1D35E279C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassJamPlugin", "BassJamPlugin\BassJamPlugin.csproj", "{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}"
@@ -15,7 +13,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "..\OpenSongCh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame", "..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj", "{435AADCF-6892-4B44-94A1-1E6EA624D80C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BassJamImageProcessor", "BassJamImageProcessor\BassJamImageProcessor.csproj", "{9C8653B7-650A-483D-BCD2-C6A969268B7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassJamImageProcessor", "BassJamImageProcessor\BassJamImageProcessor.csproj", "{9C8653B7-650A-483D-BCD2-C6A969268B7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,24 +46,6 @@ Global
 		{197584B3-F240-40AB-9E35-DBD2AC539AC7}.Release|x64.Build.0 = Release|Any CPU
 		{197584B3-F240-40AB-9E35-DBD2AC539AC7}.Release|x86.ActiveCfg = Release|Any CPU
 		{197584B3-F240-40AB-9E35-DBD2AC539AC7}.Release|x86.Build.0 = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|x64.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Debug|x86.Build.0 = Debug|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|x64.ActiveCfg = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|x64.Build.0 = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|x86.ActiveCfg = Release|Any CPU
-		{6CF111C4-9213-4B4B-B86D-3058EC924BE5}.Release|x86.Build.0 = Release|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU

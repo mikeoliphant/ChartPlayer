@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BassJam"
+        xmlns:wpf="clr-namespace:AudioPlugSharpWPF;assembly=AudioPlugSharpWPF"
         mc:Ignorable="d"
         Title="MainWindow" Width="1280" Height="720" ResizeMode="CanResize">
-        <local:PluginView x:Name="PluginDisplay" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <wpf:PluginView x:Name="PluginDisplay" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 </Window>
