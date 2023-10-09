@@ -1,19 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing;
-using System.IO;
-using System.Text;
-using ImageSheetProcessor;
-using static System.Net.Mime.MediaTypeNames;
-using System.Drawing.Text;
-using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
-using static System.Formats.Asn1.AsnWriter;
-using UILayout;
+﻿using System.Drawing;
 
 namespace BassJamImageProcessor
 {
@@ -31,16 +16,8 @@ namespace BassJamImageProcessor
         {
             BeginSpriteSheetGroup("UISheet");
 
-            PushDirectory("SrcFonts");
-
             AddFont("MainFont", "Segoe UI", 14);
             AddFont("LargeFont", "Segoe UI", FontStyle.Bold, 32);
-
-            //ScaleAndParseFont("MainFont", 1, 0.1f);
-
-            //ScaleAndParseFont("LargeFont", 1, 0.1f);
-
-            PopDirectory();
 
             PushDirectory("UserInterface");
 

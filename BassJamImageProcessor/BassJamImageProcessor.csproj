@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <Reference Include="ImageSheetProcessor">
-      <HintPath>..\..\UILayout\ImageSheetProcessor\bin\Debug\net6.0\ImageSheetProcessor.dll</HintPath>
+      <HintPath>..\..\UILayout\ImageSheetProcessor\bin\Debug\net6.0-windows\ImageSheetProcessor.dll</HintPath>
     </Reference>
   </ItemGroup>
 

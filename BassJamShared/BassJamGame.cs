@@ -31,6 +31,7 @@ namespace BassJam
             UIFont.DefaultFont.SpriteFont.Spacing = -1;
             UIFont.DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
 
+            TextBlock.DefaultFont = UIFont.DefaultFont;
             TextBlock.DefaultColor = UIColor.White;
 
             DefaultOutlineNinePatch = GetImage("PopupBackground");

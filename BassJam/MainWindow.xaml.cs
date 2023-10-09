@@ -1,9 +1,6 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
-using System.Windows.Interop;
 using AudioPlugSharpWPF;
-using AudioPlugSharp.Asio;
 
 namespace BassJam
 {
