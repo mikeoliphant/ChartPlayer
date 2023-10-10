@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 using AudioPlugSharp;
 using Microsoft.Xna.Framework;
 using UILayout;
@@ -67,8 +68,15 @@ namespace BassJam
 
             this.parentWindow = parentWindow;
 
-            gameThread = new Thread(new ThreadStart(RunGame));
-            gameThread.Start();
+            if (parentWindow == IntPtr.Zero)
+            {
+                RunGame();
+            }
+            else
+            {
+                gameThread = new Thread(new ThreadStart(RunGame));
+                gameThread.Start();
+            }
         }
 
         public void Debug(String debugStr)
@@ -106,13 +114,15 @@ namespace BassJam
                     game = new BassJamGame();
                     game.Plugin = this;
 
-
                     gameHost.IsMouseVisible = true;
 
-                    gameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
-                    gameHost.Window.IsBorderless = true;
+                    if (parentWindow != IntPtr.Zero)
+                    {
+                        gameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
+                        gameHost.Window.IsBorderless = true;
 
-                    SetParent(gameHost.Window.Handle, parentWindow);
+                        SetParent(gameHost.Window.Handle, parentWindow);
+                    }
 
                     Logger.Log("Start game");
                     gameHost.StartGame(game);
