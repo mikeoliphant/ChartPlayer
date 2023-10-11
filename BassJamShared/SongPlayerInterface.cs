@@ -69,7 +69,12 @@ namespace BassJam
 
             TextButton songsButton = new TextButton("Songs")
             {
-                ClickAction = delegate { Layout.Current.ShowPopup(songList); }
+                ClickAction = delegate
+                {
+                    songList.SetCurrentInstrument(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.CurrentInstrument);
+
+                    Layout.Current.ShowPopup(songList);
+                }
             };
             bottomButtonStack.Children.Add(songsButton);
 
@@ -86,6 +91,8 @@ namespace BassJam
 
         public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType)
         {
+            BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.CurrentInstrument = songList.CurrentInstrument;
+
             try
             {
                 string songPath = Path.Combine(basePath, song.FolderPath);

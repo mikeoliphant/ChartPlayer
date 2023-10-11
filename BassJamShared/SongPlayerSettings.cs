@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using SongFormat;
 using UILayout;
 
 namespace BassJam
@@ -10,6 +10,7 @@ namespace BassJam
     {
         public bool InvertStrings { get; set; } = false;
         public bool RetuneToEStandard { get; set; } = true;
+        public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
     }
 
     public class SongPlayerSettingsInterface : InputDialog

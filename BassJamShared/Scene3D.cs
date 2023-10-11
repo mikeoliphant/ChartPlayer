@@ -69,6 +69,7 @@ namespace BassJam
 
             MonoGameLayout.Current.Host.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
             MonoGameLayout.Current.Host.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            MonoGameLayout.Current.Host.GraphicsDevice.DepthStencilState = DepthStencilState.None;
 
             DrawQuads();
         }

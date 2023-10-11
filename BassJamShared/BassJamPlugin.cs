@@ -128,6 +128,9 @@ namespace BassJam
                     gameHost.StartGame(game);
                 }
 
+                EditorWidth = (uint)gameHost.ScreenWidth;
+                EditorHeight = (uint)gameHost.ScreenHeight;
+
                 gameHost = null;
             }
             catch (Exception ex)
@@ -204,6 +207,11 @@ namespace BassJam
             {
                 Logger.Log("Process failed with: " + ex.ToString());
             }
+        }
+
+        public override void RestoreState(byte[] stateData)
+        {
+            base.RestoreState(stateData);
         }
     }
 

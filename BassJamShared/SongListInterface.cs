@@ -8,9 +8,10 @@ namespace BassJam
 {
     public class SongListDisplay : MultiColumnItemDisplay<SongIndexEntry>
     {
+        public ESongInstrumentType CurrentInstrument { get; private set; } = ESongInstrumentType.LeadGuitar;
+
         List<SongIndexEntry> allSongs;
         List<SongIndexEntry> currentSongs;
-        ESongInstrumentType currentInstrument = ESongInstrumentType.BassGuitar;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
 
         public SongListDisplay()
@@ -46,7 +47,7 @@ namespace BassJam
 
         void SetCurrentSongs()
         {
-            switch (currentInstrument)
+            switch (CurrentInstrument)
             {
                 case ESongInstrumentType.LeadGuitar:
                     currentSongs = allSongs.Where(s => (s.LeadGuitarTuning != null)).ToList();
@@ -70,15 +71,15 @@ namespace BassJam
             Sort(toggleReverse: false);
         }
 
-        void SetCurrentInstrument(ESongInstrumentType type)
+        public void SetCurrentInstrument(ESongInstrumentType type)
         {
-            if (currentInstrument != type)
+            if (CurrentInstrument != type)
             {
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
 
-                if (currentInstrument != type)
+                if (CurrentInstrument != type)
                 {
-                    currentInstrument = type;
+                    CurrentInstrument = type;
 
                     SetCurrentSongs();
                 }
@@ -90,7 +91,7 @@ namespace BassJam
         {
             Close();
 
-            SongPlayerInterface.Instance.SetSong(currentSongs[index], currentInstrument);
+            SongPlayerInterface.Instance.SetSong(currentSongs[index], CurrentInstrument);
         }
 
         public void Close()
