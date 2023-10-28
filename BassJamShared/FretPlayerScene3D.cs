@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualBasic.Logging;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 
 namespace BassJam
 {
-    public class SongPlayerScene3D : Scene3D
+    public class FretPlayerScene3D : Scene3D
     {
         static UIColor[] stringColors = new UIColor[] { UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
+        static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         SongPlayer player;
         float secondsLong;
         UIColor whiteHalfAlpha;
         UIColor whiteThreeQuartersAlpha;
         float currentTime;
+        float startTime;
+        float endTime;
         float timeScale = 200f;
         float positionFret = 2;
         float targetFocusFret = 2;
@@ -30,10 +32,29 @@ namespace BassJam
 
         Dictionary<float, bool> nonReapeatDict = new Dictionary<float, bool>();
 
-        public SongPlayerScene3D(SongPlayer player, float secondsLong)
+        string[] numberStrings;
+        UIImage[] stringNoteImages;
+        UIImage[] stringNoteTrailImages;
+
+        public FretPlayerScene3D(SongPlayer player, float secondsLong)
         {
             this.player = player;
             this.secondsLong = secondsLong;
+
+            numberStrings = new string[25];
+            for (int i = 0; i < numberStrings.Length; i++)
+            {
+                numberStrings[i] = i.ToString();
+            }
+
+            stringNoteImages = new UIImage[6];
+            stringNoteTrailImages = new UIImage[6];
+
+            for (int strng = 0; strng < 6; strng++)
+            {
+                stringNoteImages[strng] = Layout.Current.GetImage("Guitar" + stringColorNames[strng]);
+                stringNoteTrailImages[strng] = Layout.Current.GetImage("NoteTrail" + stringColorNames[strng]);
+            }
 
             whiteHalfAlpha = UIColor.White;
             whiteHalfAlpha.A = 128;
@@ -137,8 +158,8 @@ namespace BassJam
                 {
                     firstNote = null;
 
-                    float startTime = currentTime;
-                    float endTime = currentTime + secondsLong;
+                    startTime = currentTime;
+                    endTime = currentTime + secondsLong;
 
                     for (int fret = 0; fret < 24; fret++)
                     {
@@ -167,6 +188,8 @@ namespace BassJam
                     UIColor handPositionColor = UIColor.White;
                     handPositionColor.A = 32;
 
+                    // Pre-pass
+
                     foreach (SongNote note in notes)
                     {
                         if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
@@ -188,78 +211,14 @@ namespace BassJam
 
                     notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
 
+                    // Draw the notes
+
                     foreach (SongNote note in notes)
                     {
-                        if (note.TimeOffset > endTime)
-                        {
-                            break;
-                        }
-
-                        isDetected = false;
-
-                        if (note.TimeOffset <= currentTime)
-                        {
-                            isDetected = NoteDetect(note);
-                        }
-
-                        if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
-                        {
-                            SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
-
-                            UIColor color = UIColor.White;
-                            color.A = 32;
-
-                            for (int str = 0; str < chord.Fingers.Count; str++)
-                            {
-                                if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
-                                {
-                                    SongNote chordNote = new SongNote()
-                                    {
-                                        TimeOffset = note.TimeOffset,
-                                        TimeLength = note.TimeLength,
-                                        Fret = chord.Frets[str],
-                                        String = str,
-                                        Techniques = note.Techniques,
-                                        HandFret = note.HandFret
-                                    };
-
-                                    if (nonReapeatDict.ContainsKey(note.TimeOffset))
-                                    {
-                                        if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
-                                            DrawVerticalText(chord.Frets[str].ToString(), chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
-
-                                        DrawNote(chordNote);
-                                    }
-                                }
-                            }
-
-                            if (note.TimeOffset > currentTime)
-                            {
-                                if (nonReapeatDict.ContainsKey(note.TimeOffset) && !String.IsNullOrEmpty(chord.Name))
-                                {
-                                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, note.TimeOffset, 0, GetStringHeight(numStrings), color);
-
-                                    DrawVerticalText(chord.Name, note.HandFret - 1.25f, GetStringHeight(numStrings - 1), note.TimeOffset, UIColor.White, 0.10f);
-                                }
-                                else
-                                {
-                                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, note.TimeOffset, 0, GetStringHeight(2), color);
-
-                                    if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
-                                    {
-                                        DrawVerticalImage(Layout.Current.GetImage("NoteMute"), note.HandFret + 1, note.TimeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
-                                DrawVerticalText(note.Fret.ToString(), note.Fret - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
-
-                            DrawNote(note);
-                        }
+                        DrawNote(note);
                     }
+
+                    // Draw the front section
 
                     for (int str = 0; str < numStrings; str++)
                     {
@@ -300,11 +259,80 @@ namespace BassJam
 
         void DrawNote(SongNote note)
         {
-            if (isDetected)
-            {
+            if (note.TimeOffset > endTime)
+                return;
 
+            isDetected = false;
+
+            if (note.TimeOffset <= currentTime)
+            {
+                isDetected = NoteDetect(note);
             }
 
+            if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
+            {
+                SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
+
+                UIColor color = UIColor.White;
+                color.A = 32;
+
+                if (!note.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
+                {
+                    for (int str = 0; str < chord.Fingers.Count; str++)
+                    {
+                        if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
+                        {
+                            SongNote chordNote = new SongNote()
+                            {
+                                TimeOffset = note.TimeOffset,
+                                TimeLength = note.TimeLength,
+                                Fret = chord.Frets[str],
+                                String = str,
+                                Techniques = note.Techniques,
+                                HandFret = note.HandFret
+                            };
+
+                            if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset <= currentTime))
+                            {
+                                if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
+                                    DrawVerticalText(numberStrings[chord.Frets[str]], chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
+
+                                DrawSingleNote(chordNote);
+                            }
+                        }
+                    }
+                }
+
+                float timeOffset = Math.Max(note.TimeOffset, currentTime);
+
+                if (nonReapeatDict.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
+                {
+                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), color);
+
+                    if (!String.IsNullOrEmpty(chord.Name))
+                        DrawVerticalText(chord.Name, note.HandFret - 1.25f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.10f);
+                }
+                else
+                {
+                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(2), color);
+
+                    if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
+                    {
+                        DrawVerticalImage(Layout.Current.GetImage("NoteMute"), note.HandFret + 1, timeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
+                    }
+                }
+            }
+            else
+            {
+                if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
+                    DrawVerticalText(numberStrings[note.Fret], note.Fret - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
+
+                DrawSingleNote(note);
+            }
+        }
+
+        void DrawSingleNote(SongNote note)
+        {
             if (note.Fret == 0)
             {
                 minFret = Math.Min(minFret, note.HandFret + 2);
@@ -317,41 +345,6 @@ namespace BassJam
             }
 
             UIColor stringColor = UIColor.White;
-            string imageName = null;
-            string trailImageName = null;
-
-            switch (note.String)
-            {
-                case 0:
-                    imageName = "GuitarRed";
-                    trailImageName = "NoteTrailRed";
-                    break;
-
-                case 1:
-                    imageName = "GuitarYellow";
-                    trailImageName = "NoteTrailYellow";
-                    break;
-
-                case 2:
-                    imageName = "GuitarCyan";
-                    trailImageName = "NoteTrailCyan";
-                    break;
-
-                case 3:
-                    imageName = "GuitarOrange";
-                    trailImageName = "NoteTrailOrange";
-                    break;
-
-                case 4:
-                    imageName = "GuitarGreen";
-                    trailImageName = "NoteTrailGreen";
-                    break;
-
-                case 5:
-                    imageName = "GuitarPurple";
-                    trailImageName = "NoteTrailPurple";
-                    break;
-            }
 
             if (!isDetected)
             {
@@ -411,14 +404,14 @@ namespace BassJam
                 if (note.TimeLength > 0)
                 {
                     // Sustain note tail
-                    DrawFlatImage(Layout.Current.GetImage(trailImageName), midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
+                    DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
 
                 // Note head
                 if (isDetected)
                     DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
 
-                DrawVerticalImage(Layout.Current.GetImage(imageName), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
+                DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
 
                 // Note Modifier
                 if (modifierImage != null)
@@ -434,24 +427,24 @@ namespace BassJam
                     {
                         //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
 
-                        DrawImageTrail(Layout.Current.GetImage(trailImageName), stringColor, 0.03f,
+                        DrawImageTrail(stringNoteTrailImages[note.String], stringColor, 0.03f,
                             new Vector3(note.Fret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
                     }
                     else
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
+                            DrawBend(stringNoteTrailImages[note.String], note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
                         }
                         else
                         {
                             if (note.Techniques.HasFlag(ESongNoteTechnique.Vibrato))
                             {
-                                DrawVibrato(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(stringOffset), stringColor);
+                                DrawVibrato(stringNoteTrailImages[note.String], note.Fret - 0.5f, note.TimeOffset, note.TimeOffset + note.TimeLength, GetStringHeight(stringOffset), stringColor);
                             }
                             else
                             {
-                                DrawFlatImage(Layout.Current.GetImage(trailImageName), note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .03f);
+                                DrawFlatImage(stringNoteTrailImages[note.String], note.Fret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .03f);
                             }
                         }
                     }
@@ -492,14 +485,14 @@ namespace BassJam
                         if (isDetected)
                             DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                        DrawVerticalImage(Layout.Current.GetImage(imageName), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
+                        DrawVerticalImage(stringNoteImages[note.String], slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                     else
                     {
                         if (isDetected)
                             DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                        DrawVerticalImage(Layout.Current.GetImage(imageName), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
+                        DrawVerticalImage(stringNoteImages[note.String], note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
                 }
 

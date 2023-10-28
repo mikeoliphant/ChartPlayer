@@ -26,12 +26,11 @@ namespace BassJam
 
             GraphicsContext.SingleWhitePixelImage = GetImage("SingleWhitePixel");
 
-            UIFont.DefaultFont = GetFont("MainFont");
-            UIFont.DefaultFont.SpriteFont.Spacing = -1;
-            UIFont.DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
+            DefaultFont = GetFont("MainFont");
+            DefaultFont.SpriteFont.Spacing = -1;
+            DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
 
-            TextBlock.DefaultFont = UIFont.DefaultFont;
-            TextBlock.DefaultColor = UIColor.White;
+            DefaultForegroundColor = UIColor.White;
 
             DefaultOutlineNinePatch = GetImage("PopupBackground");
 

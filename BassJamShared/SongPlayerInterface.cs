@@ -14,7 +14,7 @@ namespace BassJam
     {
         public static SongPlayerInterface Instance { get; private set; }
 
-        string basePath = @"C:\Share\JamSongs";
+        string basePath = @"C:\Share\RBSongs";
 
         SongListDisplay songList = new SongListDisplay();
         SongIndex songIndex;
@@ -99,7 +99,7 @@ namespace BassJam
 
                 using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
                 {
-                    songData = JsonSerializer.Deserialize<SongData>(songStream);
+                    songData = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
                 }
 
                 foreach (SongInstrumentPart part in songData.InstrumentParts)
@@ -118,7 +118,14 @@ namespace BassJam
 
                         sectionInterface.SetSongPlayer(songPlayer);
 
-                        BassJamGame.Instance.Scene3D = new SongPlayerScene3D(songPlayer, 3);
+                        if (part.InstrumentType == ESongInstrumentType.Keys)
+                        {
+                            BassJamGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
+                        }
+                        else
+                        {
+                            BassJamGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
+                        }
 
                         break;
                     }
@@ -152,7 +159,7 @@ namespace BassJam
                 {
                     vocalText.StringBuilder.Append(vocal.Vocal);
 
-                    if (!vocal.Vocal.EndsWith('\n'))
+                    if (!vocal.Vocal.EndsWith('\n') && !vocal.Vocal.EndsWith('-'))
                     {
                         vocalText.StringBuilder.Append(' ');
                     }
@@ -188,6 +195,9 @@ namespace BassJam
             this.songPlayer = songPlayer;
 
             sectionDensity.Clear();
+
+            if (songPlayer.SongInstrumentNotes.Sections.Count == 0)
+                return;
 
             foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
             {

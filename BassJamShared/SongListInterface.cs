@@ -33,6 +33,7 @@ namespace BassJam
             LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
+            LeftInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
             SetSortColumn("Title");
@@ -57,6 +58,9 @@ namespace BassJam
                     break;
                 case ESongInstrumentType.BassGuitar:
                     currentSongs = allSongs.Where(s => (s.BassGuitarTuning != null)).ToList();
+                    break;
+                case ESongInstrumentType.Keys:
+                    currentSongs = allSongs;
                     break;
                 case ESongInstrumentType.Vocals:
                     currentSongs = allSongs;

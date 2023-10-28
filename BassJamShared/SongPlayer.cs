@@ -46,15 +46,15 @@ namespace BassJam
 
             using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
             {
-                SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream);
+                SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream, SongIndex.SerializerOptions);
             }
 
             using (Stream structStream = File.OpenRead(Path.Combine(songPath, "arrangement.json")))
             {
-                SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream);
+                SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SongIndex.SerializerOptions);
             }
 
-            if (part.Tuning.IsOffsetFromStandard())
+            if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
                 tuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
 
             tuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
@@ -65,7 +65,7 @@ namespace BassJam
             {
                 using (Stream vocalStream = File.OpenRead(Path.Combine(songPath, vocalPart.InstrumentName + ".json")))
                 {
-                    SongVocals = JsonSerializer.Deserialize<List<SongVocal>>(vocalStream);
+                    SongVocals = JsonSerializer.Deserialize<List<SongVocal>>(vocalStream, SongIndex.SerializerOptions);
                 }
             }
             else
@@ -73,7 +73,7 @@ namespace BassJam
                 SongVocals = new List<SongVocal>();
             }
 
-            vorbisReader = new VorbisReader(Path.Combine(songPath, "song.ogg"));
+            vorbisReader = new VorbisReader(Path.Combine(songPath, "keys.ogg"));
 
             if (vorbisReader == null)
             {

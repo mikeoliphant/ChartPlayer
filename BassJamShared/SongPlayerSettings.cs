@@ -21,7 +21,7 @@ namespace BassJam
         SongPlayerSettings newSettings = new SongPlayerSettings();
 
         public SongPlayerSettingsInterface(SongPlayerSettings settings)
-            : base(Layout.DefaultOutlineNinePatch)
+            : base(Layout.Current.DefaultOutlineNinePatch)
         {
             oldSettings = settings;
 

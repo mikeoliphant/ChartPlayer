@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using SongFormat;
 
 namespace BassJam
@@ -15,10 +16,19 @@ namespace BassJam
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
+        public string KeysTuning { get; set; }
     }
 
     public class SongIndex
     {
+        public static JsonSerializerOptions SerializerOptions { get; } =
+            new JsonSerializerOptions()
+            {
+                Converters = {
+                   new JsonStringEnumConverter()
+                },
+            };
+
         public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
 
         string basePath;
@@ -66,7 +76,7 @@ namespace BassJam
         {
             using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
             {
-                SongData song = JsonSerializer.Deserialize<SongData>(songStream);
+                SongData song = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
 
                 if (song != null)
                 {
@@ -91,6 +101,10 @@ namespace BassJam
                         else if (part.InstrumentType == ESongInstrumentType.BassGuitar)
                         {
                             indexEntry.BassGuitarTuning = part.Tuning.GetTuning();
+                        }
+                        else if (part.InstrumentType == ESongInstrumentType.Keys)
+                        {
+                            indexEntry.KeysTuning = "Standard";
                         }
                     }
 
