@@ -14,6 +14,7 @@ namespace BassJam
         public float CurrentSecond { get; private set; } = 0;
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
+        public SongKeyboardNotes SongKeyboardNotes { get; private set; }
         public SongInstrumentNotes SongInstrumentNotes { get; private set; }
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
@@ -44,9 +45,21 @@ namespace BassJam
             this.Song = song;
             this.SongInstrumentPart = part;
 
-            using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
+            if (part.InstrumentType == ESongInstrumentType.Keys)
             {
-                SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream, SongIndex.SerializerOptions);
+                using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
+                {
+                    SongKeyboardNotes = JsonSerializer.Deserialize<SongKeyboardNotes>(noteStream, SongIndex.SerializerOptions);
+                }
+
+                SongInstrumentNotes = new SongInstrumentNotes();
+            }
+            else
+            {
+                using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
+                {
+                    SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream, SongIndex.SerializerOptions);
+                }
             }
 
             using (Stream structStream = File.OpenRead(Path.Combine(songPath, "arrangement.json")))

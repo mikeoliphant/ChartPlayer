@@ -112,7 +112,7 @@ namespace BassJam
 
                         songPlayer.SetSong(songPath, songData, part);
 
-                        songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
+                        //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
 
                         BassJamGame.Instance.Plugin.SetSongPlayer(songPlayer);
 

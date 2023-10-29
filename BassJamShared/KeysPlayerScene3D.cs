@@ -4,12 +4,15 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
-
+using SharpDX.DirectWrite;
 
 namespace BassJam
 {
     public class KeysPlayerScene3D : Scene3D
     {
+        static int[] ScaleWhiteBlack = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
+        static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
+
         UIColor whiteHalfAlpha;
         UIColor whiteThreeQuartersAlpha;
         SongPlayer player;
@@ -82,9 +85,12 @@ namespace BassJam
                     startTime = currentTime;
                     endTime = currentTime + secondsLong;
 
-                    for (int key = minKey; key <= maxKey; key++)
+                    for (int key = minKey; key <= (maxKey + 2); key++)
                     {
-                        DrawKeyTimeLine(key, 0, startTime, endTime, whiteHalfAlpha);
+                        if (ScaleWhiteBlack[(key - minKey) % 12] == 0)
+                        {
+                            DrawKeyTimeLine(key, 0, startTime, endTime, whiteHalfAlpha);
+                        }
                     }
 
                     UIColor lineColor = UIColor.White;
@@ -93,7 +99,28 @@ namespace BassJam
                     {
                         lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
 
-                        DrawFretHorizontalLine(minKey, maxKey + 1, beat.TimeOffset, 0, lineColor, .08f);
+                        DrawKeyHorizontalLine(minKey, maxKey + 2, beat.TimeOffset, 0, lineColor, .08f);
+                    }
+
+                    float startWithMinSustain = startTime - 0.15f;
+
+                    var notes = player.SongKeyboardNotes.Notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset);
+
+                    // Draw the notes
+                    foreach (SongKeyboardNote note in notes)
+                    {
+                        if ((note.Note < minKey) || (note.Note > maxKey))
+                        {
+
+                        }
+                        else
+                        {
+                            bool isWhite = (ScaleWhiteBlack[(note.Note - minKey) % 12] == 0);
+
+                            float startTime = Math.Max(note.TimeOffset, currentTime);
+
+                            DrawFlatImage(Layout.Current.GetImage(isWhite ? "NoteTrailWhite" : "NoteTrailBlack"), (float)note.Note + 0.5f, startTime, note.TimeOffset + note.TimeLength, 0, UIColor.White, 0.06f);
+                        }
                     }
                 }
             }
@@ -105,7 +132,19 @@ namespace BassJam
 
         float GetKeyPosition(float key)
         {
-            return (key - minKey) * 10;
+            int intKey = (int)key;
+
+            if (key == intKey)
+            {
+                int octave = ((intKey - minKey) / 12);
+
+                return (ScaleOffsets[(intKey - minKey) % 12] + (octave * 7)) * 8;
+            }
+
+            float pos = GetKeyPosition(intKey);
+            float frac = key - intKey;
+
+            return MathUtil.Lerp(pos, pos + 8, frac);
         }
 
         void DrawKeyTimeLine(float keyCenter, float height, float startTime, float endTime, UIColor color)
@@ -124,8 +163,7 @@ namespace BassJam
             DrawQuad(image, new Vector3(minX, height, startTime), color, new Vector3(minX, height, endTime), color, new Vector3(maxX, height, endTime), color, new Vector3(maxX, height, startTime), color);
         }
 
-
-        void DrawFretHorizontalLine(float startKey, float endKey, float time, float heightOffset, UIColor color, float imageScale)
+        void DrawKeyHorizontalLine(float startKey, float endKey, float time, float heightOffset, UIColor color, float imageScale)
         {
             startKey = GetKeyPosition(startKey);
             endKey = GetKeyPosition(endKey);

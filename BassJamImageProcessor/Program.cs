@@ -51,6 +51,9 @@ namespace BassJamImageProcessor
             AddWithShadow("NoteTrailGreen");
             AddWithShadow("NoteTrailPurple");
 
+            AddWithShadow("NoteTrailWhite");
+            AddWithShadow("NoteTrailBlack");
+
             AddWithShadow("NoteHammerOn");
             AddWithShadow("NotePullOff");
             AddWithShadow("NoteMute");
