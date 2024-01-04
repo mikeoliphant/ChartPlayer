@@ -7,6 +7,7 @@ using System.Text.Json;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
+using System.Runtime.InteropServices;
 
 namespace BassJam
 {
@@ -14,7 +15,8 @@ namespace BassJam
     {
         public static SongPlayerInterface Instance { get; private set; }
 
-        string basePath = @"C:\Share\RBSongs";
+        //string basePath = @"C:\Share\RBSongs";
+        string basePath = @"C:\Share\JamSongs";
 
         SongListDisplay songList = new SongListDisplay();
         SongIndex songIndex;
@@ -28,8 +30,6 @@ namespace BassJam
         public SongPlayerInterface()
         {
             Instance = this;
-
-            Padding = new LayoutPadding(5);
 
             songIndex = new SongIndex(basePath);
 
@@ -61,6 +61,7 @@ namespace BassJam
 
             HorizontalStack bottomButtonStack = new HorizontalStack()
             {
+                Padding = new LayoutPadding(5),
                 HorizontalAlignment = EHorizontalAlignment.Left,
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2
@@ -73,6 +74,8 @@ namespace BassJam
                 {
                     songList.SetCurrentInstrument(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.CurrentInstrument);
 
+                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
                     Layout.Current.ShowPopup(songList);
                 }
             };
@@ -80,7 +83,12 @@ namespace BassJam
 
             TextButton optionsButton = new TextButton("Options")
             {
-                ClickAction = delegate { Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings }); }
+                ClickAction = delegate
+                {
+                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+                    Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+                }
             };
             bottomButtonStack.Children.Add(optionsButton);
         }
@@ -137,6 +145,15 @@ namespace BassJam
             }
         }
 
+        [DllImport("kernel32.dll")]
+        public static extern uint SetThreadExecutionState(uint esFlags);
+        public const uint ES_CONTINUOUS = 0x80000000;
+        public const uint ES_SYSTEM_REQUIRED = 0x00000001;
+        public const uint ES_DISPLAY_REQUIRED = 0x00000002;
+
+        Vector2 lastMousePosition;
+        int mouseIdleFrames = 0;
+
         public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
@@ -166,8 +183,32 @@ namespace BassJam
                 }
             }
 
+            Vector2 mousePosition = inputManager.MousePosition;
+
+            if (Vector2.Distance(mousePosition, lastMousePosition) > 10)
+            {
+                mouseIdleFrames = 0;
+
+                BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+            }
+            else
+            {
+                mouseIdleFrames++;
+                
+                if (mouseIdleFrames > 200)
+                {
+                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = false;
+                }
+            }
+
+            lastMousePosition = mousePosition;
+
+            // Keep the monitor from turning off
+            SetThreadExecutionState(ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
+
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
         }
+
 
         void ApplySettings()
         {

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Forms;
 using AudioPlugSharp;
 using Microsoft.Xna.Framework;
+using SharpDX;
 using UILayout;
 
 namespace BassJam
@@ -14,12 +15,12 @@ namespace BassJam
         public BassJamSaveState BassJamSaveState { get { return (SaveStateData as BassJamSaveState) ?? new BassJamSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<double> SampleHistory { get; private set; } = new SampleHistory<double>();
+        public MonoGameHost GameHost { get; private set; } = null;
 
         AudioIOPort stereoInput;
         AudioIOPort stereoOutput;
         float[] interleavedAudio = new float[0];
         Thread gameThread = null;
-        MonoGameHost gameHost = null;
 
         public BassJamPlugin()
         {
@@ -109,29 +110,29 @@ namespace BassJam
 
                 Logger.Log("Create BassJam Game");
 
-                using (gameHost = new MonoGameHost(screenWidth, screenHeight, fullscreen: false))
+                using (GameHost = new MonoGameHost(screenWidth, screenHeight, fullscreen: false))
                 {
                     game = new BassJamGame();
                     game.Plugin = this;
 
-                    gameHost.IsMouseVisible = true;
+                    GameHost.IsMouseVisible = true;
 
                     if (parentWindow != IntPtr.Zero)
                     {
-                        gameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
-                        gameHost.Window.IsBorderless = true;
+                        GameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
+                        GameHost.Window.IsBorderless = true;
 
-                        SetParent(gameHost.Window.Handle, parentWindow);
+                        SetParent(GameHost.Window.Handle, parentWindow);
                     }
 
                     Logger.Log("Start game");
-                    gameHost.StartGame(game);
+                    GameHost.StartGame(game);
                 }
 
-                EditorWidth = (uint)gameHost.ScreenWidth;
-                EditorHeight = (uint)gameHost.ScreenHeight;
+                EditorWidth = (uint)GameHost.ScreenWidth;
+                EditorHeight = (uint)GameHost.ScreenHeight;
 
-                gameHost = null;
+                GameHost = null;
             }
             catch (Exception ex)
             {
@@ -143,9 +144,9 @@ namespace BassJam
         {
             base.ResizeEditor(newWidth, newHeight);
 
-            if (gameHost != null)
+            if (GameHost != null)
             {
-                gameHost.RequestResize((int)newWidth, (int)newHeight);
+                GameHost.RequestResize((int)newWidth, (int)newHeight);
             }
         }
 
@@ -153,9 +154,9 @@ namespace BassJam
         {
             base.HideEditor();
 
-            if (gameHost != null)
+            if (GameHost != null)
             {
-                gameHost.Exit();
+                GameHost.Exit();
 
                 gameThread.Join();
             }
@@ -207,11 +208,6 @@ namespace BassJam
             {
                 Logger.Log("Process failed with: " + ex.ToString());
             }
-        }
-
-        public override void RestoreState(byte[] stateData)
-        {
-            base.RestoreState(stateData);
         }
     }
 

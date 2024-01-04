@@ -73,6 +73,16 @@ namespace BassJam
 
             foreach (SongNote note in player.SongInstrumentNotes.Notes)
             {
+                // Avoid not showing chords that are continued (won't work if the continued note doesn't immediately follow)
+                if (note.Techniques.HasFlag(ESongNoteTechnique.Continued))
+                {
+                    if (lastNote.HasValue)
+                        nonReapeatDict[lastNote.Value.TimeOffset] = true;
+
+                    // ...and don't repeat continued notes
+                    continue;
+                }
+
                 if (!lastNote.HasValue)
                 {
                     nonReapeatDict[note.TimeOffset] = true;
@@ -87,7 +97,7 @@ namespace BassJam
                     {
                         if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
                         {
-                            if ((lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
+                            if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) ||  (lastNote.Value.ChordID != note.ChordID)  || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
                             {
                                 nonReapeatDict[note.TimeOffset] = true;
                             }
@@ -116,7 +126,7 @@ namespace BassJam
                 if (fretDist < 0)
                     fretDist = 0;
 
-                targetCameraDistance = 60 + (Math.Max(fretDist, 4) * 3);
+                targetCameraDistance = 65 + (Math.Max(fretDist, 4) * 3);
 
                 float targetPositionFret = ((float)maxFret + (float)minFret) / 2;
 
@@ -284,6 +294,7 @@ namespace BassJam
                         {
                             SongNote chordNote = new SongNote()
                             {
+                                ChordID = note.ChordID,
                                 TimeOffset = note.TimeOffset,
                                 TimeLength = note.TimeLength,
                                 Fret = chord.Frets[str],
@@ -475,30 +486,33 @@ namespace BassJam
 
                 }
 
+                float drawFret = note.Fret;
+
+                if (isSlide && (note.TimeOffset < currentTime))
+                {
+                    drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+                }
+
                 // Note head
                 if (!note.Techniques.HasFlag(ESongNoteTechnique.Continued) || (note.TimeOffset < currentTime))
                 {
-                    if (isSlide && (note.TimeOffset < currentTime))
-                    {
-                        float slideFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+                    if (isDetected)
+                        DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                        if (isDetected)
-                            DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
-
-                        DrawVerticalImage(stringNoteImages[note.String], slideFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
-                    }
-                    else
-                    {
-                        if (isDetected)
-                            DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
-
-                        DrawVerticalImage(stringNoteImages[note.String], note.Fret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
-                    }
+                    DrawVerticalImage(stringNoteImages[note.String], drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                 }
 
                 // Note modifier
                 if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, note.Fret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
+                    DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
+
+                if ((note.TimeOffset < currentTime) && (note.ChordID != -1))
+                {
+                    int finger = player.SongInstrumentNotes.Chords[note.ChordID].Fingers[note.String];
+
+                    if (finger > 0)
+                        DrawVerticalText(finger.ToString(), drawFret - 0.5f, noteHeadHeight, noteHeadTime, UIColor.White, 0.06f);
+                }
             }
 
             if (note.TimeOffset > currentTime)

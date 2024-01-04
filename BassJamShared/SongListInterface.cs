@@ -15,10 +15,11 @@ namespace BassJam
         ItemDisplayColum<SongIndexEntry> tuningColumn;
 
         public SongListDisplay()
-            : base(UIColor.Black)
         {
             Padding = new LayoutPadding(5);
-            ListDisplay.BackgroundColor = UIColor.Black;
+
+            BackgroundColor = UIColor.Black;
+
             ListDisplay.SelectAction = SongSelected;
 
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
@@ -243,7 +244,7 @@ namespace BassJam
         ItemDisplayColum<T> lastSortColumn;
         bool lastSortReverse;
 
-        public MultiColumnItemDisplay(UIColor backgroundColor)
+        public MultiColumnItemDisplay()
         {
             DisplayColumns = new List<ItemDisplayColum<T>>();
 
@@ -256,7 +257,6 @@ namespace BassJam
 
             swipeStack.Children.Add(topDock = new Dock
             {
-                BackgroundColor = backgroundColor,
                 VerticalAlignment = EVerticalAlignment.Top,
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             });
@@ -272,7 +272,6 @@ namespace BassJam
 
             swipeStack.Children.Add(bottomDock = new Dock
             {
-                BackgroundColor = backgroundColor,
                 VerticalAlignment = EVerticalAlignment.Top,
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             });

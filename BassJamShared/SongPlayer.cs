@@ -86,7 +86,7 @@ namespace BassJam
                 SongVocals = new List<SongVocal>();
             }
 
-            vorbisReader = new VorbisReader(Path.Combine(songPath, "keys.ogg"));
+            vorbisReader = new VorbisReader(Path.Combine(songPath, "song.ogg"));
 
             if (vorbisReader == null)
             {
