@@ -66,6 +66,7 @@ namespace BassJam
 
             // Do a pre-pass on the notes to find spot where we want to add note numbers on the fretboard or re-show the full chord
             SongNote? lastNote = null;
+            SongNote?[] lastStringNote = new SongNote?[25];
             float lastTime = currentTime;
 
             UIColor handPositionColor = UIColor.White;
@@ -73,14 +74,18 @@ namespace BassJam
 
             foreach (SongNote note in player.SongInstrumentNotes.Notes)
             {
-                // Avoid not showing chords that are continued (won't work if the continued note doesn't immediately follow)
+                // Avoid not showing chords that are continued
                 if (note.Techniques.HasFlag(ESongNoteTechnique.Continued))
                 {
-                    if (lastNote.HasValue)
-                        nonReapeatDict[lastNote.Value.TimeOffset] = true;
+                    SongNote? last = lastStringNote[note.String];
 
-                    // ...and don't repeat continued notes
-                    continue;
+                    if (last.HasValue)
+                    {
+                        if (last.Value.String == note.String)
+                        {
+                            nonReapeatDict[last.Value.TimeOffset] = true;
+                        }
+                    }
                 }
 
                 if (!lastNote.HasValue)
@@ -97,16 +102,31 @@ namespace BassJam
                     {
                         if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
                         {
-                            if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) ||  (lastNote.Value.ChordID != note.ChordID)  || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
+                            if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || (lastNote.Value.Techniques != note.Techniques) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
                             {
                                 nonReapeatDict[note.TimeOffset] = true;
                             }
                         }
-                        else if ((note.Fret > 0) && ((lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                        else
                         {
-                            nonReapeatDict[note.TimeOffset] = true;
+                            if ((note.Fret > 0) && ((lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
+                            {
+                                nonReapeatDict[note.TimeOffset] = true;
+                            }
                         }
                     }
+                }
+
+                if (note.ChordID != -1)
+                {
+                    for (int str = 0; str < 6; str++)
+                    {
+                        lastStringNote[str] = note;
+                    }
+                }
+                else
+                {
+                    lastStringNote[note.String] = note;
                 }
 
                 lastNote = note;
@@ -495,6 +515,7 @@ namespace BassJam
 
                 // Note head
                 if (!note.Techniques.HasFlag(ESongNoteTechnique.Continued) || (note.TimeOffset < currentTime))
+                    //if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset < currentTime))
                 {
                     if (isDetected)
                         DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
