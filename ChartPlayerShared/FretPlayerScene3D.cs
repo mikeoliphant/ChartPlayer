@@ -306,9 +306,6 @@ namespace ChartPlayer
             {
                 SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
 
-                UIColor color = UIColor.White;
-                color.A = 32;
-
                 if (!note.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
                 {
                     for (int str = 0; str < chord.Fingers.Count; str++)
@@ -339,16 +336,19 @@ namespace ChartPlayer
 
                 float timeOffset = Math.Max(note.TimeOffset, currentTime);
 
+                UIColor color = UIColor.White;
+                color.A = 128;
+
                 if (nonReapeatDict.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
                 {
-                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), color);
+                    DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), isDetected ? UIColor.White : color);
 
                     if (!String.IsNullOrEmpty(chord.Name))
                         DrawVerticalText(chord.Name, note.HandFret - 1.25f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.10f);
                 }
                 else
                 {
-                    DrawVerticalImage(Layout.Current.GetImage("SingleWhitePixel"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(2), color);
+                    DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(2), isDetected ? UIColor.White : color);
 
                     if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
                     {
@@ -673,6 +673,15 @@ namespace ChartPlayer
             time *= -timeScale;
 
             DrawQuad(image, new Vector3(startFret, startHeight, time), color, new Vector3(startFret, endHeight, time), color, new Vector3(endFret, endHeight, time), color, new Vector3(endFret, startHeight, time), color);
+        }
+
+        void DrawVerticalNinePatch(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, UIColor color)
+        {
+            startFret = GetFretPosition(startFret);
+            endFret = GetFretPosition(endFret);
+            time *= -timeScale;
+
+            DrawNinePatch(image, image.Width / 2, image.Height / 2, new Vector3(startFret, startHeight, time), new Vector3(startFret, endHeight, time), new Vector3(endFret, endHeight, time), new Vector3(endFret, startHeight, time), color);
         }
 
         void DrawFlatImage(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, UIColor color, float imageScale)

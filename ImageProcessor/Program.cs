@@ -35,6 +35,8 @@ namespace ChartPlayerImageProcessor
             Add("VerticalFretLine");
             Add("HorizontalFretLine");
 
+            Add("ChordOutline");
+
             AddWithShadow("GuitarRed");
             AddWithShadow("GuitarYellow");
             AddWithShadow("GuitarCyan");

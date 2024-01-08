@@ -136,6 +136,85 @@ namespace ChartPlayer
             DrawQuad(image, verts);
         }
 
+        float[] xPercents = new float[4];
+        float[] yPercents = new float[4];
+        float[] xTexCoords = new float[4];
+        float[] yTexCoords = new float[4];
+        float[] blah = new float[4];
+
+        public void DrawNinePatch(UIImage image, int xCornerSize, int yCornerSize, Vector3 bottomLeft, Vector3 topLeft,
+            Vector3 topRight, Vector3 bottomRight, UIColor color)
+        {
+            xPercents[0] = 0;
+            xPercents[1] = (float)xCornerSize / (float)image.Width;
+            xPercents[2] = 1.0f - xPercents[1];
+            xPercents[3] = 1.0f;
+
+            yPercents[0] = 0;
+            yPercents[1] = (float)xCornerSize / (float)image.Width;
+            yPercents[2] = 1.0f - xPercents[1];
+            yPercents[3] = 1.0f;
+
+            blah[0] = 0;
+            blah[1] = 0.05f;
+            blah[2] = 1.0f - blah[1];
+            blah[3] = 1.0f;
+
+            for (int x = 0; x < 4; x++)
+            {
+                xTexCoords[x] = ((float)image.XOffset + (xPercents[x] * (float)image.Width)) / (float)image.ActualWidth;
+            }
+
+            for (int y = 0; y < 4; y++)
+            {
+                yTexCoords[y] = ((float)image.YOffset + (yPercents[y] * (float)image.Height)) / (float)image.ActualHeight;
+            }
+
+            // Assumes that image is a parallelogram 
+            Vector3 over = topRight - topLeft;
+            Vector3 down = bottomLeft - topLeft;
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    // Bottom Left;
+                    verts[0] = new VertexPositionColorTexture
+                    {
+                        Position = topLeft + (over * blah[x]) + (down * blah[y + 1]),
+                        Color = color.NativeColor,
+                        TextureCoordinate = new Vector2(xTexCoords[x], yTexCoords[y + 1])
+                    };
+
+                    // Top left
+                    verts[1] = new VertexPositionColorTexture
+                    {
+                        Position = topLeft + (over * blah[x]) + (down * blah[y]),
+                        Color = color.NativeColor,
+                        TextureCoordinate = new Vector2(xTexCoords[x], yTexCoords[y])
+                    };
+
+                    // Top Right
+                    verts[2] = new VertexPositionColorTexture
+                    {
+                        Position = topLeft + (over * blah[x + 1]) + (down * blah[y]),
+                        Color = color.NativeColor,
+                        TextureCoordinate = new Vector2(xTexCoords[x + 1], yTexCoords[y])
+                    };
+
+                    // Bottom Right
+                    verts[3] = new VertexPositionColorTexture
+                    {
+                        Position = topLeft + (over * blah[x + 1]) + (down * blah[y + 1]),
+                        Color = color.NativeColor,
+                        TextureCoordinate = new Vector2(xTexCoords[x + 1], yTexCoords[y + 1])
+                    };
+
+                    DrawQuad(image, verts);
+                }
+            }
+        }
+
         public void DrawQuad(UIImage image, VertexPositionColorTexture[] vertices)
         {
             quadVertexBuffer.SetData(vertices);
