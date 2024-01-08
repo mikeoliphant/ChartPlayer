@@ -44,6 +44,6 @@
 		<Message Text="Restoring dotnet tools" Importance="High" />
 		<Exec Command="dotnet tool restore" />
 	</Target>
-	<Import Project="..\BassJamShared\BassJamShared.projitems" Label="Shared" />
+	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
 	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>

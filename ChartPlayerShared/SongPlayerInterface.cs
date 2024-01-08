@@ -9,7 +9,7 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class SongPlayerInterface : Dock
     {
@@ -52,7 +52,7 @@ namespace BassJam
 
             vocalText = new StringBuilderTextBlock
             {
-                TextFont = BassJamGame.Instance.GetFont("LargeFont"),
+                TextFont = ChartPlayerGame.Instance.GetFont("LargeFont"),
                 TextColor = UIColor.White,
                 Padding = new LayoutPadding(20)
             };
@@ -72,9 +72,9 @@ namespace BassJam
             {
                 ClickAction = delegate
                 {
-                    songList.SetCurrentInstrument(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.CurrentInstrument);
+                    songList.SetCurrentInstrument(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument);
 
-                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(songList);
                 }
@@ -85,9 +85,9 @@ namespace BassJam
             {
                 ClickAction = delegate
                 {
-                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
-                    Layout.Current.ShowPopup(new SongPlayerSettingsInterface(BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+                    Layout.Current.ShowPopup(new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
                 }
             };
             bottomButtonStack.Children.Add(optionsButton);
@@ -99,7 +99,7 @@ namespace BassJam
 
         public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType)
         {
-            BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.CurrentInstrument = songList.CurrentInstrument;
+            ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument = songList.CurrentInstrument;
 
             try
             {
@@ -115,24 +115,24 @@ namespace BassJam
                     if (part.InstrumentType == instrumentType)
                     {
                         songPlayer = new SongPlayer();
-                        songPlayer.SetPlaybackSampleRate(BassJamGame.Instance.Plugin.Host.SampleRate);
-                        songPlayer.RetuneToEStandard = BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.RetuneToEStandard;
+                        songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
+                        songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
 
                         songPlayer.SetSong(songPath, songData, part);
 
                         //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
 
-                        BassJamGame.Instance.Plugin.SetSongPlayer(songPlayer);
+                        ChartPlayerGame.Instance.Plugin.SetSongPlayer(songPlayer);
 
                         sectionInterface.SetSongPlayer(songPlayer);
 
                         if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
-                            BassJamGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
+                            ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
                         }
                         else
                         {
-                            BassJamGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
+                            ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
                         }
 
                         break;
@@ -189,7 +189,7 @@ namespace BassJam
             {
                 mouseIdleFrames = 0;
 
-                BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
             }
             else
             {
@@ -197,7 +197,7 @@ namespace BassJam
                 
                 if (mouseIdleFrames > 200)
                 {
-                    BassJamGame.Instance.Plugin.GameHost.IsMouseVisible = false;
+                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
                 }
             }
 
@@ -214,7 +214,7 @@ namespace BassJam
         {
             if (songPlayer != null)
             {
-                songPlayer.RetuneToEStandard = BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.RetuneToEStandard;
+                songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
             }
         }
     }

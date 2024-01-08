@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using UILayout;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class Scene3D
     {

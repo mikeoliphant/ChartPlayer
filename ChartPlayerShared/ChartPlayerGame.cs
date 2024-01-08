@@ -2,16 +2,16 @@
 using Microsoft.Xna.Framework;
 using UILayout;
 
-namespace BassJam
+namespace ChartPlayer
 {
-    public class BassJamGame : MonoGameLayout
+    public class ChartPlayerGame : MonoGameLayout
     {
-        public static new BassJamGame Instance { get; private set; }
+        public static new ChartPlayerGame Instance { get; private set; }
 
-        public BassJamPlugin Plugin { get; set; }
+        public ChartPlayerPlugin Plugin { get; set; }
         public Scene3D Scene3D { get; set; }
 
-        public BassJamGame()
+        public ChartPlayerGame()
         {
             Instance = this;
         }

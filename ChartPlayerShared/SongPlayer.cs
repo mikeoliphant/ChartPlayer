@@ -6,7 +6,7 @@ using System.Text.Json;
 using NVorbis;
 using SongFormat;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class SongPlayer
     {

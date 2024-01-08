@@ -6,7 +6,7 @@ using UILayout;
 using SongFormat;
 using SharpDX.DirectWrite;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class KeysPlayerScene3D : Scene3D
     {
@@ -43,7 +43,7 @@ namespace BassJam
 
         public override void Draw()
         {
-            if (BassJamGame.Instance.Plugin.SongPlayer != null)
+            if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 currentTime = (float)player.CurrentSecond;
 

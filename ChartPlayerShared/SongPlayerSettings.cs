@@ -4,7 +4,7 @@ using System.Reflection;
 using SongFormat;
 using UILayout;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class SongPlayerSettings
     {

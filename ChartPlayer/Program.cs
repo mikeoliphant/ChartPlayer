@@ -1,14 +1,14 @@
 ﻿using System;
 using AudioPlugSharpHost;
 
-namespace BassJam
+namespace ChartPlayer
 {
     class Program
     {
         [STAThread]
         static void Main(string[] args)
         {
-            WindowsFormsHost<BassJamPlugin> host = new WindowsFormsHost<BassJamPlugin>(new BassJamPlugin());
+            WindowsFormsHost<ChartPlayerPlugin> host = new WindowsFormsHost<ChartPlayerPlugin>(new ChartPlayerPlugin());
 
             host.Run();
         }

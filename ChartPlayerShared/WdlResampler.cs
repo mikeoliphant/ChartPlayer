@@ -31,7 +31,7 @@ using WDL_ResampleSample = System.Single; // n.b. default in WDL is double
 // default to floats for sinc filter ceofficients
 using WDL_SincFilterSample = System.Single; // can also be set to double
 
-namespace BassJam
+namespace ChartPlayer
 {
     /// <summary>
     /// Fully managed resampler, based on Cockos WDL Resampler

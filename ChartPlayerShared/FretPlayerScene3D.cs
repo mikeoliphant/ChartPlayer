@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class FretPlayerScene3D : Scene3D
     {
@@ -138,7 +138,7 @@ namespace BassJam
 
         public override void Draw()
         {
-            if (BassJamGame.Instance.Plugin.SongPlayer != null)
+            if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 currentTime = (float)player.CurrentSecond;
 
@@ -502,7 +502,7 @@ namespace BassJam
                 {
                     float bendOffset = GetBendOffset(note.TimeOffset, note.TimeLength, note.String, note.CentsOffsets);
 
-                    if (BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.InvertStrings)
+                    if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
                         noteHeadHeight -= bendOffset;
                     else
                         noteHeadHeight += bendOffset;
@@ -552,7 +552,7 @@ namespace BassJam
 
         int GetStringOffset(int str)
         {
-            if (BassJamGame.Instance.Plugin.BassJamSaveState.SongPlayerSettings.InvertStrings)
+            if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
                 return numStrings - str - 1;
 
             return str;
@@ -934,7 +934,7 @@ namespace BassJam
 
         double GetBin(double frequency)
         {
-            return (fftData.Length * (frequency / BassJamGame.Instance.Plugin.Host.SampleRate));
+            return (fftData.Length * (frequency / ChartPlayerGame.Instance.Plugin.Host.SampleRate));
         }
 
         bool NoteDetect(SongNote note)
@@ -980,7 +980,7 @@ namespace BassJam
 
         bool NoteDetect(params double[] frequencies)
         {
-            SampleHistory<double> history = BassJamGame.Instance.Plugin.SampleHistory;
+            SampleHistory<double> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
 
             history.Process(ConvertToComplex, fftData.Length);
 

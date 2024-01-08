@@ -8,11 +8,11 @@ using Microsoft.Xna.Framework;
 using SharpDX;
 using UILayout;
 
-namespace BassJam
+namespace ChartPlayer
 {
-    public class BassJamPlugin : AudioPluginBase
+    public class ChartPlayerPlugin : AudioPluginBase
     {
-        public BassJamSaveState BassJamSaveState { get { return (SaveStateData as BassJamSaveState) ?? new BassJamSaveState(); } }
+        public ChartPlayerSaveState ChartPlayerSaveState { get { return (SaveStateData as ChartPlayerSaveState) ?? new ChartPlayerSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<double> SampleHistory { get; private set; } = new SampleHistory<double>();
         public MonoGameHost GameHost { get; private set; } = null;
@@ -22,12 +22,12 @@ namespace BassJam
         float[] interleavedAudio = new float[0];
         Thread gameThread = null;
 
-        public BassJamPlugin()
+        public ChartPlayerPlugin()
         {
             Company = "Nostatic Software";
             Website = "www.nostaticsoftware.com";
             Contact = "contact@nostatic.org";
-            PluginName = "Bass Jam";
+            PluginName = "ChartPlayer";
             PluginCategory = "Fx";
             PluginVersion = "1.0.0";
 
@@ -40,7 +40,7 @@ namespace BassJam
             EditorWidth = 1024;
             EditorHeight = 720;
 
-            SaveStateData = new BassJamSaveState();
+            SaveStateData = new ChartPlayerSaveState();
         }
 
         public override void Initialize()
@@ -106,13 +106,13 @@ namespace BassJam
                 int screenWidth = (int)EditorWidth;
                 int screenHeight = (int)EditorHeight;
 
-                BassJamGame game;
+                ChartPlayerGame game;
 
-                Logger.Log("Create BassJam Game");
+                Logger.Log("Create ChartPlayer Game");
 
                 using (GameHost = new MonoGameHost(screenWidth, screenHeight, fullscreen: false))
                 {
-                    game = new BassJamGame();
+                    game = new ChartPlayerGame();
                     game.Plugin = this;
 
                     GameHost.IsMouseVisible = true;
@@ -211,11 +211,11 @@ namespace BassJam
         }
     }
 
-    public class BassJamSaveState : AudioPluginSaveState
+    public class ChartPlayerSaveState : AudioPluginSaveState
     {
         public SongPlayerSettings SongPlayerSettings { get; set; } = new SongPlayerSettings();
 
-        public BassJamSaveState()
+        public ChartPlayerSaveState()
         {
         }
     }

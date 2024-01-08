@@ -4,7 +4,7 @@ using System.Linq;
 using UILayout;
 using SongFormat;
 
-namespace BassJam
+namespace ChartPlayer
 {
     public class SongListDisplay : MultiColumnItemDisplay<SongIndexEntry>
     {

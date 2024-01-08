@@ -6,7 +6,7 @@ using System;
 //  https://github.com/naudio/NAudio/blob/master/NAudio.Core/Dsp/FastFourierTransform.cs
 //
 
-namespace BassJam
+namespace ChartPlayer
 {
     /// <summary>
     /// Type to represent complex number

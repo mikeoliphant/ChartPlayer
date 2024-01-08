@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 
-namespace BassJamImageProcessor
+namespace ChartPlayerImageProcessor
 {
-    class BassJamImageProcessor : ImageSheetProcessor.ImageSheetProcessor
+    class ChartPlayerImageProcessor : ImageSheetProcessor.ImageSheetProcessor
     {
         public void RenderImages(string destPath)
         {
@@ -69,12 +69,12 @@ namespace BassJamImageProcessor
     {
         static void Main(string[] args)
         {
-            var processor = new BassJamImageProcessor();
+            var processor = new ChartPlayerImageProcessor();
 
-            processor.SrcPath = @"C:\Code\BassJam\SrcTextures";
+            processor.SrcPath = @"C:\Code\ChartPlayer\SrcTextures";
             processor.ForceRegen = false;
 
-            processor.RenderImages(@"C:\Code\BassJam\BassJamShared\Content\Textures");
+            processor.RenderImages(@"C:\Code\ChartPlayer\ChartPlayerShared\Content\Textures");
         }
 
     }
