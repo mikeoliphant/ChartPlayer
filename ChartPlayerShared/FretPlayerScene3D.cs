@@ -240,7 +240,7 @@ namespace ChartPlayer
                         DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
                     }
 
-                    float startWithMinSustain = startTime - 0.15f;
+                    float startWithMinSustain = startTime - 0.3f;
 
                     notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
 

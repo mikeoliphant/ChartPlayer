@@ -10,6 +10,7 @@ namespace ChartPlayer
     {
         public ESongInstrumentType CurrentInstrument { get; private set; } = ESongInstrumentType.LeadGuitar;
 
+        SongIndex songIndex;
         List<SongIndexEntry> allSongs;
         List<SongIndexEntry> currentSongs;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
@@ -24,12 +25,16 @@ namespace ChartPlayer
 
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
+            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Plays", ValueFunc =delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; }, RequestedDisplayWidth = 50 });
+            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "LastPlay",
+                ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
+                SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateOnly.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; }, RequestedDisplayWidth = 70 });
 
             float width = 0;
             float height = 0;
 
             ListDisplay.Font.SpriteFont.MeasureString("Eb Drop Db", out width, out height);
-            AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "BassGuitarTuning", RequestedDisplayWidth = width });
+            AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
 
             LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
@@ -40,9 +45,11 @@ namespace ChartPlayer
             SetSortColumn("Title");
         }
 
-        public void SetSongs(List<SongIndexEntry> songs)
+        public void SetSongIndex(SongIndex songIndex)
         {
-            this.allSongs = songs;
+            this.songIndex = songIndex;
+
+            this.allSongs = songIndex.Songs;
 
             SetCurrentSongs();
         }
@@ -91,7 +98,6 @@ namespace ChartPlayer
             }
         }
 
-
         public void SongSelected(int index)
         {
             Close();
@@ -102,6 +108,28 @@ namespace ChartPlayer
         public void Close()
         {
             Layout.Current.ClosePopup(this);
+        }
+
+        DateTime currentDate = DateTime.Now;
+
+        string GetDayString(DateOnly date)
+        {
+            int days = (currentDate - date.ToDateTime(TimeOnly.MinValue)).Days;
+
+            if (days == 0)
+                return "Today";
+
+            if (days > 365)
+            {
+                return (days / 365 + "y");
+            }
+                
+            if (days > 30)
+            {
+                return (days / 30) + "m";
+            }
+
+            return days + "d";
         }
     }
 
@@ -145,7 +173,9 @@ namespace ChartPlayer
     public class ItemDisplayColum<T>
     {
         public string PropertyName { get; set; }
+        public Func<T, object> ValueFunc { get; set; }
         public string SortPropertyName { get; set; }
+        public Func<T, object> SortValueFunc { get; set; }
         public bool StartReversed { get; set; }
         public string DisplayName { get; set; }
         public float DisplayOffset { get; set; }
@@ -154,11 +184,20 @@ namespace ChartPlayer
 
         public object GetSortValue(T obj)
         {
+            if (SortValueFunc != null)
+                return SortValueFunc(obj);
+
+            if (ValueFunc != null)
+                return ValueFunc(obj);
+
             return obj.GetType().GetProperty(SortPropertyName ?? PropertyName).GetValue(obj, null);
         }
 
         public object GetValue(T obj)
         {
+            if (ValueFunc != null)
+                return ValueFunc(obj);
+
             return obj.GetType().GetProperty(PropertyName).GetValue(obj, null);
         }
 

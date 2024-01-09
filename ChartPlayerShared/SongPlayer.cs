@@ -12,6 +12,7 @@ namespace ChartPlayer
     {
         public double PlaybackSampleRate { get; private set; } = 48000;
         public float CurrentSecond { get; private set; } = 0;
+        public float SongLengthSeconds { get; private set; } = 0;
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
         public SongKeyboardNotes SongKeyboardNotes { get; private set; }
@@ -92,11 +93,24 @@ namespace ChartPlayer
             {
                 throw new InvalidOperationException("Song has no audio file");
             }
+
+            SongLengthSeconds = (float)vorbisReader.TotalTime.TotalSeconds;
         }
 
         public void SeekTime(float secs)
         {
             seekTime = secs;
+
+            if (Paused)
+            {
+                if (seekTime != -1)
+                {
+                    vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
+                    seekTime = -1;
+
+                    CurrentSecond = (float)vorbisReader.TimePosition.TotalSeconds;
+                }
+            }
         }
 
         public int ReadSamples(Span<float> buffer)

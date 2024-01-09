@@ -62,7 +62,7 @@ namespace ChartPlayer
             basicEffect.View = Camera.GetViewMatrix();
             basicEffect.World = Matrix.Identity;
 
-            MonoGameLayout.Current.Host.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+            MonoGameLayout.Current.Host.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicClamp;
             MonoGameLayout.Current.Host.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             MonoGameLayout.Current.Host.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             MonoGameLayout.Current.Host.GraphicsDevice.RasterizerState = RasterizerState.CullNone;

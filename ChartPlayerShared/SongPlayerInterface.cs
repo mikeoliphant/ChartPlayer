@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
+using SharpDX.Direct3D9;
 
 namespace ChartPlayer
 {
@@ -33,7 +34,7 @@ namespace ChartPlayer
 
             songIndex = new SongIndex(basePath);
 
-            songList.SetSongs(songIndex.Songs);
+            songList.SetSongIndex(songIndex);
 
             VerticalStack topStack = new VerticalStack()
             {
@@ -138,6 +139,20 @@ namespace ChartPlayer
                         break;
                     }
                 }
+
+                SongStatsEntry stats = songIndex.Stats[(int)songList.CurrentInstrument].GetSongStats(song.FolderPath);
+
+                if (song.Stats[(int)songList.CurrentInstrument] == null)
+                {
+                    song.Stats[(int)songList.CurrentInstrument] = stats;
+                }
+
+                stats.LastPlayed = DateOnly.FromDateTime(DateTime.Now);
+                stats.NumPlays++;
+
+                songIndex.SaveStats();
+
+                GC.Collect();
             }
             catch (Exception ex)
             {
@@ -228,7 +243,6 @@ namespace ChartPlayer
 
         public SongSectionInterface()
         {
-
         }
 
         public void SetSongPlayer(SongPlayer songPlayer)
@@ -283,20 +297,30 @@ namespace ChartPlayer
             if (songPlayer == null)
                 return false;
 
-            if (touch.TouchState != ETouchState.Pressed)
-                return false;
-
-            float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
-
-            foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+            if ((touch.TouchState == ETouchState.Pressed) || (touch.TouchState == ETouchState.Moved))
             {
-                if ((time >= section.StartTime) && (time < section.EndTime))
+
+                float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
+
+                if (Layout.Current.InputManager.IsDown("PreciseClick"))
                 {
-                    songPlayer.SeekTime(section.StartTime);
+                    songPlayer.SeekTime(time);
                 }
+                else
+                {
+                    foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+                    {
+                        if ((time >= section.StartTime) && (time < section.EndTime))
+                        {
+                            songPlayer.SeekTime(section.StartTime);
+                        }
+                    }
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         protected override void DrawContents()
@@ -308,13 +332,18 @@ namespace ChartPlayer
 
             UIColor color = UIColor.Orange;
 
+            UIColor lineColor = UIColor.White;
+            lineColor.A = 128;
+
             float currentTime = songPlayer.CurrentSecond;
 
             for (int i = 0; i < songPlayer.SongInstrumentNotes.Sections.Count; i++)
             {
                 SongSection section = songPlayer.SongInstrumentNotes.Sections[i];
 
-                if ((currentTime >= section.StartTime) && (currentTime < section.EndTime))
+                bool isCurrent = (currentTime >= section.StartTime) && (currentTime < section.EndTime);
+
+                if (isCurrent)
                     color.A = 255;
                 else
                     color.A = 192;
@@ -330,6 +359,10 @@ namespace ChartPlayer
 
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF((int)startX, (int)(ContentBounds.Bottom - (int)height), endX - startX - 2, (int)height), color);
             }
+
+            int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
+
+            Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
         }
     }
 }

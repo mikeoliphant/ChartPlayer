@@ -16,7 +16,7 @@ namespace ChartPlayerImageProcessor
         {
             BeginSpriteSheetGroup("UISheet");
 
-            AddFont("MainFont", "Segoe UI", 14);
+            AddFont("MainFont", "Segoe UI", FontStyle.Bold, 14);
             AddFont("LargeFont", "Segoe UI", FontStyle.Bold, 32);
 
             PushDirectory("UserInterface");
