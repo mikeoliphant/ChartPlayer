@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
@@ -36,6 +37,9 @@ namespace ChartPlayer
         UIImage[] stringNoteImages;
         UIImage[] stringNoteTrailImages;
 
+        NoteDetector noteDetector;
+        Thread noteDetectThread;
+
         public FretPlayerScene3D(SongPlayer player, float secondsLong)
         {
             this.player = player;
@@ -63,6 +67,12 @@ namespace ChartPlayer
             whiteThreeQuartersAlpha.A = 192;
 
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
+
+            noteDetector = new NoteDetector();
+            noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
+
+            noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
+            noteDetectThread.Start();
 
             // Do a pre-pass on the notes to find spot where we want to add note numbers on the fretboard or re-show the full chord
             SongNote? lastNote = null;
@@ -134,6 +144,12 @@ namespace ChartPlayer
 
                 lastNote = note;
             }
+        }
+
+        public void Stop()
+        {
+            noteDetector.Stop();
+            noteDetectThread.Join();
         }
 
         public override void Draw()
@@ -900,16 +916,12 @@ namespace ChartPlayer
             }
         }
 
-        static double A4Frequency = 440.0;
-        static int A4MidiNoteNum = 69;
-        static double HalfStepRatio = Math.Pow(2.0, (1.0 / 12.0));
-
         static int[] GuitarStringNotes = { 40, 45, 50, 55, 59, 64 };
         static int[] BassStringNotes = { 28, 33, 38, 43 };
 
-        const int FFTSize = 8192;
-        Complex[] fftData = new Complex[FFTSize];
-        float[] fftOutput = new float[FFTSize / 2];
+        static double A4Frequency = 440.0;
+        static int A4MidiNoteNum = 69;
+        static double HalfStepRatio = Math.Pow(2.0, (1.0 / 12.0));
 
         static double GetMidiNoteFrequency(int midiNoteNum)
         {
@@ -930,24 +942,8 @@ namespace ChartPlayer
             }
         }
 
-        float GetPower(double frequency)
-        {
-            double bin = GetBin(frequency);
-            
-            int low = (int)Math.Floor(bin);
-
-            double partial = bin - low;
-
-            return (float)MathUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
-        }
-
-        double GetBin(double frequency)
-        {
-            return (fftData.Length * (frequency / ChartPlayerGame.Instance.Plugin.Host.SampleRate));
-        }
-
         bool NoteDetect(SongNote note)
-        {
+        {                
             if (note.ChordID != -1)
             {
                 SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
@@ -974,7 +970,7 @@ namespace ChartPlayer
                     }
                 }
 
-                bool detected = NoteDetect(freqs);
+                bool detected = noteDetector.NoteDetect(freqs);
 
                 if (detected)
                 {
@@ -984,67 +980,7 @@ namespace ChartPlayer
                 return detected;
             }
 
-            return NoteDetect(GetNoteFrequency(note.String, note.Fret));
-        }
-
-        bool NoteDetect(params double[] frequencies)
-        {
-            SampleHistory<double> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
-
-            history.Process(ConvertToComplex, fftData.Length);
-
-            FastFourierTransform.FFT(true, (int)Math.Log(fftData.Length, 2.0), fftData);
-
-            for (int i = 0; i < fftData.Length / 2; i++)
-            {
-                float fft = Math.Abs(fftData[i].X + fftData[i].Y);
-                float fftMirror = Math.Abs(fftData[fftData.Length - i - 1].X + fftData[fftData.Length - i - 1].Y);
-
-                fftOutput[i] = (fft + fftMirror) * (0.5f + (i / (fftData.Length * 2)));
-            }
-
-            int maxFrequencyBin = (int)GetBin((numStrings == 6) ? 2637 : 330);  // Max note frequency
-
-            float totPower = 0;
-
-            foreach (double freq in frequencies)
-            {
-                totPower += GetPower(freq);
-            }
-
-            if (totPower > .001)
-            {
-                var sorted = fftOutput.Take(maxFrequencyBin).Select((x, i) => (x, i)).OrderByDescending(x => x.x).Take(frequencies.Length * 3);
-
-                int numInTop = 0;
-
-                foreach (double freq in frequencies)
-                {
-                    int bin = (int)GetBin(freq);
-
-                    if (sorted.Where(x => (x.i == bin) || (x.i == (bin + 1))).Any())
-                    {
-                        numInTop++;
-                    }
-                }
-
-
-                if (frequencies.Length == 1)
-                    return (numInTop == 1);
-
-                return (numInTop >= frequencies.Length - 1);
-            }
-
-            return false;
-        }
-
-        void ConvertToComplex(ReadOnlySpan<double> samples, int offset)
-        {
-            for (int pos = 0; pos < samples.Length; pos++)
-            {
-                fftData[pos + offset].X = (float)samples[pos] * (float)FastFourierTransform.HammingWindow(pos + offset, fftData.Length);
-                fftData[pos + offset].Y = 0;
-            }
+            return noteDetector.NoteDetect(GetNoteFrequency(note.String, note.Fret));
         }
     }
 }

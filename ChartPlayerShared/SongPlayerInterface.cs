@@ -133,6 +133,11 @@ namespace ChartPlayer
                         }
                         else
                         {
+                            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
+                            {
+                                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
+                            }
+
                             ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
                         }
 
@@ -205,6 +210,8 @@ namespace ChartPlayer
                 mouseIdleFrames = 0;
 
                 ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+                lastMousePosition = mousePosition;
             }
             else
             {
@@ -215,8 +222,6 @@ namespace ChartPlayer
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
                 }
             }
-
-            lastMousePosition = mousePosition;
 
             // Keep the monitor from turning off
             SetThreadExecutionState(ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
