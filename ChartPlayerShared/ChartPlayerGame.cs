@@ -62,5 +62,12 @@ namespace ChartPlayer
 
             base.Draw();
         }
+
+        public override void Exiting()
+        {
+            SongPlayerInterface.Instance.Exit();
+
+            base.Exiting();
+        }
     }
 }

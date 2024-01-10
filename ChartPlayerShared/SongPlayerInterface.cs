@@ -94,6 +94,14 @@ namespace ChartPlayer
             bottomButtonStack.Children.Add(optionsButton);
         }
 
+        public void Exit()
+        {
+            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
+            {
+                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
+            }
+        }
+
         public void ResizeScreen()
         {
         }
