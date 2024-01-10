@@ -86,7 +86,10 @@ namespace ChartPlayer
 
             int maxFrequencyBin = (int)GetBin(MaxFrequency);  // Max note frequency
 
-            topX = fftOutput.Take(maxFrequencyBin).Select((x, i) => (x, i)).OrderByDescending(x => x.x).Take(10).ToList();
+            topX = fftOutput.Take(maxFrequencyBin).Select((Power, Bin) => (Power, Bin)).OrderByDescending(x => x.Power).Take(10).ToList();
+            //{
+            //    topX.Add((top.Power + fftOutput[top.Bin * 2], top.Bin));
+            //}
         }
 
         public bool NoteDetect(params double[] frequencies)
@@ -100,7 +103,7 @@ namespace ChartPlayer
             {
                 int bin = (int)GetBin(freq);
 
-                if (topX.Take(frequencies.Length * 3).Where(x => (x.Bin == bin) || (x.Bin == (bin + 1))).Any())
+                if (topX.Take(frequencies.Length * 3).Where(x => (x.Bin == bin) || (x.Bin == (bin * 2)) || (x.Bin == (bin * 3))).Any())
                 {
                     numInTop++;
                 }
@@ -116,7 +119,14 @@ namespace ChartPlayer
             if (totPower > .001)
             {
                 if (frequencies.Length == 1)
+                {
+                    if (numInTop == 0)
+                    {
+
+                    }
+
                     return (numInTop == 1);
+                }
 
                 return (numInTop >= frequencies.Length - 1);
             }
