@@ -40,6 +40,11 @@ namespace ChartPlayer
         NoteDetector noteDetector;
         Thread noteDetectThread;
 
+        SongNote? currentChordNote;
+        SongNote? currentFingerNote;
+        SongNote?[] currentStringNotes;
+        int[] currentStringFingers;
+
         public FretPlayerScene3D(SongPlayer player, float secondsLong)
         {
             this.player = player;
@@ -67,6 +72,9 @@ namespace ChartPlayer
             whiteThreeQuartersAlpha.A = 192;
 
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
+
+            currentStringNotes = new SongNote?[numStrings];
+            currentStringFingers = new int[numStrings];
 
             noteDetector = new NoteDetector();
             noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
@@ -115,7 +123,7 @@ namespace ChartPlayer
                             // should differentiate base on *some* techniques
 
                             //if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || (lastNote.Value.Techniques != note.Techniques) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
-                            if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
+                            if ((note.TimeLength > 0) || note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
                             {
                                 nonReapeatDict[note.TimeOffset] = true;
                             }
@@ -256,6 +264,15 @@ namespace ChartPlayer
                         DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
                     }
 
+                    for (int str = 0; str < numStrings; str++)
+                    {
+                        currentStringNotes[str] = null;
+                        currentStringFingers[str] = -1;
+                    }
+
+                    currentChordNote = null;
+                    currentFingerNote = null;
+
                     float startWithMinSustain = startTime - 0.3f;
 
                     notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
@@ -268,7 +285,6 @@ namespace ChartPlayer
                     }
 
                     // Draw the front section
-
                     for (int str = 0; str < numStrings; str++)
                     {
                         UIColor color = stringColors[str];
@@ -292,6 +308,74 @@ namespace ChartPlayer
                         }
 
                         DrawVerticalText(fret.ToString(), fret - 0.5f, 1, currentTime, color, 0.08f);
+                    }
+
+                    // Draw current notes
+
+                    if (currentChordNote.HasValue)
+                    {
+                        DrawChordOutline(currentChordNote.Value);
+
+                        if (!currentChordNote.Value.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
+                            DrawChordNotes(currentChordNote.Value, player.SongInstrumentNotes.Chords[currentChordNote.Value.ChordID], drawCurrent: true);
+                    }
+
+                    for (int str = 0; str < numStrings; str++)
+                    {
+                        if (currentStringNotes[str].HasValue)
+                        {
+                            SongNote stringNote = currentStringNotes[str].Value;
+
+                            DrawSingleNote(stringNote, drawCurrent: true);
+                        }
+                    }
+
+                    // Draw fingering
+                    int fingerID = -1;
+                    SongNote fingerNote = new SongNote();
+
+                    if (currentChordNote.HasValue)
+                    {
+                        fingerID = currentChordNote.Value.ChordID;
+                        fingerNote = currentChordNote.Value;
+                    }
+
+                    if (currentFingerNote.HasValue)
+                    {
+                        fingerID = currentFingerNote.Value.FingerID;
+                        fingerNote = currentFingerNote.Value;
+                    }
+
+                    if (fingerID != -1)
+                    {
+                        SongChord fingerChord = player.SongInstrumentNotes.Chords[fingerID];
+
+                        for (int str = 0; str < fingerChord.Fingers.Count; str++)
+                        {
+                            if ((fingerChord.Fingers[str] != -1) && (fingerChord.Frets[str] != -1))
+                            {
+                                SongNote stringNote = (currentStringNotes[str].HasValue && (currentStringNotes[str].Value.TimeOffset >= fingerNote.TimeOffset)) ? currentStringNotes[str].Value :
+                                    new SongNote()
+                                    {
+                                        ChordID = fingerNote.ChordID,
+                                        TimeOffset = fingerNote.TimeOffset,
+                                        TimeLength = fingerNote.TimeLength,
+                                        Fret = fingerChord.Frets[str],
+                                        String = str,
+                                        Techniques = fingerNote.Techniques,
+                                        HandFret = fingerNote.HandFret
+                                    };
+
+                                float drawFret = stringNote.Fret;
+                                
+                                if (stringNote.SlideFret != -1)
+                                {
+                                    drawFret = MathUtil.Lerp(stringNote.Fret, stringNote.SlideFret, MathUtil.Saturate((currentTime - stringNote.TimeOffset) / stringNote.TimeLength));
+                                }                                
+
+                                DrawVerticalText(fingerChord.Fingers[str].ToString(), drawFret - 0.5f, GetNoteHeadHeight(stringNote), currentTime, UIColor.White, 0.06f);
+                            }
+                        }
                     }
 
                     if (firstNote.HasValue)
@@ -320,60 +404,27 @@ namespace ChartPlayer
 
             if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
             {
-                SongChord chord = player.SongInstrumentNotes.Chords[note.ChordID];
+                if ((note.TimeOffset <= currentTime) && !currentChordNote.HasValue)
+                    currentChordNote = note;
 
                 if (!note.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
                 {
-                    for (int str = 0; str < chord.Fingers.Count; str++)
-                    {
-                        if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
-                        {
-                            SongNote chordNote = new SongNote()
-                            {
-                                ChordID = note.ChordID,
-                                TimeOffset = note.TimeOffset,
-                                TimeLength = note.TimeLength,
-                                Fret = chord.Frets[str],
-                                String = str,
-                                Techniques = note.Techniques,
-                                HandFret = note.HandFret
-                            };
-
-                            if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset <= currentTime))
-                            {
-                                if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
-                                    DrawVerticalText(numberStrings[chord.Frets[str]], chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
-
-                                DrawSingleNote(chordNote);
-                            }
-                        }
-                    }
+                    DrawChordNotes(note, player.SongInstrumentNotes.Chords[note.ChordID]);
                 }
 
-                float timeOffset = Math.Max(note.TimeOffset, currentTime);
-
-                UIColor color = UIColor.White;
-                color.A = 128;
-
-                if (nonReapeatDict.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
+                if (note.TimeOffset > currentTime)
                 {
-                    DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), isDetected ? UIColor.White : color);
-
-                    if (!String.IsNullOrEmpty(chord.Name))
-                        DrawVerticalText(chord.Name, note.HandFret - 1.25f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.10f);
-                }
-                else
-                {
-                    DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(2), isDetected ? UIColor.White : color);
-
-                    if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
-                    {
-                        DrawVerticalImage(Layout.Current.GetImage("NoteMute"), note.HandFret + 1, timeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
-                    }
+                    DrawChordOutline(note);
                 }
             }
             else
             {
+                if (note.FingerID != -1)
+                {
+                    if ((note.TimeOffset <= currentTime) && !currentFingerNote.HasValue)
+                        currentFingerNote = note;
+                }
+
                 if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
                     DrawVerticalText(numberStrings[note.Fret], note.Fret - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
 
@@ -381,8 +432,86 @@ namespace ChartPlayer
             }
         }
 
+        void DrawChordNotes(SongNote note, SongChord chord)
+        {
+            DrawChordNotes(note, chord, drawCurrent: false);
+        }
+
+        void DrawChordNotes(SongNote note, SongChord chord, bool drawCurrent)
+        {
+            for (int str = 0; str < chord.Fingers.Count; str++)
+            {
+                if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
+                {
+                    SongNote chordNote = new SongNote()
+                    {
+                        ChordID = note.ChordID,
+                        TimeOffset = note.TimeOffset,
+                        TimeLength = note.TimeLength,
+                        Fret = chord.Frets[str],
+                        String = str,
+                        Techniques = note.Techniques,
+                        HandFret = note.HandFret
+                    };
+
+                    if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset <= currentTime))
+                    {
+                        if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
+                            DrawVerticalText(numberStrings[chord.Frets[str]], chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
+
+                        DrawSingleNote(chordNote, drawCurrent);
+                    }
+                }
+            }
+        }
+
+        void DrawChordOutline(SongNote note)
+        {
+            int chordID = note.ChordID;
+
+            if (chordID == -1)
+                chordID = note.FingerID;
+
+            SongChord chord = player.SongInstrumentNotes.Chords[chordID];
+
+            float timeOffset = Math.Max(note.TimeOffset, currentTime);
+
+            UIColor color = UIColor.White;
+            color.A = 128;
+
+            if (nonReapeatDict.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
+            {
+                DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), isDetected ? UIColor.White : color);
+
+                if (!String.IsNullOrEmpty(chord.Name))
+                    DrawVerticalText(chord.Name, note.HandFret - 1.1f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.09f, rightAlign: true);
+            }
+            else
+            {
+                DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(2), isDetected ? UIColor.White : color);
+
+                if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
+                {
+                    DrawVerticalImage(Layout.Current.GetImage("NoteMute"), note.HandFret + 1, timeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
+                }
+            }
+        }
+
         void DrawSingleNote(SongNote note)
         {
+            DrawSingleNote(note, drawCurrent: false);
+        }
+
+        void DrawSingleNote(SongNote note, bool drawCurrent)
+        {
+            bool isCurrent = (note.TimeOffset <= currentTime);
+
+            if ((isCurrent && !drawCurrent) && (!note.Techniques.HasFlag(ESongNoteTechnique.Chord) || note.Techniques.HasFlag(ESongNoteTechnique.ChordNote)))
+            {
+                if (!currentStringNotes[note.String].HasValue)
+                    currentStringNotes[note.String] = note;
+            }
+
             if (note.Fret == 0)
             {
                 minFret = Math.Min(minFret, note.HandFret + 2);
@@ -451,40 +580,49 @@ namespace ChartPlayer
             {
                 float midAnchorFret = (float)note.HandFret + 1;
 
-                if (note.TimeLength > 0)
+                if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
                 {
                     // Sustain note tail
                     DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
 
-                // Note head
-                if (isDetected)
-                    DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
+                if (!isCurrent || drawCurrent)
+                {
+                    // Note head
+                    if (isDetected)
+                        DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
 
-                DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
+                    DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
 
-                // Note Modifier
-                if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
+                    // Note Modifier
+                    if (modifierImage != null)
+                        DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
+                }
             }
             else    // Fretted note
             {
-                if (note.TimeLength > 0)
+                float drawFret = note.Fret;
+
+                if (isSlide && (note.TimeOffset < currentTime))
+                {
+                    drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+                }
+
+                if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
                 {
                     // Sustain note tail
-
                     if (isSlide)
                     {
                         //DrawSkewedFlatImage(PixGame.Instance.GetImage(trailImageName), note.Fret - 0.5f, slideTo - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(note.String), stringColor);
 
                         DrawImageTrail(stringNoteTrailImages[note.String], stringColor, 0.03f,
-                            new Vector3(note.Fret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
+                            new Vector3(drawFret - 0.5f, GetStringHeight(stringOffset), noteHeadTime), new Vector3(slideTo - 0.5f, GetStringHeight(stringOffset), noteHeadTime + noteSustain));
                     }
                     else
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(stringNoteTrailImages[note.String], note.Fret - 0.5f, noteHeadTime, noteSustain, stringOffset, note.CentsOffsets, stringColor);
+                            DrawBend(stringNoteTrailImages[note.String], note.Fret - 0.5f, note.TimeOffset, noteSustain, stringOffset, note.CentsOffsets, stringColor);
                         }
                         else
                         {
@@ -500,63 +638,60 @@ namespace ChartPlayer
                     }
                 }
 
-                // Note "shadow" on fretboard
-                DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha, 0.08f);
-
-                // Small lines for lower strings
-                for (int prevString = 0; prevString < stringOffset; prevString++)
+                if (!isCurrent)
                 {
-                    DrawFretHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha, .04f);
+                    // Note "shadow" on fretboard
+                    DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha, 0.08f);
+
+                    // Small lines for lower strings
+                    for (int prevString = 0; prevString < stringOffset; prevString++)
+                    {
+                        DrawFretHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha, .04f);
+                    }
                 }
 
-                // Vertical line from fretboard up to note head
-                DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
-
-                float noteHeadHeight = GetStringHeight(stringOffset);
-
-                if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
+                if (!isCurrent || drawCurrent)
                 {
-                    float bendOffset = GetBendOffset(note.TimeOffset, note.TimeLength, note.String, note.CentsOffsets);
+                    // Vertical line from fretboard up to note head
+                    DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
 
-                    if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
-                        noteHeadHeight -= bendOffset;
-                    else
-                        noteHeadHeight += bendOffset;
+                    float noteHeadHeight = GetNoteHeadHeight(note);
 
-                }
-
-                float drawFret = note.Fret;
-
-                if (isSlide && (note.TimeOffset < currentTime))
-                {
-                    drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
-                }
-
-                // Note head
-                if (!note.Techniques.HasFlag(ESongNoteTechnique.Continued) || (note.TimeOffset < currentTime))
+                    // Note head
+                    if (!note.Techniques.HasFlag(ESongNoteTechnique.Continued) || (note.TimeOffset < currentTime))
                     //if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset < currentTime))
-                {
-                    if (isDetected)
-                        DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
+                    {
+                        if (isDetected)
+                            DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.1f);
 
-                    DrawVerticalImage(stringNoteImages[note.String], drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
-                }
+                        DrawVerticalImage(stringNoteImages[note.String], drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
+                    }
 
-                // Note modifier
-                if (modifierImage != null)
-                    DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
-
-                if ((note.TimeOffset < currentTime) && (note.ChordID != -1))
-                {
-                    int finger = player.SongInstrumentNotes.Chords[note.ChordID].Fingers[note.String];
-
-                    if (finger > 0)
-                        DrawVerticalText(finger.ToString(), drawFret - 0.5f, noteHeadHeight, noteHeadTime, UIColor.White, 0.06f);
+                    // Note modifier
+                    if (modifierImage != null)
+                        DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
                 }
             }
 
             if (note.TimeOffset > currentTime)
                 firstNote = note;
+        }
+
+        float GetNoteHeadHeight(SongNote note)
+        {
+            float noteHeadHeight = GetStringHeight(GetStringOffset(note.String));
+
+            if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
+            {
+                float bendOffset = GetBendOffset(note.TimeOffset, note.String, note.CentsOffsets);
+
+                if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
+                    noteHeadHeight -= bendOffset;
+                else
+                    noteHeadHeight += bendOffset;
+            }
+
+            return noteHeadHeight;
         }
 
         float scaleLength = 300.0f;
@@ -587,7 +722,7 @@ namespace ChartPlayer
             return cents / -30.0f;
         }
 
-        float GetBendOffset(float startTime, float sustain, float strng, CentsOffset[] bendOffsets)
+        float GetBendOffset(float startTime, float strng, CentsOffset[] bendOffsets)
         {
             if (startTime > currentTime)
                 return 0;
@@ -802,7 +937,7 @@ namespace ChartPlayer
             float maxX = fretCenter + ((float)image.Width * imageScale);
 
             float lastTime = startTime;
-            float lastHeight = heightOffset;
+            float lastHeight = heightOffset + GetBendOffset(startTime, strng, bendOffsets);
 
             foreach (CentsOffset offset in bendOffsets)
             {
@@ -882,6 +1017,11 @@ namespace ChartPlayer
 
         void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, UIColor color, float imageScale)
         {
+            DrawVerticalText(text, fretCenter, verticalCenter, timeCenter, color, imageScale, rightAlign: false);
+        }
+
+        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, UIColor color, float imageScale, bool rightAlign)
+        {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
 
@@ -892,7 +1032,16 @@ namespace ChartPlayer
 
             font.SpriteFont.MeasureString(text, imageScale, out textWidth, out textHeight);
 
-            float x = fretCenter - (textWidth / 2);
+            float x = 0;
+            
+            if (rightAlign)
+            {
+                x = fretCenter - textWidth;
+            }
+            else
+            {
+                x = fretCenter - (textWidth / 2);
+            }
 
             Rectangle drawRect = Rectangle.Empty;
 

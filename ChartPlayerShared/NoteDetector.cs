@@ -11,7 +11,7 @@ namespace ChartPlayer
     {
         public double MaxFrequency { get; set; }
 
-        const int FFTSize = 8192;
+        const int FFTSize = 4096;
         Complex[] fftData = new Complex[FFTSize];
         float[] fftOutput = new float[FFTSize / 2];
         int msPerPass = 50;
@@ -103,7 +103,7 @@ namespace ChartPlayer
             {
                 int bin = (int)GetBin(freq);
 
-                if (topX.Take(frequencies.Length * 3).Where(x => (x.Bin == bin) || (x.Bin == (bin * 2)) || (x.Bin == (bin * 3))).Any())
+                if (topX.Take(frequencies.Length * 2).Where(x => (x.Bin == bin) || (x.Bin == (bin * 2)) || (x.Bin == (bin * 3))).Any())
                 {
                     numInTop++;
                 }

@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
-using SharpDX.Direct3D9;
 
 namespace ChartPlayer
 {
@@ -119,7 +118,7 @@ namespace ChartPlayer
                     songData = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
                 }
 
-                foreach (SongInstrumentPart part in songData.InstrumentParts)
+                foreach (SongInstrumentPart part in songData.InstrumentParts.OrderBy(p => p.InstrumentName))
                 {
                     if (part.InstrumentType == instrumentType)
                     {

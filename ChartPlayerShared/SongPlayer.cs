@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using AudioPlugSharp;
 using NVorbis;
 using SongFormat;
 
@@ -100,21 +101,16 @@ namespace ChartPlayer
         public void SeekTime(float secs)
         {
             seekTime = secs;
-
-            if (Paused)
-            {
-                if (seekTime != -1)
-                {
-                    vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
-                    seekTime = -1;
-
-                    CurrentSecond = (float)vorbisReader.TimePosition.TotalSeconds;
-                }
-            }
         }
 
         public int ReadSamples(Span<float> buffer)
         {
+            if (seekTime != -1)
+            {
+                vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
+                seekTime = -1;
+            }
+
             if (Paused)
             {
                 buffer.Clear();
@@ -126,12 +122,6 @@ namespace ChartPlayer
 
             if (RetuneToEStandard && (tuningOffsetSemitones != 0))
                 actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
-
-            if (seekTime != -1)
-            {
-                vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
-                seekTime = -1;
-            }
 
             int read = 0;
 
