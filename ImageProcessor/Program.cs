@@ -37,6 +37,8 @@ namespace ChartPlayerImageProcessor
 
             Add("ChordOutline");
 
+            Add("FingerOutline");
+
             AddWithShadow("GuitarRed");
             AddWithShadow("GuitarYellow");
             AddWithShadow("GuitarCyan");

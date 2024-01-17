@@ -248,7 +248,6 @@ namespace ChartPlayer
                     handPositionColor.A = 32;
 
                     // Pre-pass
-
                     foreach (SongNote note in notes)
                     {
                         if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
@@ -280,7 +279,6 @@ namespace ChartPlayer
                     notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
 
                     // Draw the notes
-
                     foreach (SongNote note in notes)
                     {
                         DrawNote(note);
@@ -313,7 +311,6 @@ namespace ChartPlayer
                     }
 
                     // Draw current notes
-
                     if (currentChordNote.HasValue)
                     {
                         DrawChordOutline(currentChordNote.Value);
@@ -373,9 +370,10 @@ namespace ChartPlayer
                                 if (stringNote.SlideFret != -1)
                                 {
                                     drawFret = MathUtil.Lerp(stringNote.Fret, stringNote.SlideFret, MathUtil.Saturate((currentTime - stringNote.TimeOffset) / stringNote.TimeLength));
-                                }                                
+                                }
 
-                                DrawVerticalText(fingerChord.Fingers[str].ToString(), drawFret - 0.5f, GetNoteHeadHeight(stringNote), currentTime, UIColor.White, 0.06f);
+                                DrawVerticalImage(Layout.Current.GetImage("FingerOutline"), drawFret - 0.5f, currentTime, GetNoteHeadHeight(stringNote), UIColor.White, 0.05f);
+                                DrawVerticalText(fingerChord.Fingers[str].ToString(), drawFret - 0.5f, GetNoteHeadHeight(stringNote), currentTime, UIColor.White, 0.05f);
                             }
                         }
                     }
