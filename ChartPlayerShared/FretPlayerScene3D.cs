@@ -5,6 +5,8 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
+using SharpDX.Direct3D9;
+using SharpDX.MediaFoundation;
 
 namespace ChartPlayer
 {
@@ -622,7 +624,7 @@ namespace ChartPlayer
                     {
                         if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
                         {
-                            DrawBend(stringNoteTrailImages[note.String], note.Fret - 0.5f, note.TimeOffset, noteSustain, stringOffset, note.CentsOffsets, stringColor);
+                            DrawBend(stringNoteTrailImages[note.String], note.Fret - 0.5f, note.TimeOffset, note.TimeLength, stringOffset, note.CentsOffsets, stringColor);
                         }
                         else
                         {
@@ -677,23 +679,6 @@ namespace ChartPlayer
                 firstNote = note;
         }
 
-        float GetNoteHeadHeight(SongNote note)
-        {
-            float noteHeadHeight = GetStringHeight(GetStringOffset(note.String));
-
-            if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
-            {
-                float bendOffset = GetBendOffset(note.TimeOffset, note.String, note.CentsOffsets);
-
-                if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
-                    noteHeadHeight -= bendOffset;
-                else
-                    noteHeadHeight += bendOffset;
-            }
-
-            return noteHeadHeight;
-        }
-
         float scaleLength = 300.0f;
 
         float GetFretPosition(float fret)
@@ -712,38 +697,6 @@ namespace ChartPlayer
         float GetStringHeight(float str)
         {
             return 3.0f + (str * 4.0f);
-        }
-
-        float GetCentsOffset(float strng, float cents)
-        {
-            if (strng < 2)
-                return cents / 30.0f;
-
-            return cents / -30.0f;
-        }
-
-        float GetBendOffset(float startTime, float strng, CentsOffset[] bendOffsets)
-        {
-            if (startTime > currentTime)
-                return 0;
-
-            int lastCents = 0;
-            float lastTime = startTime;
-
-            foreach (CentsOffset offset in bendOffsets)
-            {
-                if (offset.TimeOffset > currentTime)
-                {
-                    float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
-
-                    return GetCentsOffset(strng, MathUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
-                }
-
-                lastCents = offset.Cents;
-                lastTime = offset.TimeOffset;
-            }
-
-            return GetCentsOffset(strng,lastCents);
         }
 
         void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color, float imageScale)
@@ -925,8 +878,64 @@ namespace ChartPlayer
             }
         }
 
-        void DrawBend(UIImage image, float fretCenter, float startTime, float sustainTime, float strng, CentsOffset[] bendOffsets, UIColor color)
+        float GetCentsOffset(float strng, float cents)
         {
+            if (strng < 2)
+                return cents / 30.0f;
+
+            return cents / -30.0f;
+        }
+
+        float GetBendOffset(float startTime, float strng, CentsOffset[] bendOffsets)
+        {
+            if (startTime > currentTime)
+            {
+                return (bendOffsets[0].TimeOffset == startTime) ? GetCentsOffset(strng, bendOffsets[0].Cents) : 0;
+            }
+
+            int lastCents = 0;
+            float lastTime = startTime;
+
+            foreach (CentsOffset offset in bendOffsets)
+            {
+                if (offset.TimeOffset >= currentTime)
+                {
+                    float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
+
+                    return GetCentsOffset(strng, MathUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
+                }
+
+                lastCents = offset.Cents;
+                lastTime = offset.TimeOffset;
+            }
+
+            return GetCentsOffset(strng, lastCents);
+        }
+
+        float GetNoteHeadHeight(SongNote note)
+        {
+            float noteHeadHeight = GetStringHeight(GetStringOffset(note.String));
+
+            if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
+            {
+                float bendOffset = GetBendOffset(note.TimeOffset, note.String, note.CentsOffsets);
+
+                if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
+                    noteHeadHeight -= bendOffset;
+                else
+                    noteHeadHeight += bendOffset;
+            }
+
+            return noteHeadHeight;
+        }
+
+        void DrawBend(UIImage image, float fretCenter, float startTime, float sustain, float strng, CentsOffset[] bendOffsets, UIColor color)
+        {
+            float endTime = startTime + sustain;
+
+            if (endTime < currentTime)
+                return;
+
             fretCenter = GetFretPosition(fretCenter);
 
             float heightOffset = GetStringHeight(strng);
@@ -937,18 +946,23 @@ namespace ChartPlayer
             float maxX = fretCenter + ((float)image.Width * imageScale);
 
             float lastTime = startTime;
-            float lastHeight = heightOffset + GetBendOffset(startTime, strng, bendOffsets);
+            float lastHeight = heightOffset;
 
             foreach (CentsOffset offset in bendOffsets)
             {
                 float height = heightOffset + GetCentsOffset(strng, offset.Cents);
 
-                sustainTime -= (offset.TimeOffset - lastTime);
-
-                lastTime = Math.Max(lastTime, currentTime);
-
-                if (offset.TimeOffset > currentTime)
+                if ((offset.TimeOffset >= currentTime) && (offset.TimeOffset > lastTime))
                 {
+                    if (lastTime < currentTime)
+                    {
+                        float timePercent = (currentTime - lastTime) / (offset.TimeOffset - lastTime);
+
+                        lastHeight = MathUtil.Lerp(lastHeight, height, timePercent);
+
+                        lastTime = currentTime;
+                    }
+
                     DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
                         new Vector3(minX, height, offset.TimeOffset * -timeScale), color,
                         new Vector3(maxX, height, offset.TimeOffset * -timeScale), color,
@@ -959,19 +973,14 @@ namespace ChartPlayer
                 lastTime = offset.TimeOffset;
             }
 
-            if (sustainTime > 0)
+            if (lastTime < endTime)
             {
-                float endTime = lastTime + sustainTime;
+                lastTime = Math.Max(lastTime, currentTime);
 
-                if (endTime > currentTime)
-                {
-                    lastTime = Math.Max(lastTime, currentTime);
-
-                    DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
-                        new Vector3(minX, lastHeight, endTime * -timeScale), color,
-                        new Vector3(maxX, lastHeight, endTime * -timeScale), color,
-                        new Vector3(maxX, lastHeight, lastTime * -timeScale), color);
-                }
+                DrawQuad(image, new Vector3(minX, lastHeight, lastTime * -timeScale), color,
+                    new Vector3(minX, lastHeight, endTime * -timeScale), color,
+                    new Vector3(maxX, lastHeight, endTime * -timeScale), color,
+                    new Vector3(maxX, lastHeight, lastTime * -timeScale), color);
             }
         }
 
