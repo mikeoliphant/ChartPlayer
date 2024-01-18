@@ -7,9 +7,61 @@ using UILayout;
 using SongFormat;
 using SharpDX.Direct3D9;
 using SharpDX.MediaFoundation;
+using Microsoft.VisualBasic.Logging;
 
 namespace ChartPlayer
 {
+    public class FretCamera : Camera3D
+    {
+        public float CameraDistance { get; private set; } = 70;
+        public float FocusDist { get; set; }
+        float targetCameraDistance = 64;
+        float positionFret = 2;
+
+        public FretCamera()
+        {
+            Position = new Vector3(0, 0, 5);
+            Up = Vector3.Up;
+            Forward = new Vector3(0, 0, -1);
+        }
+
+        public void Update(float minFret, float maxFret, float targetFocusFret, float focusY)
+        {
+            if (minFret <= maxFret)
+            {
+                float fretDist = maxFret - minFret;
+
+                fretDist -= 12;
+
+                if (fretDist < 0)
+                    fretDist = 0;
+
+                targetCameraDistance = 65 + (Math.Max(fretDist, 4) * 3);
+
+                float targetPositionFret = ((float)maxFret + (float)minFret) / 2;
+
+                if (targetPositionFret < (targetFocusFret - 3))
+                {
+                    targetPositionFret = targetFocusFret - 3;
+                }
+
+                if (targetPositionFret > (targetFocusFret + 5))
+                {
+                    targetPositionFret = targetFocusFret + 5;
+                }
+
+                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
+            }
+
+            CameraDistance = MathUtil.Lerp(CameraDistance, targetCameraDistance, 0.01f);
+
+            float fretOffset = (10 - positionFret) / 4.0f;
+
+            Position = new Vector3(FretPlayerScene3D.GetFretPosition(positionFret + fretOffset), 50, focusY + CameraDistance);
+            SetLookAt(new Vector3(FretPlayerScene3D.GetFretPosition(positionFret), 0, Position.Z - (FocusDist * .3f)));
+        }
+    }
+
     public class FretPlayerScene3D : Scene3D
     {
         static UIColor[] stringColors = new UIColor[] { UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
@@ -23,15 +75,14 @@ namespace ChartPlayer
         float startTime;
         float endTime;
         float timeScale = 200f;
-        float positionFret = 2;
         float targetFocusFret = 2;
-        float cameraDistance = 70;
-        float targetCameraDistance = 64;
-        int minFret = 0;
-        int maxFret = 4;
+        float minFret = 0;
+        float maxFret = 4;
         SongNote? firstNote;
         int numStrings;
         bool isDetected = false;
+
+        FretCamera fretCamera;
 
         Dictionary<float, bool> nonReapeatDict = new Dictionary<float, bool>();
 
@@ -51,6 +102,10 @@ namespace ChartPlayer
         {
             this.player = player;
             this.secondsLong = secondsLong;
+
+            Camera = fretCamera = new FretCamera();
+
+            fretCamera.FocusDist = secondsLong * timeScale;
 
             numberStrings = new string[25];
             for (int i = 0; i < numberStrings.Length; i++)
@@ -168,35 +223,7 @@ namespace ChartPlayer
             {
                 currentTime = (float)player.CurrentSecond;
 
-                int fretDist = maxFret - minFret;
-
-                fretDist -= 12;
-
-                if (fretDist < 0)
-                    fretDist = 0;
-
-                targetCameraDistance = 65 + (Math.Max(fretDist, 4) * 3);
-
-                float targetPositionFret = ((float)maxFret + (float)minFret) / 2;
-
-                if (targetPositionFret < (targetFocusFret - 5))
-                {
-                    targetPositionFret = targetFocusFret - 5;
-                }
-
-                if (targetPositionFret > (targetFocusFret + 5))
-                {
-                    targetPositionFret = targetFocusFret + 5;
-                }
-
-                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
-
-                cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
-
-                float fretOffset = (10 - positionFret) / 4.0f;
-
-                Camera.Position = new Vector3(GetFretPosition(positionFret + fretOffset), 50, -(float)(currentTime * timeScale) + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetFretPosition(positionFret), 0, Camera.Position.Z - (secondsLong * timeScale) * .3f));
+                fretCamera.Update(minFret, maxFret, targetFocusFret, -(float)(currentTime * timeScale));
             }
 
             base.Draw();
@@ -208,7 +235,7 @@ namespace ChartPlayer
 
             FogEnabled = true;
             FogStart = 400;
-            FogEnd = cameraDistance + (secondsLong * timeScale);
+            FogEnd = fretCamera.CameraDistance + fretCamera.FocusDist;
             FogColor = UIColor.Black;
 
             try
@@ -512,17 +539,6 @@ namespace ChartPlayer
                     currentStringNotes[note.String] = note;
             }
 
-            if (note.Fret == 0)
-            {
-                minFret = Math.Min(minFret, note.HandFret + 2);
-                maxFret = Math.Max(maxFret, note.Fret);
-            }
-            else
-            {
-                minFret = Math.Min(minFret, note.Fret);
-                maxFret = Math.Max(maxFret, note.HandFret + 2);
-            }
-
             UIColor stringColor = UIColor.White;
 
             if (!isDetected)
@@ -578,6 +594,9 @@ namespace ChartPlayer
 
             if (note.Fret == 0)   // Open string
             {
+                minFret = Math.Min(minFret, note.HandFret);
+                maxFret = Math.Max(maxFret, note.HandFret + 3);
+
                 float midAnchorFret = (float)note.HandFret + 1;
 
                 if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
@@ -607,6 +626,9 @@ namespace ChartPlayer
                 {
                     drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
                 }
+
+                minFret = Math.Min(minFret, drawFret);
+                maxFret = Math.Max(maxFret, drawFret);
 
                 if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
                 {
@@ -677,9 +699,9 @@ namespace ChartPlayer
                 firstNote = note;
         }
 
-        float scaleLength = 300.0f;
+        static float scaleLength = 300.0f;
 
-        float GetFretPosition(float fret)
+        public static float GetFretPosition(float fret)
         {
             return scaleLength - (scaleLength / (float)(Math.Pow(2, (double)fret / 12.0)));
         }
