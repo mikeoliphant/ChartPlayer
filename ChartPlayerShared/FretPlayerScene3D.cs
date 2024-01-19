@@ -23,6 +23,8 @@ namespace ChartPlayer
             Position = new Vector3(0, 0, 5);
             Up = Vector3.Up;
             Forward = new Vector3(0, 0, -1);
+
+            FieldOfView = (float)Math.PI / 4.0f;
         }
 
         public void Update(float minFret, float maxFret, float targetFocusFret, float focusY)
@@ -541,10 +543,20 @@ namespace ChartPlayer
 
             UIColor stringColor = UIColor.White;
 
+
             if (!isDetected)
             {
-                stringColor = UIColor.Lerp(UIColor.White, stringColors[note.String], 0.25f);
-                stringColor = UIColor.Lerp(stringColor, UIColor.Black, 0.25f);
+                float dimAmount = 0.25f;
+
+                float timeDiff = currentTime - note.TimeOffset;
+
+                if ((timeDiff > 0) && (timeDiff < 0.1f))
+                {
+                    dimAmount -= (0.1f - timeDiff) * 2;
+                }
+
+                stringColor = UIColor.Lerp(UIColor.White, stringColors[note.String], dimAmount);
+                stringColor = UIColor.Lerp(stringColor, UIColor.Black, dimAmount);
             }
 
             float noteHeadTime = Math.Max(note.TimeOffset, currentTime);
