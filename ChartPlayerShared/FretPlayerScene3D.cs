@@ -16,7 +16,7 @@ namespace ChartPlayer
         public float CameraDistance { get; private set; } = 70;
         public float FocusDist { get; set; }
         float targetCameraDistance = 64;
-        float positionFret = 2;
+        float positionFret = 3;
 
         public FretCamera()
         {
@@ -52,7 +52,7 @@ namespace ChartPlayer
                     targetPositionFret = targetFocusFret + 5;
                 }
 
-                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 4, 24) - 1, 0.01f);
+                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 3.5f, 24) - 1, 0.01f);
             }
 
             CameraDistance = MathUtil.Lerp(CameraDistance, targetCameraDistance, 0.01f);
@@ -86,7 +86,8 @@ namespace ChartPlayer
 
         FretCamera fretCamera;
 
-        Dictionary<float, bool> nonReapeatDict = new Dictionary<float, bool>();
+        Dictionary<float, bool> nonRepeatChords = new Dictionary<float, bool>();
+        Dictionary<float, bool> nonRepeatNotes = new Dictionary<float, bool>();
 
         string[] numberStrings;
         UIImage[] stringNoteImages;
@@ -160,20 +161,21 @@ namespace ChartPlayer
                     {
                         if (last.Value.String == note.String)
                         {
-                            nonReapeatDict[last.Value.TimeOffset] = true;
+                            nonRepeatChords[last.Value.TimeOffset] = true;
                         }
                     }
                 }
 
                 if (!lastNote.HasValue)
                 {
-                    nonReapeatDict[note.TimeOffset] = true;
+                    nonRepeatChords[note.TimeOffset] = true;
+                    nonRepeatNotes[note.TimeOffset] = true;
                 }
                 else
                 {
                     if (note.HandFret != lastNote.Value.HandFret)
                     {
-                        nonReapeatDict[note.TimeOffset] = true;
+                        nonRepeatChords[note.TimeOffset] = true;
                     }
                     else
                     {
@@ -184,15 +186,20 @@ namespace ChartPlayer
                             //if (note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || (lastNote.Value.Techniques != note.Techniques) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
                             if ((note.TimeLength > 0) || note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) || (lastNote.Value.ChordID != note.ChordID) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1))
                             {
-                                nonReapeatDict[note.TimeOffset] = true;
+                                nonRepeatChords[note.TimeOffset] = true;
                             }
                         }
                         else
                         {
                             if ((note.Fret > 0) && ((lastNote.Value.Fret != note.Fret) || ((note.TimeOffset - lastNote.Value.TimeOffset) > 1)))
                             {
-                                nonReapeatDict[note.TimeOffset] = true;
+                                nonRepeatNotes[note.TimeOffset] = true;
                             }
+                        }
+
+                        if ((note.FingerID != -1) && (lastNote.Value.FingerID != note.FingerID))
+                        {
+                            nonRepeatChords[note.TimeOffset] = true;
                         }
                     }
                 }
@@ -345,7 +352,7 @@ namespace ChartPlayer
                         DrawChordOutline(currentChordNote.Value);
 
                         if (!currentChordNote.Value.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
-                            DrawChordNotes(currentChordNote.Value, player.SongInstrumentNotes.Chords[currentChordNote.Value.ChordID], drawCurrent: true);
+                            DrawChordNotes(currentChordNote.Value, player.SongInstrumentNotes.Chords[currentChordNote.Value.ChordID], drawCurrent: true, isGhost: false);
                     }
 
                     for (int str = 0; str < numStrings; str++)
@@ -354,7 +361,7 @@ namespace ChartPlayer
                         {
                             SongNote stringNote = currentStringNotes[str].Value;
 
-                            DrawSingleNote(stringNote, drawCurrent: true);
+                            DrawSingleNote(stringNote, drawCurrent: true, isGhost: false);
                         }
                     }
 
@@ -382,7 +389,7 @@ namespace ChartPlayer
                         {
                             if ((fingerChord.Fingers[str] != -1) && (fingerChord.Frets[str] != -1))
                             {
-                                SongNote stringNote = (currentStringNotes[str].HasValue && (currentStringNotes[str].Value.TimeOffset >= fingerNote.TimeOffset)) ? currentStringNotes[str].Value :
+                                SongNote stringNote = (currentStringNotes[str].HasValue && (currentStringNotes[str].Value.Fret == fingerChord.Frets[str]) &&  (currentStringNotes[str].Value.TimeOffset >= fingerNote.TimeOffset)) ? currentStringNotes[str].Value :
                                     new SongNote()
                                     {
                                         ChordID = fingerNote.ChordID,
@@ -405,6 +412,8 @@ namespace ChartPlayer
                                 DrawVerticalText(fingerChord.Fingers[str].ToString(), drawFret - 0.5f, GetNoteHeadHeight(stringNote), currentTime, UIColor.White, 0.05f);
                             }
                         }
+
+                        DrawChordOutline(fingerNote);
                     }
 
                     if (firstNote.HasValue)
@@ -448,25 +457,39 @@ namespace ChartPlayer
             }
             else
             {
-                if (note.FingerID != -1)
-                {
-                    if ((note.TimeOffset <= currentTime) && !currentFingerNote.HasValue)
-                        currentFingerNote = note;
-                }
-
-                if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonReapeatDict.ContainsKey(note.TimeOffset))
+                if ((note.TimeOffset > currentTime) && (note.Fret > 0) && nonRepeatNotes.ContainsKey(note.TimeOffset))
                     DrawVerticalText(numberStrings[note.Fret], note.Fret - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
 
                 DrawSingleNote(note);
+            }
+
+            if (note.FingerID != -1)
+            {
+                if (note.TimeOffset <= currentTime)
+                {
+                    if (!currentFingerNote.HasValue)
+                        currentFingerNote = note;
+                }
+                else
+                {
+                    if (nonRepeatChords.ContainsKey(note.TimeOffset))
+                    {
+                        SongChord fingerChord = player.SongInstrumentNotes.Chords[note.FingerID];
+
+                        DrawChordNotes(note, fingerChord, drawCurrent: false, isGhost: true);
+
+                        DrawChordOutline(note);
+                    }
+                }
             }
         }
 
         void DrawChordNotes(SongNote note, SongChord chord)
         {
-            DrawChordNotes(note, chord, drawCurrent: false);
+            DrawChordNotes(note, chord, drawCurrent: false, isGhost: false);
         }
 
-        void DrawChordNotes(SongNote note, SongChord chord, bool drawCurrent)
+        void DrawChordNotes(SongNote note, SongChord chord, bool drawCurrent, bool isGhost)
         {
             for (int str = 0; str < chord.Fingers.Count; str++)
             {
@@ -483,12 +506,12 @@ namespace ChartPlayer
                         HandFret = note.HandFret
                     };
 
-                    if (nonReapeatDict.ContainsKey(note.TimeOffset) || (note.TimeOffset <= currentTime))
+                    if (nonRepeatChords.ContainsKey(note.TimeOffset) || (note.TimeOffset <= currentTime))
                     {
                         if ((note.TimeOffset > currentTime) && (chord.Frets[str] > 0))
                             DrawVerticalText(numberStrings[chord.Frets[str]], chord.Frets[str] - 0.5f, 0, note.TimeOffset, UIColor.White, 0.12f);
 
-                        DrawSingleNote(chordNote, drawCurrent);
+                        DrawSingleNote(chordNote, drawCurrent, isGhost);
                     }
                 }
             }
@@ -508,7 +531,7 @@ namespace ChartPlayer
             UIColor color = UIColor.White;
             color.A = 128;
 
-            if (nonReapeatDict.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
+            if (nonRepeatChords.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
             {
                 DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), isDetected ? UIColor.White : color);
 
@@ -528,10 +551,10 @@ namespace ChartPlayer
 
         void DrawSingleNote(SongNote note)
         {
-            DrawSingleNote(note, drawCurrent: false);
+            DrawSingleNote(note, drawCurrent: false, isGhost: false);
         }
 
-        void DrawSingleNote(SongNote note, bool drawCurrent)
+        void DrawSingleNote(SongNote note, bool drawCurrent, bool isGhost)
         {
             bool isCurrent = (note.TimeOffset <= currentTime);
 
@@ -557,6 +580,11 @@ namespace ChartPlayer
 
                 stringColor = UIColor.Lerp(UIColor.White, stringColors[note.String], dimAmount);
                 stringColor = UIColor.Lerp(stringColor, UIColor.Black, dimAmount);
+            }
+
+            if (isGhost)
+            {
+                stringColor.A = 32;
             }
 
             float noteHeadTime = Math.Max(note.TimeOffset, currentTime);
