@@ -100,6 +100,7 @@ namespace ChartPlayer
         SongNote? currentFingerNote;
         SongNote?[] currentStringNotes;
         int[] currentStringFingers;
+        int startNotePosition = 0;
 
         public FretPlayerScene3D(SongPlayer player, float secondsLong)
         {
@@ -141,6 +142,9 @@ namespace ChartPlayer
 
             noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
             noteDetectThread.Start();
+
+            // Sort notes by time and then by string
+            player.SongInstrumentNotes.Notes = player.SongInstrumentNotes.Notes.OrderBy(n => n.TimeOffset).ThenByDescending(n => GetStringOffset(n.String)).ToList();
 
             // Do a pre-pass on the notes to find spot where we want to add note numbers on the fretboard or re-show the full chord
             SongNote? lastNote = null;
@@ -273,9 +277,9 @@ namespace ChartPlayer
                         DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, .08f);
                     }
 
-                    float startWithBuffer = startTime - 1;
+                    float defaultSustain = 0.3f;
 
-                    IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithBuffer) && (n.TimeOffset <= endTime));
+                    float startWithBuffer = startTime - defaultSustain;
 
                     int lastHandFret = -1;
                     float lastTime = currentTime;
@@ -283,9 +287,46 @@ namespace ChartPlayer
                     UIColor handPositionColor = UIColor.White;
                     handPositionColor.A = 32;
 
-                    // Pre-pass
-                    foreach (SongNote note in notes)
+                    List<SongNote> allNotes = player.SongInstrumentNotes.Notes;
+
+                    startNotePosition = MathUtil.Clamp(startNotePosition, 0, allNotes.Count - 1);
+
+                    while (startNotePosition > 0)
                     {
+                        SongNote note = allNotes[startNotePosition];
+
+                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, defaultSustain);
+
+                        if (endTime < currentTime)
+                            break;
+
+                        startNotePosition--;
+                    }
+
+                    while (startNotePosition < allNotes.Count)
+                    {
+                        SongNote note = allNotes[startNotePosition];
+
+                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, defaultSustain);
+
+                        if (endTime > currentTime)
+                            break;
+
+                        startNotePosition++;
+                    }
+
+                    //IEnumerable<SongNote> notes = player.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset + n.TimeLength) >= startWithBuffer) && (n.TimeOffset <= endTime));
+
+                    int pos = 0;
+
+                    // Draw hand position areas on timeline
+                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
+                    {
+                        SongNote note = allNotes[pos];
+
+                        if (note.TimeOffset > endTime)
+                            break;
+
                         if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
                         {
                             DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, handPositionColor);
@@ -312,11 +353,11 @@ namespace ChartPlayer
 
                     float startWithMinSustain = startTime - 0.3f;
 
-                    notes = notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset).ThenBy(n => GetStringOffset(n.String));
-
                     // Draw the notes
-                    foreach (SongNote note in notes)
+                    for (; pos >= startNotePosition; pos--)
                     {
+                        SongNote note = allNotes[pos];
+
                         DrawNote(note);
                     }
 
@@ -536,7 +577,7 @@ namespace ChartPlayer
                 DrawVerticalNinePatch(Layout.Current.GetImage("ChordOutline"), note.HandFret - 1, note.HandFret + 3, timeOffset, 0, GetStringHeight(numStrings), isDetected ? UIColor.White : color);
 
                 if (!String.IsNullOrEmpty(chord.Name))
-                    DrawVerticalText(chord.Name, note.HandFret - 1.1f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.09f, rightAlign: true);
+                    DrawVerticalText(chord.Name, note.HandFret - 1.02f, GetStringHeight(numStrings - 1), timeOffset, UIColor.White, 0.09f, rightAlign: true);
             }
             else
             {
@@ -642,7 +683,7 @@ namespace ChartPlayer
                 if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
                 {
                     // Sustain note tail
-                    DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
+                    DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .1f);
                 }
 
                 if (!isCurrent || drawCurrent)
