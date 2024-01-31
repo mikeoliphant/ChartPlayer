@@ -311,14 +311,13 @@ namespace ChartPlayer
 
             if ((touch.TouchState == ETouchState.Pressed) || (touch.TouchState == ETouchState.Moved))
             {
-
                 float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
 
                 if (Layout.Current.InputManager.IsDown("PreciseClick"))
                 {
                     songPlayer.SeekTime(time);
                 }
-                else
+                else if (touch.TouchState == ETouchState.Pressed)
                 {
                     foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
                     {
@@ -333,6 +332,20 @@ namespace ChartPlayer
             }
 
             return false;
+        }
+
+        public override void HandleInput(InputManager inputManager)
+        {
+            base.HandleInput(inputManager);
+
+            if (inputManager.WasClicked("FastForward", this))
+            {
+                songPlayer.SeekTime(songPlayer.CurrentSecond + 0.2f);
+            }
+            else if (inputManager.WasClicked("Rewind", this))
+            {
+                songPlayer.SeekTime(songPlayer.CurrentSecond - 0.2f);
+            }
         }
 
         protected override void DrawContents()

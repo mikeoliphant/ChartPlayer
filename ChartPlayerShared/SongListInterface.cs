@@ -25,10 +25,21 @@ namespace ChartPlayer
 
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
-            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Plays", ValueFunc =delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; }, RequestedDisplayWidth = 50 });
-            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "LastPlay",
+            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            {
+                DisplayName = "Plays",
+                ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
+                RequestedDisplayWidth = 50,
+                StartReversed = true
+            });
+            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            {
+                DisplayName = "LastPlay",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
-                SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateOnly.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; }, RequestedDisplayWidth = 70 });
+                SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateOnly.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
+                RequestedDisplayWidth = 70,
+                StartReversed = true
+            });
 
             float width = 0;
             float height = 0;

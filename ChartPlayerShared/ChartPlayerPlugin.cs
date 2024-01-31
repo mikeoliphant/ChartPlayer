@@ -19,7 +19,6 @@ namespace ChartPlayer
 
         AudioIOPort stereoInput;
         AudioIOPort stereoOutput;
-        float[] interleavedAudio = new float[0];
         Thread gameThread = null;
 
         public ChartPlayerPlugin()
@@ -167,13 +166,6 @@ namespace ChartPlayer
             this.SongPlayer = songPlayer;
         }
 
-        public override void SetMaxAudioBufferSize(uint maxSamples, EAudioBitsPerSample bitsPerSample)
-        {
-            base.SetMaxAudioBufferSize(maxSamples, bitsPerSample);
-
-            Array.Resize(ref interleavedAudio, (int)maxSamples * 2);
-        }
-
         public override void Process()
         {
             base.Process();
@@ -191,17 +183,20 @@ namespace ChartPlayer
 
                 if (SongPlayer != null)
                 {
-                    SongPlayer.ReadSamples(interleavedAudio);
+                    SongPlayer.ReadSamples(left, right);
+
+                    double gain = 0.25f;
+
+                    for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
+                    {
+                        left[i] *= gain;// + input[i];
+                        right[i] *= gain;// + input[i];
+                    }
                 }
-
-                int offset = 0;
-
-                double gain = 0.25f;
-
-                for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
+                else
                 {
-                    left[i] = ((double)interleavedAudio[offset++] * gain);// + input[i];
-                    right[i] = ((double)interleavedAudio[offset++] * gain);// + input[i];
+                    left.Clear();
+                    right.Clear();
                 }
             }
             catch (Exception ex)

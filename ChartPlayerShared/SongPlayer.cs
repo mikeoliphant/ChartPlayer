@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using AudioPlugSharp;
+using System.Threading;
+using Microsoft.VisualBasic.Logging;
 using NVorbis;
 using SongFormat;
 
@@ -12,6 +13,7 @@ namespace ChartPlayer
     public class SongPlayer
     {
         public double PlaybackSampleRate { get; private set; } = 48000;
+        public double SongSampleRate { get; private set; }
         public float CurrentSecond { get; private set; } = 0;
         public float SongLengthSeconds { get; private set; } = 0;
         public SongData Song { get; private set; }
@@ -27,6 +29,11 @@ namespace ChartPlayer
         WdlResampler resampler;
         double tuningOffsetSemitones = 0;
         float seekTime = -1;
+        long totalSamples;
+        long currentPlaybackSample = 0;
+        Thread decodeThread = null;
+        float[][] sampleData = new float[2][];
+        double actualPlaybackSampleRate;
 
         public SongPlayer()
         {
@@ -96,55 +103,104 @@ namespace ChartPlayer
             }
 
             SongLengthSeconds = (float)vorbisReader.TotalTime.TotalSeconds;
+
+            actualPlaybackSampleRate = PlaybackSampleRate;
+
+            if (RetuneToEStandard && (tuningOffsetSemitones != 0))
+                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
+
+            resampler.SetRates(vorbisReader.SampleRate, actualPlaybackSampleRate);
+
+            totalSamples = (long)Math.Ceiling(actualPlaybackSampleRate * SongLengthSeconds);
+
+            sampleData[0] = new float[totalSamples];
+            sampleData[1] = new float[totalSamples];
+
+            decodeThread = new Thread(new ThreadStart(RunDecode));
+            decodeThread.Start();
         }
 
         public void SeekTime(float secs)
         {
             seekTime = secs;
+            CurrentSecond = seekTime;
         }
 
-        public int ReadSamples(Span<float> buffer)
+        public void ReadSamples(Span<double> leftChannel, Span<double> rightChannel)
         {
             if (seekTime != -1)
             {
-                vorbisReader.TimePosition = TimeSpan.FromSeconds(seekTime);
+                currentPlaybackSample = (int)((seekTime / SongLengthSeconds) * totalSamples);
+
                 seekTime = -1;
             }
 
             if (Paused)
             {
-                buffer.Clear();
+                leftChannel.Clear();
+                rightChannel.Clear();
 
-                return buffer.Length;
+                return;
             }
 
-            double actualPlaybackSampleRate = PlaybackSampleRate;
+            int samples = (int)Math.Min(leftChannel.Length, totalSamples - currentPlaybackSample);
 
-            if (RetuneToEStandard && (tuningOffsetSemitones != 0))
-                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
-
-            int read = 0;
-
-            if (actualPlaybackSampleRate == vorbisReader.SampleRate)
+            for (int i = 0; i < samples; i++)
             {
-                read = vorbisReader.ReadSamples(buffer);
+                leftChannel[i] = sampleData[0][currentPlaybackSample + i];
+                rightChannel[i] = sampleData[1][currentPlaybackSample + i];
             }
-            else
+
+            for (int i = samples; i < leftChannel.Length; i++)
             {
-                float[] inBuffer;
-                int inBufferOffset;
-                int framesRequested = buffer.Length / 2;
-
-                resampler.SetRates(vorbisReader.SampleRate, actualPlaybackSampleRate);
-
-                int inNeeded = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
-                int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, inNeeded * 2) / 2;
-                read = resampler.ResampleOut(buffer, 0, inAvailable, framesRequested, 2) * 2;
+                leftChannel[i] = 0;
+                rightChannel[i] = 0;
             }
 
-            CurrentSecond = (float)vorbisReader.TimePosition.TotalSeconds;
+            currentPlaybackSample += samples;
 
-            return read;
+            CurrentSecond = ((float)currentPlaybackSample / (float)totalSamples) * SongLengthSeconds;
+        }
+
+        void RunDecode()
+        {
+            long currentOutputOffset = 0;
+
+            float[] tempBuffer = new float[1024];
+
+            long samplesLeft = vorbisReader.TotalSamples;
+
+            while (samplesLeft > 0)
+            {
+                int framesRequested = tempBuffer.Length / 2;
+
+                int read;
+
+                if (actualPlaybackSampleRate == vorbisReader.SampleRate)
+                {
+                    read = vorbisReader.ReadSamples(tempBuffer);
+                }
+                else
+                {
+                    int inBufferOffset;
+                    float[] inBuffer;
+
+                    int inNeeded = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
+                    int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, inNeeded * 2) / 2;
+
+                    read = resampler.ResampleOut(tempBuffer, 0, inAvailable, framesRequested, 2) * 2;
+                }
+
+                samplesLeft -= framesRequested;
+
+                for (int i = 0; i < read; i += 2)
+                {
+                    sampleData[0][currentOutputOffset] = tempBuffer[i];
+                    sampleData[1][currentOutputOffset] = tempBuffer[i + 1];
+
+                    currentOutputOffset++;
+                }
+            }
         }
     }
 }

@@ -17,6 +17,7 @@
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
+		<PackageReference Include="rubberband-sharp" Version="1.0.0" />
 		<PackageReference Include="System.Text.Json" Version="7.0.3" />
 	</ItemGroup>
 	<ItemGroup>
