@@ -446,7 +446,7 @@ namespace ChartPlayer
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
             {
-                headerStack.Children[columnPos].DesiredWidth = column.DisplayWidth - (headerStack.Children[columnPos].Padding.Left + headerStack.Children[columnPos].Padding.Right);
+                headerStack.Children[columnPos].DesiredWidth = (int)(column.DisplayWidth - (headerStack.Children[columnPos].Padding.Left + headerStack.Children[columnPos].Padding.Right));
 
                 columnPos++;
             }
