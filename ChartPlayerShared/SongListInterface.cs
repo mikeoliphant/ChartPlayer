@@ -16,10 +16,9 @@ namespace ChartPlayer
         ItemDisplayColum<SongIndexEntry> tuningColumn;
 
         public SongListDisplay()
+            : base(UIColor.Black)
         {
             Padding = new LayoutPadding(5);
-
-            BackgroundColor = UIColor.Black;
 
             ListDisplay.SelectAction = SongSelected;
 
@@ -294,8 +293,10 @@ namespace ChartPlayer
         ItemDisplayColum<T> lastSortColumn;
         bool lastSortReverse;
 
-        public MultiColumnItemDisplay()
+        public MultiColumnItemDisplay(UIColor backgroundColor)
         {
+            this.BackgroundColor = backgroundColor;
+
             DisplayColumns = new List<ItemDisplayColum<T>>();
 
             VerticalStackWidthDrawBehind swipeStack = new VerticalStackWidthDrawBehind()
@@ -308,7 +309,9 @@ namespace ChartPlayer
             swipeStack.Children.Add(topDock = new Dock
             {
                 VerticalAlignment = EVerticalAlignment.Top,
-                HorizontalAlignment = EHorizontalAlignment.Stretch
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                Padding = new LayoutPadding(0, 5),
+                BackgroundColor = backgroundColor
             });
 
             headerStack = new HorizontalStack { HorizontalAlignment = EHorizontalAlignment.Stretch };
@@ -323,11 +326,15 @@ namespace ChartPlayer
             swipeStack.Children.Add(bottomDock = new Dock
             {
                 VerticalAlignment = EVerticalAlignment.Top,
-                HorizontalAlignment = EHorizontalAlignment.Stretch
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                BackgroundColor = backgroundColor
             });
 
             // Make sure the bottom dock covers scrolling
-            bottomDock.Children.Add(new UIElement { DesiredHeight = 15 });
+            bottomDock.Children.Add(new UIElement
+            {
+                DesiredHeight = 15
+            });
 
             HorizontalStack leftButtonStack = new HorizontalStack
             {
@@ -439,7 +446,7 @@ namespace ChartPlayer
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)
             {
-                headerStack.Children[columnPos].DesiredWidth = column.DisplayWidth;
+                headerStack.Children[columnPos].DesiredWidth = column.DisplayWidth - (headerStack.Children[columnPos].Padding.Left + headerStack.Children[columnPos].Padding.Right);
 
                 columnPos++;
             }
