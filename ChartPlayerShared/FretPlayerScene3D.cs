@@ -645,7 +645,6 @@ namespace ChartPlayer
 
             UIColor stringColor = UIColor.White;
 
-
             if (!isDetected)
             {
                 float dimAmount = 0.25f;
@@ -1268,11 +1267,6 @@ namespace ChartPlayer
                 }
 
                 bool detected = noteDetector.NoteDetect(freqs);
-
-                if (detected)
-                {
-
-                }
 
                 return detected;
             }

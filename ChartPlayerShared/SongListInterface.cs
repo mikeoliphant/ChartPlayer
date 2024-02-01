@@ -52,7 +52,7 @@ namespace ChartPlayer
             LeftInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
             LeftInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
-            SetSortColumn("Title");
+            SetSortColumn("Artist");
         }
 
         public void SetSongIndex(SongIndex songIndex)
@@ -95,6 +95,8 @@ namespace ChartPlayer
 
         public void SetCurrentInstrument(ESongInstrumentType type)
         {
+            SongIndexEntry topSong = currentSongs[ListDisplay.CurrentTopItemIndex];
+
             if (CurrentInstrument != type)
             {
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
@@ -106,6 +108,10 @@ namespace ChartPlayer
                     SetCurrentSongs();
                 }
             }
+
+            int topIndex = GetIndexOf(topSong);
+
+            ListDisplay.SetTopItem(topIndex);
         }
 
         public void SongSelected(int index)
@@ -503,6 +509,21 @@ namespace ChartPlayer
             }
 
             ListDisplay.FirstItem();
+        }
+
+        public int GetIndexOf(T item)
+        {
+            Comparison<T> compare = lastSortReverse ? lastSortColumn.CompareReverse : lastSortColumn.Compare;
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (compare(item, items[i]) <= 0)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         public void Randomize()
