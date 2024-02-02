@@ -702,6 +702,14 @@ namespace ChartPlayer
 
                 isMuted = true;
             }
+            else if (note.Techniques.HasFlag(ESongNoteTechnique.Harmonic))
+            {
+                modifierImage = Layout.Current.GetImage("NoteHarmonic");
+            }
+            else if (note.Techniques.HasFlag(ESongNoteTechnique.PinchHarmonic))
+            {
+                modifierImage = Layout.Current.GetImage("NotePinchHarmonic");
+            }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Slide))
             {
                 isSlide = true;
