@@ -61,6 +61,7 @@ namespace ChartPlayerImageProcessor
             AddWithShadow("NoteHammerOn");
             AddWithShadow("NotePullOff");
             AddWithShadow("NoteMute");
+            AddWithShadow("NotePalmMute");
             AddWithShadow("NoteHarmonic");
             AddWithShadow("NotePinchHarmonic");
 

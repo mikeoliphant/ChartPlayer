@@ -698,7 +698,7 @@ namespace ChartPlayer
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute))
             {
-                modifierImage = Layout.Current.GetImage("NoteMute");
+                modifierImage = Layout.Current.GetImage("NotePalmMute");
 
                 isMuted = true;
             }
