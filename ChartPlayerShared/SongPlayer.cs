@@ -174,26 +174,27 @@ namespace ChartPlayer
             {
                 int framesRequested = tempBuffer.Length / 2;
 
-                int read;
+                int framesRead = framesRequested;
+                int framesOutput;
 
                 if (actualPlaybackSampleRate == vorbisReader.SampleRate)
                 {
-                    read = vorbisReader.ReadSamples(tempBuffer);
+                    framesOutput = vorbisReader.ReadSamples(tempBuffer);
                 }
                 else
                 {
                     int inBufferOffset;
                     float[] inBuffer;
 
-                    int inNeeded = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
-                    int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, inNeeded * 2) / 2;
+                    framesRead = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
+                    int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, framesRead * 2) / 2;
 
-                    read = resampler.ResampleOut(tempBuffer, 0, inAvailable, framesRequested, 2) * 2;
+                    framesOutput = resampler.ResampleOut(tempBuffer, 0, inAvailable, framesRequested, 2) * 2;
                 }
 
-                samplesLeft -= framesRequested;
+                samplesLeft -= framesRead;
 
-                for (int i = 0; i < read; i += 2)
+                for (int i = 0; i < framesOutput; i += 2)
                 {
                     sampleData[0][currentOutputOffset] = tempBuffer[i];
                     sampleData[1][currentOutputOffset] = tempBuffer[i + 1];
