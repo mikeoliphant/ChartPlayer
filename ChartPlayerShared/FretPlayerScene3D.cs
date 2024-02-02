@@ -608,7 +608,12 @@ namespace ChartPlayer
             float timeOffset = Math.Max(note.TimeOffset, currentTime);
 
             UIColor color = UIColor.White;
-            color.A = 128;
+            color.A = 64;
+
+            if (note.Techniques.HasFlag(ESongNoteTechnique.Accent))
+            {
+                color.A = 255;
+            }
 
             if (nonRepeatChords.ContainsKey(note.TimeOffset) || (timeOffset == currentTime))
             {
@@ -703,9 +708,14 @@ namespace ChartPlayer
                 slideTo = note.SlideFret;
             }
 
-            if (isMuted)
+            if (isMuted && !isDetected)
             {
                 stringColor = UIColor.Lerp(stringColor, UIColor.Black, 0.5f);
+            }
+
+            if (note.Techniques.HasFlag(ESongNoteTechnique.Accent))
+            {
+                stringColor = UIColor.Lerp(stringColor, UIColor.White, 0.75f);
             }
 
             int stringOffset = GetStringOffset(note.String);
