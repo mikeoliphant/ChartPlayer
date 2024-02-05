@@ -172,14 +172,15 @@ namespace ChartPlayer
 
             while (samplesLeft > 0)
             {
-                int framesRequested = tempBuffer.Length / 2;
+                int samplesRequested = (int)Math.Min(samplesLeft, tempBuffer.Length);
+                int framesRequested = samplesRequested / 2;
 
                 int framesRead = framesRequested;
                 int framesOutput;
 
                 if (actualPlaybackSampleRate == vorbisReader.SampleRate)
                 {
-                    framesOutput = vorbisReader.ReadSamples(tempBuffer, 0, (int)Math.Min(samplesLeft, tempBuffer.Length));
+                    framesOutput = vorbisReader.ReadSamples(tempBuffer, 0, samplesRequested);
                 }
                 else
                 {
