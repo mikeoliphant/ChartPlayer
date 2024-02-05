@@ -628,7 +628,7 @@ namespace ChartPlayer
 
                 if (note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) || note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute))
                 {
-                    DrawVerticalImage(Layout.Current.GetImage("NoteMute"), note.HandFret + 1, timeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
+                    DrawVerticalImage(Layout.Current.GetImage(note.Techniques.HasFlag(ESongNoteTechnique.PalmMute) ? "NotePalmMute" : "NoteMute"), note.HandFret + 1, timeOffset, GetStringHeight(.5f), whiteHalfAlpha, 0.15f);
                 }
             }
         }

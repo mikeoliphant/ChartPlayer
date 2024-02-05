@@ -179,7 +179,7 @@ namespace ChartPlayer
 
                 if (actualPlaybackSampleRate == vorbisReader.SampleRate)
                 {
-                    framesOutput = vorbisReader.ReadSamples(tempBuffer);
+                    framesOutput = vorbisReader.ReadSamples(tempBuffer, 0, (int)Math.Min(samplesLeft, tempBuffer.Length));
                 }
                 else
                 {
