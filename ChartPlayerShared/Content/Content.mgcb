@@ -13,12 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Audio/Metronome.wav
-/copy:Audio/Metronome.wav
-
-#begin Audio/Metronome2.wav
-/copy:Audio/Metronome2.wav
-
 #begin Textures/ImageManifest.xml
 /copy:Textures/ImageManifest.xml
 
