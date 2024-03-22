@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.IO;
+using System.Reflection;
 
 namespace ChartPlayerImageProcessor
 {
@@ -78,10 +80,12 @@ namespace ChartPlayerImageProcessor
         {
             var processor = new ChartPlayerImageProcessor();
 
-            processor.SrcPath = @"C:\Code\ChartPlayer\SrcTextures";
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\..");
+
+            processor.SrcPath = Path.Combine(path, "SrcTextures");
             processor.ForceRegen = false;
 
-            processor.RenderImages(@"C:\Code\ChartPlayer\ChartPlayerShared\Content\Textures");
+            processor.RenderImages(Path.Combine(path, @"ChartPlayerShared\Content\Textures"));
         }
 
     }
