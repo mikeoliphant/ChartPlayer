@@ -45,41 +45,44 @@ namespace ChartPlayer
         {
             this.basePath = basePath;
 
-            string indexFile = Path.Combine(basePath, "index.json");
-
-            if (File.Exists(indexFile))
+            if (!string.IsNullOrEmpty(basePath))
             {
-                using (Stream indexStream = File.OpenRead(indexFile))
+                string indexFile = Path.Combine(basePath, "index.json");
+
+                if (File.Exists(indexFile))
                 {
-                    Songs = JsonSerializer.Deserialize<List<SongIndexEntry>>(indexStream);
-                }
-            }
-            else
-            {
-                IndexFolder(basePath);
-
-                using (Stream indexStream = File.Create(indexFile))
-                {
-                    JsonSerializer.Serialize(indexStream, Songs);
-                }
-            }
-
-            foreach (ESongInstrumentType type in Enum.GetValues(typeof(ESongInstrumentType)))
-            {
-                Stats[(int)type] = SongStats.Load(basePath, type);
-
-                Dictionary<string, SongStatsEntry> statsDict = new();
-
-                foreach (SongStatsEntry entry in Stats[(int)type].Songs)
-                {
-                    statsDict[entry.Song] = entry;
-                }
-
-                foreach (SongIndexEntry indexEntry in Songs)
-                {
-                    if (statsDict.ContainsKey(indexEntry.FolderPath))
+                    using (Stream indexStream = File.OpenRead(indexFile))
                     {
-                        indexEntry.Stats[(int)type] = statsDict[indexEntry.FolderPath];
+                        Songs = JsonSerializer.Deserialize<List<SongIndexEntry>>(indexStream);
+                    }
+                }
+                else
+                {
+                    IndexFolder(basePath);
+
+                    using (Stream indexStream = File.Create(indexFile))
+                    {
+                        JsonSerializer.Serialize(indexStream, Songs);
+                    }
+                }
+
+                foreach (ESongInstrumentType type in Enum.GetValues(typeof(ESongInstrumentType)))
+                {
+                    Stats[(int)type] = SongStats.Load(basePath, type);
+
+                    Dictionary<string, SongStatsEntry> statsDict = new();
+
+                    foreach (SongStatsEntry entry in Stats[(int)type].Songs)
+                    {
+                        statsDict[entry.Song] = entry;
+                    }
+
+                    foreach (SongIndexEntry indexEntry in Songs)
+                    {
+                        if (statsDict.ContainsKey(indexEntry.FolderPath))
+                        {
+                            indexEntry.Stats[(int)type] = statsDict[indexEntry.FolderPath];
+                        }
                     }
                 }
             }
