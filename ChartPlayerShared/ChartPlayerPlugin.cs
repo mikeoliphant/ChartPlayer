@@ -75,6 +75,7 @@ namespace ChartPlayer
             else
             {
                 gameThread = new Thread(new ThreadStart(RunGame));
+                gameThread.SetApartmentState(ApartmentState.STA);
                 gameThread.Start();
             }
         }
