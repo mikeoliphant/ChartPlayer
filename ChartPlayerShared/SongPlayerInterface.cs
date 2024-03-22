@@ -15,9 +15,6 @@ namespace ChartPlayer
     {
         public static SongPlayerInterface Instance { get; private set; }
 
-        //string basePath = @"C:\Share\RBSongs";
-        string basePath = @"C:\Share\JamSongs";
-
         SongListDisplay songList = new SongListDisplay();
         SongIndex songIndex;
 
@@ -31,11 +28,15 @@ namespace ChartPlayer
         TextBlock songArtistText;
         TextBlock songInstrumentText;
 
+        string songBasePath = null;
+
         public SongPlayerInterface()
         {
             Instance = this;
 
-            songIndex = new SongIndex(basePath);
+            songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
+
+            songIndex = new SongIndex(songBasePath);
 
             songList.SetSongIndex(songIndex);
 
@@ -135,7 +136,7 @@ namespace ChartPlayer
 
             try
             {
-                string songPath = Path.Combine(basePath, song.FolderPath);
+                string songPath = Path.Combine(songBasePath, song.FolderPath);
 
                 using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
                 {
@@ -272,6 +273,16 @@ namespace ChartPlayer
             if (songPlayer != null)
             {
                 songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
+            }
+
+            // Check if song path changed
+            if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath != songBasePath)
+            {
+                songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
+
+                songIndex = new SongIndex(songBasePath);
+
+                songList.SetSongIndex(songIndex);
             }
         }
     }

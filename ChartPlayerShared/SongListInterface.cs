@@ -95,6 +95,9 @@ namespace ChartPlayer
 
         public void SetCurrentInstrument(ESongInstrumentType type)
         {
+            if (currentSongs.Count == 0)
+                return;
+
             SongIndexEntry topSong = currentSongs[ListDisplay.CurrentTopItemIndex];
 
             if (CurrentInstrument != type)
