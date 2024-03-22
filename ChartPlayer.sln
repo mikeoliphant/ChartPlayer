@@ -9,11 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartPlayerPlugin", "ChartP
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "..\OpenSongChart\SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame", "..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj", "{435AADCF-6892-4B44-94A1-1E6EA624D80C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageProcessor", "ImageProcessor\ImageProcessor.csproj", "{9C8653B7-650A-483D-BCD2-C6A969268B7C}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ChartPlayerShared", "ChartPlayerShared\ChartPlayerShared.shproj", "{E89D1BAC-28E4-434D-857A-3BE1D35E279C}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout", "..\UILayout\UILayout\UILayout.shproj", "{7DA2B397-A39F-4E5B-96ED-F206329982C9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout.MonoGame", "..\UILayout\UILayout.MonoGame\UILayout.MonoGame.shproj", "{D7307594-237F-43DA-BD6B-D0BC2BD9B276}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,24 +66,6 @@ Global
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x64.Build.0 = Release|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x86.ActiveCfg = Release|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x86.Build.0 = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|x64.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Debug|x86.Build.0 = Debug|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|x64.ActiveCfg = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|x64.Build.0 = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|x86.ActiveCfg = Release|Any CPU
-		{435AADCF-6892-4B44-94A1-1E6EA624D80C}.Release|x86.Build.0 = Release|Any CPU
 		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
 		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
 		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
@@ -110,10 +94,15 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ChartPlayerShared\ChartPlayerShared.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		..\OpenSongChart\SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		..\UILayout\UILayout\UILayout.projitems*{435aadcf-6892-4b44-94a1-1e6ea624d80c}*SharedItemsImports = 5
+		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
+		..\UILayout\UILayout\UILayout.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		..\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
+		..\UILayout\UILayout\UILayout.projitems*{7da2b397-a39f-4e5b-96ed-f206329982c9}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		..\OpenSongChart\SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		..\UILayout\UILayout\UILayout.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d7307594-237f-43da-bd6b-d0bc2bd9b276}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{e89d1bac-28e4-434d-857a-3be1d35e279c}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

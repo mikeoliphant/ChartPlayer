@@ -21,9 +21,6 @@
 		<PackageReference Include="System.Text.Json" Version="7.0.3" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj" />
-	</ItemGroup>
-	<ItemGroup>
 		<Reference Include="AudioPlugSharp, Culture=neutral, processorArchitecture=MSIL">
 			<SpecificVersion>False</SpecificVersion>
 			<HintPath>..\..\AudioPlugSharp\x64\Release\AudioPlugSharp.dll</HintPath>
@@ -38,4 +35,6 @@
 	</Target>
 	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
 	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
+	<Import Project="..\..\UILayout\UILayout\UILayout.projitems" Label="Shared" />
+	<Import Project="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems" Label="Shared" />
 </Project>

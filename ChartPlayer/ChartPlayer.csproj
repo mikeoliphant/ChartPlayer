@@ -46,4 +46,6 @@
 	</Target>
 	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
 	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
+	<Import Project="..\..\UILayout\UILayout\UILayout.projitems" Label="Shared" />
+	<Import Project="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems" Label="Shared" />
 </Project>

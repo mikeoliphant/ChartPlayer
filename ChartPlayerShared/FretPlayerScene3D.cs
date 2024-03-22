@@ -5,9 +5,6 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
-using SharpDX.Direct3D9;
-using SharpDX.MediaFoundation;
-using Microsoft.VisualBasic.Logging;
 
 namespace ChartPlayer
 {
@@ -52,7 +49,7 @@ namespace ChartPlayer
                     targetPositionFret = targetFocusFret + 5;
                 }
 
-                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 3.5f, 24) - 1, 0.01f);
+                positionFret = MathUtil.Lerp(positionFret, MathUtil.Clamp(targetPositionFret, 3.5f, 24) - 1, 0.02f);
             }
 
             CameraDistance = MathUtil.Lerp(CameraDistance, targetCameraDistance, 0.01f);
@@ -78,6 +75,7 @@ namespace ChartPlayer
         float endTime;
         float timeScale = 200f;
         float targetFocusFret = 2;
+        int numFrets = 24;
         float minFret = 0;
         float maxFret = 4;
         SongNote? firstNote;
@@ -111,7 +109,7 @@ namespace ChartPlayer
 
             fretCamera.FocusDist = secondsLong * timeScale;
 
-            numberStrings = new string[25];
+            numberStrings = new string[numFrets + 1];
             for (int i = 0; i < numberStrings.Length; i++)
             {
                 numberStrings[i] = i.ToString();
@@ -159,7 +157,7 @@ namespace ChartPlayer
                 // Avoid not showing chords that are continued
                 if (note.Techniques.HasFlag(ESongNoteTechnique.Continued))
                 {
-                    SongNote? last = lastStringNote[note.String];
+                    SongNote? last = (note.String == -1) ? null : lastStringNote[note.String];
 
                     if (last.HasValue)
                     {
@@ -261,12 +259,12 @@ namespace ChartPlayer
                     startTime = currentTime;
                     endTime = currentTime + secondsLong;
 
-                    for (int fret = 0; fret < 24; fret++)
+                    for (int fret = 0; fret < numFrets; fret++)
                     {
                         DrawFretTimeLine(fret, 0, startTime, endTime, whiteHalfAlpha);
                     }
 
-                    minFret = 24;
+                    minFret = numFrets;
                     maxFret = 0;
 
                     UIColor lineColor = UIColor.White;
@@ -406,10 +404,10 @@ namespace ChartPlayer
                         UIColor color = stringColors[str];
                         color.A = 192;
 
-                        DrawFretHorizontalLine(0, 24, startTime, GetStringHeight(GetStringOffset(str)), color, .04f);
+                        DrawFretHorizontalLine(0, numFrets, startTime, GetStringHeight(GetStringOffset(str)), color, .04f);
                     }
 
-                    for (int fret = 1; fret < 24; fret++)
+                    for (int fret = 1; fret < numFrets; fret++)
                     {
                         DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha);
 
@@ -572,7 +570,7 @@ namespace ChartPlayer
         {
             for (int str = 0; str < chord.Fingers.Count; str++)
             {
-                if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
+                if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1) && (chord.Frets[str] < numFrets))
                 {
                     SongNote chordNote = new SongNote()
                     {
@@ -730,13 +728,13 @@ namespace ChartPlayer
 
             if (note.Fret == 0)   // Open string
             {
-                minFret = Math.Min(minFret, note.HandFret);
-                maxFret = Math.Max(maxFret, note.HandFret + 3);
-
                 float midAnchorFret = (float)note.HandFret + 1;
 
-                if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
+                if (!(drawCurrent && isCurrent) && (note.TimeOffset + note.TimeLength > currentTime))
                 {
+                    minFret = Math.Min(minFret, note.HandFret);
+                    maxFret = Math.Max(maxFret, note.HandFret + 3);
+
                     // Sustain note tail
                     DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
@@ -763,11 +761,11 @@ namespace ChartPlayer
                     drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
                 }
 
-                minFret = Math.Min(minFret, drawFret);
-                maxFret = Math.Max(maxFret, drawFret);
-
-                if (!(drawCurrent && isCurrent) && (note.TimeLength > 0))
+                if (!(drawCurrent && isCurrent) && (note.TimeOffset + note.TimeLength > currentTime))
                 {
+                    minFret = Math.Min(minFret, drawFret);
+                    maxFret = Math.Max(maxFret, drawFret);
+
                     // Sustain note tail
                     if (isSlide)
                     {

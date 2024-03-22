@@ -168,11 +168,11 @@ namespace ChartPlayer
 
             float[] tempBuffer = new float[1024];
 
-            long samplesLeft = vorbisReader.TotalSamples;
+            long framesLeft = vorbisReader.TotalSamples;
 
-            while (samplesLeft > 0)
+            while (framesLeft > 0)
             {
-                int samplesRequested = (int)Math.Min(samplesLeft, tempBuffer.Length);
+                int samplesRequested = (int)Math.Min(framesLeft * 2, tempBuffer.Length);
                 int framesRequested = samplesRequested / 2;
 
                 int framesRead = framesRequested;
@@ -193,7 +193,11 @@ namespace ChartPlayer
                     framesOutput = resampler.ResampleOut(tempBuffer, 0, inAvailable, framesRequested, 2) * 2;
                 }
 
-                samplesLeft -= framesRead;
+                // Shouldn't happen, but sanity check
+                if (framesRead == 0)
+                    break;
+
+                framesLeft -= framesRead;
 
                 for (int i = 0; i < framesOutput; i += 2)
                 {

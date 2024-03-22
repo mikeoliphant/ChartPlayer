@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
+using SharpDX.Direct3D9;
 using SongFormat;
 
 namespace ChartPlayer
@@ -119,15 +120,15 @@ namespace ChartPlayer
                     {
                         if (part.InstrumentType == ESongInstrumentType.LeadGuitar)
                         {
-                            indexEntry.LeadGuitarTuning = part.Tuning.GetTuning();
+                            indexEntry.LeadGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.RhythmGuitar)
                         {
-                            indexEntry.RhythmGuitarTuning = part.Tuning.GetTuning();
+                            indexEntry.RhythmGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.BassGuitar)
                         {
-                            indexEntry.BassGuitarTuning = part.Tuning.GetTuning();
+                            indexEntry.BassGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
@@ -138,6 +139,11 @@ namespace ChartPlayer
                     Songs.Add(indexEntry);
                 }
             }
+        }
+
+        string GetTuning(SongInstrumentPart part)
+        {
+            return part.Tuning.GetTuning() + ((part.CapoFret > 0) ? (" C" + part.CapoFret) : "");
         }
 
         public void SaveStats()

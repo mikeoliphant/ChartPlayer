@@ -27,6 +27,10 @@ namespace ChartPlayer
         SongData songData;
         StringBuilderTextBlock vocalText;
 
+        TextBlock songNameText;
+        TextBlock songArtistText;
+        TextBlock songInstrumentText;
+
         public SongPlayerInterface()
         {
             Instance = this;
@@ -91,6 +95,26 @@ namespace ChartPlayer
                 }
             };
             bottomButtonStack.Children.Add(optionsButton);
+
+            VerticalStack songInfoStack = new VerticalStack()
+            {
+                BackgroundColor = UIColor.Black,
+                Padding = new LayoutPadding(5),
+                HorizontalAlignment = EHorizontalAlignment.Right,
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                ChildSpacing = 2
+            };
+
+            Children.Add(songInfoStack);
+
+            songNameText = new TextBlock();
+            songInfoStack.Children.Add(songNameText);
+
+            songArtistText = new TextBlock();
+            songInfoStack.Children.Add(songArtistText);
+
+            songInstrumentText = new TextBlock();
+            songInfoStack.Children.Add(songInstrumentText);
         }
 
         public void Exit()
@@ -163,6 +187,12 @@ namespace ChartPlayer
                 stats.NumPlays++;
 
                 songIndex.SaveStats();
+
+                songNameText.Text = song.SongName;
+                songArtistText.Text = song.ArtistName;
+                songInstrumentText.Text = songPlayer.SongInstrumentPart.ToString();
+
+                UpdateContentLayout();
 
                 GC.Collect();
             }
