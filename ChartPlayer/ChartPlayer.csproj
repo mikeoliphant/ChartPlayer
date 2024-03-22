@@ -45,7 +45,7 @@
 		<Exec Command="dotnet tool restore" />
 	</Target>
 	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
-	<Import Project="..\..\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
-	<Import Project="..\..\UILayout\UILayout\UILayout.projitems" Label="Shared" />
-	<Import Project="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems" Label="Shared" />
+	<Import Project="..\Dependencies\UILayout\UILayout\UILayout.projitems" Label="Shared" />
+	<Import Project="..\Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems" Label="Shared" />
+	<Import Project="..\Dependencies\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>

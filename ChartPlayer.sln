@@ -7,15 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartPlayer", "ChartPlayer\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartPlayerPlugin", "ChartPlayerPlugin\ChartPlayerPlugin.csproj", "{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "..\OpenSongChart\SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageProcessor", "ImageProcessor\ImageProcessor.csproj", "{9C8653B7-650A-483D-BCD2-C6A969268B7C}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ChartPlayerShared", "ChartPlayerShared\ChartPlayerShared.shproj", "{E89D1BAC-28E4-434D-857A-3BE1D35E279C}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout", "..\UILayout\UILayout\UILayout.shproj", "{7DA2B397-A39F-4E5B-96ED-F206329982C9}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout", "Dependencies\UILayout\UILayout\UILayout.shproj", "{7DA2B397-A39F-4E5B-96ED-F206329982C9}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout.MonoGame", "..\UILayout\UILayout.MonoGame\UILayout.MonoGame.shproj", "{D7307594-237F-43DA-BD6B-D0BC2BD9B276}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UILayout.MonoGame", "Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.shproj", "{D7307594-237F-43DA-BD6B-D0BC2BD9B276}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageProcessor", "ImageProcessor\ImageProcessor.csproj", "{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSheetProcessor", "Dependencies\UILayout\ImageSheetProcessor\ImageSheetProcessor.csproj", "{CBE11591-E599-4978-86ED-F2423F17BFB7}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "Dependencies\OpenSongChart\SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,24 +68,42 @@ Global
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x64.Build.0 = Release|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x86.ActiveCfg = Release|Any CPU
 		{D2D7B37A-FA58-4292-B4DE-2F24EFF36B60}.Release|x86.Build.0 = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|x64.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Debug|x86.Build.0 = Debug|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|x64.ActiveCfg = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|x64.Build.0 = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|x86.ActiveCfg = Release|Any CPU
-		{9C8653B7-650A-483D-BCD2-C6A969268B7C}.Release|x86.Build.0 = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|x64.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Debug|x86.Build.0 = Debug|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|x64.ActiveCfg = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|x64.Build.0 = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|x86.ActiveCfg = Release|Any CPU
+		{55C5D05B-6F9F-4D19-8AF6-C53A3AC0200C}.Release|x86.Build.0 = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|x64.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Debug|x86.Build.0 = Debug|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x64.ActiveCfg = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x64.Build.0 = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x86.ActiveCfg = Release|Any CPU
+		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,16 +113,18 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ChartPlayerShared\ChartPlayerShared.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		..\OpenSongChart\SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		..\UILayout\UILayout\UILayout.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		..\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
-		..\UILayout\UILayout\UILayout.projitems*{7da2b397-a39f-4e5b-96ed-f206329982c9}*SharedItemsImports = 13
+		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout\UILayout.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
+		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
+		Dependencies\UILayout\UILayout\UILayout.projitems*{7da2b397-a39f-4e5b-96ed-f206329982c9}*SharedItemsImports = 13
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout\UILayout.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
 		ChartPlayerShared\ChartPlayerShared.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		..\OpenSongChart\SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		..\UILayout\UILayout\UILayout.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		..\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d7307594-237f-43da-bd6b-d0bc2bd9b276}*SharedItemsImports = 13
+		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout\UILayout.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d7307594-237f-43da-bd6b-d0bc2bd9b276}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{e89d1bac-28e4-434d-857a-3be1d35e279c}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
