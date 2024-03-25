@@ -11,3 +11,13 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 * Support for guitar and bass guitar
 * Note detection
 * Pitch shifting of songs that are slightly off of standard tuning
+
+# Downloading
+
+You can download the VST plugin from the releases section [here](https://github.com/mikeoliphant/ChartPlayer/releases/latest).
+
+To install, unpack the .zip file and copy the extracted folder to "C:\Program Files\Common Files\VST3".
+
+# Where to get songs
+
+See the [OpenSongChart github repository](https://github.com/mikeoliphant/OpenSongChart).
