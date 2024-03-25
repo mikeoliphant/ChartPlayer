@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
+using SharpDX.Direct2D1;
 
 namespace ChartPlayer
 {
@@ -22,7 +23,7 @@ namespace ChartPlayer
         SongSectionInterface sectionInterface;
 
         SongData songData;
-        StringBuilderTextBlock vocalText;
+        VocalDisplay vocalText;
 
         TextBlock songNameText;
         TextBlock songArtistText;
@@ -55,13 +56,10 @@ namespace ChartPlayer
             };
             topStack.Children.Add(sectionInterface);
 
-            vocalText = new StringBuilderTextBlock
+            vocalText = new VocalDisplay()
             {
-                TextFont = ChartPlayerGame.Instance.GetFont("LargeFont"),
-                TextColor = UIColor.White,
-                Padding = new LayoutPadding(20)
+                Margin = new LayoutPadding(20)
             };
-
             topStack.Children.Add(vocalText);
 
             HorizontalStack bottomButtonStack = new HorizontalStack()
@@ -159,6 +157,8 @@ namespace ChartPlayer
 
                         sectionInterface.SetSongPlayer(songPlayer);
 
+                        vocalText.SongPlayer = songPlayer;
+
                         if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
                             ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
@@ -215,29 +215,12 @@ namespace ChartPlayer
         public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
-            
+
             if (inputManager.WasPressed("PauseGame"))
             {
                 if (songPlayer != null)
                 {
                     songPlayer.Paused = !songPlayer.Paused;
-                }
-            }
-
-            if (songPlayer != null)
-            {
-                float endTime = (float)songPlayer.CurrentSecond + 2;
-
-                vocalText.StringBuilder.Clear();
-
-                foreach (SongVocal vocal in songPlayer.SongVocals.Where(v => (v.TimeOffset >= songPlayer.CurrentSecond) && (v.TimeOffset <= endTime)))
-                {
-                    vocalText.StringBuilder.Append(vocal.Vocal);
-
-                    if (!vocal.Vocal.EndsWith('\n') && !vocal.Vocal.EndsWith('-'))
-                    {
-                        vocalText.StringBuilder.Append(' ');
-                    }
                 }
             }
 
