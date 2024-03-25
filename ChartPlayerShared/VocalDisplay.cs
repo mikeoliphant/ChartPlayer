@@ -42,8 +42,36 @@ namespace ChartPlayer
 
                 GraphicsContext2D context = Layout.Current.GraphicsContext;
 
-                foreach (SongVocal vocal in SongPlayer.SongVocals.Where(v => (v.TimeOffset >= startTime) && (v.TimeOffset <= endTime)))
+                int vocalPos = 0;
+
+                for (; vocalPos < SongPlayer.SongVocals.Count; vocalPos++)
                 {
+                    if (SongPlayer.SongVocals[vocalPos].TimeOffset > startTime)
+                        break;
+                }
+
+                if (vocalPos == SongPlayer.SongVocals.Count)
+                    return;
+
+                for (; vocalPos >= 0; vocalPos--)
+                {
+                    if (SongPlayer.SongVocals[vocalPos].Vocal.EndsWith('\n'))
+                    {
+                        vocalPos++;
+                        break;
+                    }
+                }
+
+                if (vocalPos < 0)
+                    vocalPos = 0;
+
+                for (; vocalPos < SongPlayer.SongVocals.Count; vocalPos++)
+                {
+                    SongVocal vocal = SongPlayer.SongVocals[vocalPos];
+
+                    if (vocal.TimeOffset > endTime)
+                        break;
+
                     font.MeasureString(vocal.Vocal, out width, out height);
 
                     if ((vocal.TimeOffset < SongPlayer.CurrentSecond) && ((SongPlayer.CurrentSecond - vocal.TimeOffset)) < 0.5f)
