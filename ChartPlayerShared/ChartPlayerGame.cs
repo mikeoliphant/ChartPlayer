@@ -34,8 +34,8 @@ namespace ChartPlayer
 
             DefaultOutlineNinePatch = GetImage("PopupBackground");
 
-            DefaultPressedNinePatch = GetImage("PanelBackgroundLightest");
-            DefaultUnpressedNinePatch = GetImage("PanelBackgroundLight");
+            DefaultPressedNinePatch = GetImage("ButtonPressed");
+            DefaultUnpressedNinePatch = GetImage("ButtonUnpressed");
 
             InputManager.AddMapping("PreviousPage", new KeyMapping(InputKey.PageUp) { DoRepeat = true });
             InputManager.AddMapping("NextPage", new KeyMapping(InputKey.PageDown) { DoRepeat = true });

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
+using SharpDX.Direct3D9;
 
 namespace ChartPlayer
 {
@@ -326,11 +327,27 @@ namespace ChartPlayer
             headerStack = new HorizontalStack { HorizontalAlignment = EHorizontalAlignment.Stretch };
             topDock.Children.Add(headerStack);
 
+            HorizontalStack scrollStack = new HorizontalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Stretch,
+            };
+            swipeStack.Children.Add(scrollStack);
+            swipeStack.DrawBehindElement = scrollStack;
+
             ListDisplay = new MultiColumnItemDisplaySwipeList<T>(this);
             ListDisplay.HorizontalAlignment = EHorizontalAlignment.Stretch;
             ListDisplay.VerticalAlignment = EVerticalAlignment.Stretch;
-            swipeStack.Children.Add(ListDisplay);
-            swipeStack.DrawBehindElement = ListDisplay;
+            scrollStack.Children.Add(ListDisplay);
+
+            VerticalScrollBarWithArrows scrollBar = new VerticalScrollBarWithArrows()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+            };
+            scrollStack.Children.Add(scrollBar);
+
+            ListDisplay.SetScrollBar(scrollBar.ScrollBar);
+            scrollBar.ScrollBar.Scrollable = ListDisplay;
 
             swipeStack.Children.Add(bottomDock = new Dock
             {
@@ -417,7 +434,7 @@ namespace ChartPlayer
 
         void UpdateColumnLayout()
         {
-            float widthRemaining = ContentBounds.Width;
+            float widthRemaining = ContentBounds.Width - 20;
             int numDivideColumns = 0;
 
             foreach (ItemDisplayColum<T> column in DisplayColumns)

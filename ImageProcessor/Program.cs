@@ -27,12 +27,11 @@ namespace ChartPlayerImageProcessor
 
             AddWithShadow("PopupBackground");
 
-            Add("PanelBackground");
-            Add("PanelBackgroundDark");
-            Add("PanelBackgroundDarkest");
-            Add("PanelBackgroundLight");
-            Add("PanelBackgroundLightest");
-            Add("PanelBackgroundWhite");
+            Add("ButtonPressed");
+            Add("ButtonUnpressed");
+
+            Add("ScrollUpArrow");
+            Add("ScrollDownArrow");
 
             Add("VerticalFretLine");
             Add("HorizontalFretLine");
