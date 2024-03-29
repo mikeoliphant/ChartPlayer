@@ -75,11 +75,18 @@ namespace ChartPlayer
             {
                 ClickAction = delegate
                 {
-                    songList.SetCurrentInstrument(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument);
+                    if (songIndex.Songs.Count == 0)
+                    {
+                        ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".");
+                    }
+                    else
+                    {
+                        songList.SetCurrentInstrument(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument);
 
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                        ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
-                    Layout.Current.ShowPopup(songList);
+                        Layout.Current.ShowPopup(songList);
+                    }
                 }
             };
             bottomButtonStack.Children.Add(songsButton);
