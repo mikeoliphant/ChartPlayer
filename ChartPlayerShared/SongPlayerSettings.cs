@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -17,7 +18,7 @@ namespace ChartPlayer
 
     public class SongPlayerSettingsInterface : InputDialog
     {
-        public Action ApplyAction { get; set; }
+        public Action<SongPlayerSettings> ApplyAction { get; set; }
 
         SongPlayerSettings oldSettings;
         SongPlayerSettings newSettings = new SongPlayerSettings();
@@ -31,6 +32,16 @@ namespace ChartPlayer
 
             CopySettings(oldSettings, newSettings);
 
+            UpdateDisplay();
+
+            AddInput(new DialogInput { Text = "Apply", Action = Apply, CloseOnInput = true });
+            AddInput(new DialogInput { Text = "Save as Default", Action = SaveDefault, CloseOnInput = false });
+            AddInput(new DialogInput { Text = "Restore Default", Action = RestoreDefault, CloseOnInput = false });
+            AddInput(new DialogInput { Text = "Cancel", CloseOnInput = true });
+        }
+
+        void UpdateDisplay()
+        {
             VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, VerticalAlignment = EVerticalAlignment.Stretch };
             SetContents(vStack);
 
@@ -42,7 +53,7 @@ namespace ChartPlayer
             vStack.Children.Add(songPathStack);
 
             songPathStack.Children.Add(new TextBlock("Song Path:") { VerticalAlignment = EVerticalAlignment.Center });
-            songPathStack.Children.Add(songPathText = new TextBlock(settings.SongPath)
+            songPathStack.Children.Add(songPathText = new TextBlock(newSettings.SongPath)
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Center
@@ -59,7 +70,7 @@ namespace ChartPlayer
             };
             vStack.Children.Add(invertStack);
 
-            invertStack.Children.Add(new TextBlock("String Orientation:"){ VerticalAlignment = EVerticalAlignment.Center });
+            invertStack.Children.Add(new TextBlock("String Orientation:") { VerticalAlignment = EVerticalAlignment.Center });
 
             invertStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
@@ -79,14 +90,11 @@ namespace ChartPlayer
             retuneStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
             TextToggleButton retuneButton = new TextToggleButton("Yes", "No")
-            {                
+            {
                 ClickAction = delegate { newSettings.RetuneToEStandard = !newSettings.RetuneToEStandard; }
             };
             retuneButton.SetPressed(newSettings.RetuneToEStandard);
             retuneStack.Children.Add(retuneButton);
-
-            AddInput(new DialogInput { Text = "Apply", Action = Apply, CloseOnInput = true });
-            AddInput(new DialogInput { Text = "Cancel", CloseOnInput = true });
         }
 
         void CopySettings(SongPlayerSettings fromSettings, SongPlayerSettings toSettings)
@@ -102,7 +110,25 @@ namespace ChartPlayer
             CopySettings(newSettings, oldSettings);
 
             if (ApplyAction != null)
-                ApplyAction();
+                ApplyAction(newSettings);
+        }
+
+        void SaveDefault()
+        {
+            Apply();
+
+            SongPlayerInterface.Instance.SaveDefaultOptions(newSettings);
+
+            Layout.Current.UpdateLayout();
+        }
+
+        void RestoreDefault()
+        {
+            newSettings = SongPlayerInterface.Instance.LoadDefaultOptions();
+
+            UpdateDisplay();
+
+            Layout.Current.UpdateLayout();
         }
 
         void SelectSongPath()

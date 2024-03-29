@@ -209,7 +209,7 @@ namespace ChartPlayer
 
     public class ChartPlayerSaveState : AudioPluginSaveState
     {
-        public SongPlayerSettings SongPlayerSettings { get; set; } = new SongPlayerSettings();
+        public SongPlayerSettings SongPlayerSettings { get; set; } = null;
 
         public ChartPlayerSaveState()
         {

@@ -9,6 +9,7 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 using SharpDX.Direct2D1;
+using System.Xml.Serialization;
 
 namespace ChartPlayer
 {
@@ -29,11 +30,31 @@ namespace ChartPlayer
         TextBlock songArtistText;
         TextBlock songInstrumentText;
 
+        string globalSaveFolder;
+        string globalOptionsFile;
+
         string songBasePath = null;
 
         public SongPlayerInterface()
         {
             Instance = this;
+
+            globalSaveFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChartPlayer");
+            globalOptionsFile = Path.Combine(globalSaveFolder, "DefaultOptions.xml");
+
+            if (!Directory.Exists(globalSaveFolder))
+            {
+                try
+                {
+                    Directory.CreateDirectory(globalSaveFolder);
+                }
+                catch { }
+            }
+
+            if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings == null)
+            {
+                ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings = LoadDefaultOptions();
+            }
 
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
@@ -121,6 +142,51 @@ namespace ChartPlayer
 
             songInstrumentText = new TextBlock();
             songInfoStack.Children.Add(songInstrumentText);
+        }
+
+        public SongPlayerSettings LoadDefaultOptions()
+        {
+            SongPlayerSettings settings = null;
+
+            if (File.Exists(globalOptionsFile))
+            {
+                try
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(SongPlayerSettings));
+
+                    using (Stream inputStream = File.OpenRead(globalOptionsFile))
+                    {
+                        settings = serializer.Deserialize(inputStream) as SongPlayerSettings;
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+
+            if (settings == null)
+            {
+                settings = new SongPlayerSettings();
+
+                SaveDefaultOptions(settings);
+            }
+
+            return settings;
+        }
+
+        public void SaveDefaultOptions(SongPlayerSettings settings)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SongPlayerSettings));
+
+            try
+            {
+                using (Stream outputStream = File.Create(globalOptionsFile))
+                {
+                    serializer.Serialize(outputStream, settings);
+                }
+            }
+            catch { }
         }
 
         public void Exit()
@@ -258,17 +324,17 @@ namespace ChartPlayer
         }
 
 
-        void ApplySettings()
+        void ApplySettings(SongPlayerSettings settings)
         {
             if (songPlayer != null)
             {
-                songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
+                songPlayer.RetuneToEStandard = settings.RetuneToEStandard;
             }
 
             // Check if song path changed
-            if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath != songBasePath)
+            if (settings.SongPath != songBasePath)
             {
-                songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
+                songBasePath = settings.SongPath;
 
                 songIndex = new SongIndex(songBasePath);
 
