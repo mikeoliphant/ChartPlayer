@@ -4,6 +4,8 @@ ChartPlayer is an application for playing along to charts in [OpenSongChart](htt
 
 It runs as a VST plugin inside your DAW so that you can use any other plugin you like (ie: guitar amp simulation) for your instrument sounds.
 
+![ChartPlayerSultans](https://github.com/mikeoliphant/ChartPlayer/assets/6710799/a0aafcdf-4121-425f-945b-07974ec7dbcc)
+
 # Features
 
 * Song browser
