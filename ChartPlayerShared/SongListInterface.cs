@@ -50,7 +50,7 @@ namespace ChartPlayer
             float width = 0;
             float height = 0;
 
-            ListDisplay.Font.SpriteFont.MeasureString("Eb Drop Db", out width, out height);
+            ListDisplay.Font.SpriteFont.MeasureString("EbEbEbEbEbEb C8", out width, out height);
             AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
 
             LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
