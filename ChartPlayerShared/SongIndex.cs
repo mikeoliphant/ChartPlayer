@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
+using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
 using SongFormat;
 
@@ -16,6 +17,7 @@ namespace ChartPlayer
         public string ArtistName { get; set; }
         public string AlbumName { get; set; }
         public string FolderPath { get; set; }
+        public string Arrangements { get; set; }
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
@@ -118,23 +120,31 @@ namespace ChartPlayer
                         AlbumName = song.AlbumName,
                         FolderPath = Path.GetRelativePath(basePath, songPath)
                     };
-
-                    foreach (SongInstrumentPart part in song.InstrumentParts)
+                    
+                    foreach (SongInstrumentPart part in song.InstrumentParts.OrderBy(s => s.InstrumentType))
                     {
                         if (part.InstrumentType == ESongInstrumentType.LeadGuitar)
                         {
+                            indexEntry.Arrangements += "L";
+
                             indexEntry.LeadGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.RhythmGuitar)
                         {
+                            indexEntry.Arrangements += "R";
+
                             indexEntry.RhythmGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.BassGuitar)
                         {
+                            indexEntry.Arrangements += "B";
+
                             indexEntry.BassGuitarTuning = GetTuning(part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
+                            indexEntry.Arrangements += "K";
+
                             indexEntry.KeysTuning = "Standard";
                         }
                     }

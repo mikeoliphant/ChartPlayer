@@ -27,6 +27,12 @@ namespace ChartPlayer
             AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
             AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
+                DisplayName = "Parts",
+                PropertyName = "Arrangements",
+                RequestedDisplayWidth = 50,
+            });
+            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
                 RequestedDisplayWidth = 50,
