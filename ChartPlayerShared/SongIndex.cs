@@ -162,7 +162,7 @@ namespace ChartPlayer
     public class SongStatsEntry
     {
         public string Song { get; set; }
-        public DateOnly LastPlayed { get; set; } = DateOnly.MinValue;
+        public DateTime LastPlayed { get; set; } = DateTime.MinValue;
         public int NumPlays { get; set; } = 0;
         public List<string> Tags { get; set; } = null;
     }

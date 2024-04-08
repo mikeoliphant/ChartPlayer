@@ -257,7 +257,7 @@ namespace ChartPlayer
                     song.Stats[(int)songList.CurrentInstrument] = stats;
                 }
 
-                stats.LastPlayed = DateOnly.FromDateTime(DateTime.Now);
+                stats.LastPlayed = DateTime.Now;
                 stats.NumPlays++;
 
                 songIndex.SaveStats();

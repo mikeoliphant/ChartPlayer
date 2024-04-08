@@ -36,7 +36,7 @@ namespace ChartPlayer
             {
                 DisplayName = "LastPlay",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
-                SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateOnly.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
+                SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateTime.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
                 RequestedDisplayWidth = 70,
                 StartReversed = true
             });
@@ -132,9 +132,9 @@ namespace ChartPlayer
 
         DateTime currentDate = DateTime.Now;
 
-        string GetDayString(DateOnly date)
+        string GetDayString(DateTime date)
         {
-            int days = (currentDate - date.ToDateTime(TimeOnly.MinValue)).Days;
+            int days = (currentDate - date).Days;
 
             if (days == 0)
                 return "Today";
@@ -146,7 +146,7 @@ namespace ChartPlayer
                 
             if (days > 30)
             {
-                return (days / 30) + "m";
+                return (days / 30) + "mo";
             }
 
             return days + "d";

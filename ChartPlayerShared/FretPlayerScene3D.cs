@@ -867,7 +867,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(startFret, heightOffset, minZ), color, new Vector3(startFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, minZ), color);
         }
 
-        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, UIColor color)
+        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, in UIColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
             time *= -timeScale;
@@ -882,7 +882,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(minX, startHeight, time), color, new Vector3(minX, endEndHeight, time), color, new Vector3(maxX, endEndHeight, time), color, new Vector3(maxX, startHeight, time), color);
         }
 
-        void DrawFretTimeLine(float fretCenter, float height, float startTime, float endTime, UIColor color)
+        void DrawFretTimeLine(float fretCenter, float height, float startTime, float endTime, in UIColor color)
         {
             fretCenter = GetFretPosition(fretCenter);
             startTime *= -timeScale;
@@ -898,7 +898,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(minX, height, startTime), color, new Vector3(minX, height, endTime), color, new Vector3(maxX, height, endTime), color, new Vector3(maxX, height, startTime), color);
         }
 
-        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float heightOffset, UIColor color, float imageScale)
+        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float heightOffset, in UIColor color, float imageScale)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -910,7 +910,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(startFret, minY, time), color, new Vector3(startFret, maxY, time), color, new Vector3(endFret, maxY, time), color, new Vector3(endFret, minY, time), color);
         }
 
-        void DrawVerticalImage(UIImage image, float fretCenter, float timeCenter, float heightOffset, UIColor color, float imageScale)
+        void DrawVerticalImage(UIImage image, float fretCenter, float timeCenter, float heightOffset, in UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
@@ -924,7 +924,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(minX, minY, timeCenter), color, new Vector3(minX, maxY, timeCenter), color, new Vector3(maxX, maxY, timeCenter), color, new Vector3(maxX, minY, timeCenter), color);
         }
 
-        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, UIColor color)
+        void DrawVerticalImage(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, in UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -933,7 +933,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(startFret, startHeight, time), color, new Vector3(startFret, endHeight, time), color, new Vector3(endFret, endHeight, time), color, new Vector3(endFret, startHeight, time), color);
         }
 
-        void DrawVerticalNinePatch(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, UIColor color)
+        void DrawVerticalNinePatch(UIImage image, float startFret, float endFret, float time, float startHeight, float endHeight, in UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -942,7 +942,7 @@ namespace ChartPlayer
             DrawNinePatch(image, image.Width / 2, image.Height / 2, new Vector3(startFret, startHeight, time), new Vector3(startFret, endHeight, time), new Vector3(endFret, endHeight, time), new Vector3(endFret, startHeight, time), color);
         }
 
-        void DrawFlatImage(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, UIColor color, float imageScale)
+        void DrawFlatImage(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, in UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             startTime *= -timeScale;
@@ -954,7 +954,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(minX, heightOffset, startTime), color, new Vector3(minX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, startTime), color);
         }
 
-        void DrawFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, UIColor color)
+        void DrawFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, in UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -964,7 +964,7 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(startFret, heightOffset, startTime), color, new Vector3(startFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, endTime), color, new Vector3(endFret, heightOffset, startTime), color);
         }
 
-        void DrawSkewedFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, UIColor color)
+        void DrawSkewedFlatImage(UIImage image, float startFret, float endFret, float startTime, float endTime, float heightOffset, in UIColor color)
         {
             startFret = GetFretPosition(startFret);
             endFret = GetFretPosition(endFret);
@@ -995,7 +995,7 @@ namespace ChartPlayer
             }
         }
 
-        void DrawVibrato(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, UIColor color)
+        void DrawVibrato(UIImage image, float fretCenter, float startTime, float endTime, float heightOffset, in UIColor color)
         {
             float imageScale = .03f;
 
@@ -1040,7 +1040,7 @@ namespace ChartPlayer
             return cents / -30.0f;
         }
 
-        float GetBendOffset(float startTime, float strng, CentsOffset[] bendOffsets)
+        float GetBendOffset(float startTime, float strng, in CentsOffset[] bendOffsets)
         {
             if (startTime > currentTime)
             {
@@ -1066,7 +1066,7 @@ namespace ChartPlayer
             return GetCentsOffset(strng, lastCents);
         }
 
-        float GetNoteHeadHeight(SongNote note)
+        float GetNoteHeadHeight(in SongNote note)
         {
             float noteHeadHeight = GetStringHeight(GetStringOffset(note.String));
 
@@ -1083,7 +1083,7 @@ namespace ChartPlayer
             return noteHeadHeight;
         }
 
-        void DrawBend(UIImage image, float fretCenter, float startTime, float sustain, float strng, CentsOffset[] bendOffsets, UIColor color)
+        void DrawBend(UIImage image, float fretCenter, float startTime, float sustain, float strng, in CentsOffset[] bendOffsets, in UIColor color)
         {
             float endTime = startTime + sustain;
 
@@ -1138,7 +1138,7 @@ namespace ChartPlayer
             }
         }
 
-        void DrawFlatText(string text, float fretCenter, float timeCenter, float heightOffset, UIColor color, float imageScale)
+        void DrawFlatText(string text, float fretCenter, float timeCenter, float heightOffset, in UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
@@ -1178,12 +1178,12 @@ namespace ChartPlayer
             }
         }
 
-        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, UIColor color, float imageScale)
+        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, in UIColor color, float imageScale)
         {
             DrawVerticalText(text, fretCenter, verticalCenter, timeCenter, color, imageScale, rightAlign: false);
         }
 
-        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, UIColor color, float imageScale, bool rightAlign)
+        void DrawVerticalText(string text, float fretCenter, float verticalCenter, float timeCenter, in UIColor color, float imageScale, bool rightAlign)
         {
             fretCenter = GetFretPosition(fretCenter);
             timeCenter *= -timeScale;
@@ -1254,7 +1254,7 @@ namespace ChartPlayer
             }
         }
 
-        bool NoteDetect(SongNote note)
+        bool NoteDetect(in SongNote note)
         {                
             if (note.ChordID != -1)
             {
