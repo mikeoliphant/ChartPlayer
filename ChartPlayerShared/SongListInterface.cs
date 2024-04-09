@@ -140,7 +140,7 @@ namespace ChartPlayer
 
         string GetDayString(DateTime date)
         {
-            int days = (currentDate - date).Days;
+            int days = (currentDate.Date - date.Date).Days;
 
             if (days == 0)
                 return "Today";
