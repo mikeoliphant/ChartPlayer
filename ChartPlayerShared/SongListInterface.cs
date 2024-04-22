@@ -3,42 +3,58 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
-using SharpDX.Direct3D9;
+using System.IO;
 
 namespace ChartPlayer
 {
-    public class SongListDisplay : MultiColumnItemDisplay<SongIndexEntry>
+    public class SongListDisplay : HorizontalStack, IPopup
     {
+        public Action CloseAction { get; set; }
         public ESongInstrumentType CurrentInstrument { get; private set; } = ESongInstrumentType.LeadGuitar;
+
+        public MultiColumnItemDisplay<SongIndexEntry> SongList { get; private set; }
+
+        SongIndexEntry selectedSong;
 
         SongIndex songIndex;
         List<SongIndexEntry> allSongs;
         List<SongIndexEntry> currentSongs;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
+        ImageElement albumImage;
+        TextBlock songTitleText;
+        TextBlock songArtistText;
+        TextBlock songAlbumText;
+        DialogInputStack buttonInputStack;
 
         public SongListDisplay()
-            : base(UIColor.Black)
         {
+            HorizontalAlignment = EHorizontalAlignment.Stretch;
+            VerticalAlignment = EVerticalAlignment.Stretch;
+
             Padding = new LayoutPadding(5);
 
-            ListDisplay.SelectAction = SongSelected;
+            SongList = new MultiColumnItemDisplay<SongIndexEntry>(UIColor.Black);
 
-            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
-            AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
-            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            Children.Add(SongList);
+
+            SongList.ListDisplay.SelectAction = SongSelected;
+
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "Parts",
                 PropertyName = "Arrangements",
                 RequestedDisplayWidth = 50,
             });
-            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
                 RequestedDisplayWidth = 50,
                 StartReversed = true
             });
-            AddColumn(new ItemDisplayColum<SongIndexEntry>
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "LastPlay",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
@@ -50,16 +66,64 @@ namespace ChartPlayer
             float width = 0;
             float height = 0;
 
-            ListDisplay.Font.SpriteFont.MeasureString("EbEbEbEbEbEb C8", out width, out height);
-            AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
+            SongList.ListDisplay.Font.SpriteFont.MeasureString("EbEbEbEbEbEb C8", out width, out height);
+            SongList.AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
 
-            LeftInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
-            LeftInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
+            HorizontalStack bottomStack = new HorizontalStack()
+            {
+                Padding = new LayoutPadding(10)
+            };
+            SongList.BottomDock.Children.Add(bottomStack);
 
-            SetSortColumn("Artist");
+            HorizontalStack songDisplayStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                ChildSpacing = 10
+            };
+            bottomStack.Children.Add(songDisplayStack);
+
+            albumImage = new ImageElement("SingleWhitePixel")
+            {
+                DesiredWidth = 256,
+                DesiredHeight = 256
+            };
+            songDisplayStack.Children.Add(albumImage);
+
+            VerticalStack songInfoStack = new VerticalStack()
+            {
+                DesiredWidth = 400
+            };
+            songDisplayStack.Children.Add(songInfoStack);
+
+            songInfoStack.Children.Add(songTitleText = new TextBlock());
+            songInfoStack.Children.Add(songArtistText = new TextBlock());
+            songInfoStack.Children.Add(songAlbumText = new TextBlock());
+
+            HorizontalStack buttonStack = new HorizontalStack
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                Padding = new LayoutPadding(0, 5),
+                ChildSpacing = 2
+            };
+
+            buttonInputStack = new DialogInputStack(this, buttonStack);
+            bottomStack.Children.Add(buttonInputStack);
+
+            buttonInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Play", Action = Play });
+            buttonInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
+
+            SongList.SetSortColumn("Artist");
+
+            CloseAction = Close;
+        }
+
+        public virtual void Opened()
+        {
         }
 
         public void SetSongIndex(SongIndex songIndex)
@@ -95,9 +159,9 @@ namespace ChartPlayer
                     break;
             }
 
-            SetItems(currentSongs);
+            SongList.SetItems(currentSongs);
 
-            Sort(toggleReverse: false);
+            SongList.Sort(toggleReverse: false);
         }
 
         public void SetCurrentInstrument(ESongInstrumentType type)
@@ -105,7 +169,7 @@ namespace ChartPlayer
             if (currentSongs.Count == 0)
                 return;
 
-            SongIndexEntry topSong = currentSongs[ListDisplay.CurrentTopItemIndex];
+            SongIndexEntry topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
 
             if (CurrentInstrument != type)
             {
@@ -119,16 +183,73 @@ namespace ChartPlayer
                 }
             }
 
-            int topIndex = GetIndexOf(topSong);
+            int songIndex = -1;
 
-            ListDisplay.SetTopItem(topIndex);
+            if (selectedSong != null)
+            {
+                songIndex = SongList.ListDisplay.Items.IndexOf(selectedSong);
+            }
+
+            if (songIndex != -1)
+            {
+                SongList.ListDisplay.SetTopItem(songIndex);
+                SongList.ListDisplay.LastSelectedItem = songIndex;
+            }
+            else
+            {
+                int topIndex = SongList.GetIndexOf(topSong);
+
+                SongList.ListDisplay.SetTopItem(topIndex);
+
+                SongList.ListDisplay.LastSelectedItem = -1;
+            }
+        }
+
+        public void Play()
+        {
+            if (selectedSong != null)
+            {
+                Close();
+
+                SongPlayerInterface.Instance.SetSong(selectedSong, CurrentInstrument);
+            }
         }
 
         public void SongSelected(int index)
         {
-            Close();
+            if (currentSongs[index] == selectedSong)
+            {
+                Play();
+            }
+            else
+            {
+                selectedSong = currentSongs[index];
 
-            SongPlayerInterface.Instance.SetSong(currentSongs[index], CurrentInstrument);
+                UpdateSelectedSongDisplay();
+            }
+        }
+
+        void UpdateSelectedSongDisplay()
+        {
+            string songPath = Path.Combine(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath, selectedSong.FolderPath);
+
+            using (Stream inputStream = File.OpenRead(Path.Combine(songPath, "albumart.png")))
+            {
+                // Should free album image texture memory, but it can't be done immediately as it is still in use by the gpu
+
+                //if (albumImage.Image.Texture != null)
+                //{
+                //    albumImage.Image.Texture.Dispose();
+                //}
+
+                albumImage.Image = new UIImage(inputStream);
+            }
+
+            songTitleText.Text = selectedSong.SongName;
+            songArtistText.Text = selectedSong.ArtistName;
+            songAlbumText.Text = selectedSong.AlbumName;
+
+            UpdateContentLayout();
         }
 
         public void Close()
@@ -294,17 +415,14 @@ namespace ChartPlayer
         }
     }
 
-    public class MultiColumnItemDisplay<T> : Dock, IPopup
+    public class MultiColumnItemDisplay<T> : Dock
     {
         public MultiColumnItemDisplaySwipeList<T> ListDisplay { get; private set; }
         internal List<ItemDisplayColum<T>> DisplayColumns { get; private set; }
-        public DialogInputStack LeftInputStack { get; private set; }
-        public DialogInputStack RightInputStack { get; private set; }
-        public Action CloseAction { get; set; }
+        public Dock BottomDock { get; private set; }
 
         List<T> items;
         Dock topDock;
-        Dock bottomDock;
         HorizontalStack headerStack;
         ItemDisplayColum<T> lastSortColumn;
         bool lastSortReverse;
@@ -337,6 +455,7 @@ namespace ChartPlayer
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Stretch,
+                Padding = new LayoutPadding(5)
             };
             swipeStack.Children.Add(scrollStack);
             swipeStack.DrawBehindElement = scrollStack;
@@ -355,7 +474,7 @@ namespace ChartPlayer
             ListDisplay.SetScrollBar(scrollBar.ScrollBar);
             scrollBar.ScrollBar.Scrollable = ListDisplay;
 
-            swipeStack.Children.Add(bottomDock = new Dock
+            swipeStack.Children.Add(BottomDock = new Dock
             {
                 VerticalAlignment = EVerticalAlignment.Top,
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
@@ -363,7 +482,7 @@ namespace ChartPlayer
             });
 
             // Make sure the bottom dock covers scrolling
-            bottomDock.Children.Add(new UIElement
+            BottomDock.Children.Add(new UIElement
             {
                 DesiredHeight = 15
             });
@@ -375,24 +494,6 @@ namespace ChartPlayer
                 Padding = new LayoutPadding(0, 5),
                 ChildSpacing = 2
             };
-
-            LeftInputStack = new DialogInputStack(this, leftButtonStack);
-            bottomDock.Children.Add(LeftInputStack);
-
-            HorizontalStack rightButtonStack = new HorizontalStack
-            {
-                HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Bottom,
-                Padding = new LayoutPadding(0, 5),
-                ChildSpacing = 2
-            };
-
-            RightInputStack = new DialogInputStack(this, rightButtonStack) { HorizontalAlignment = EHorizontalAlignment.Right };
-            bottomDock.Children.Add(RightInputStack);
-        }
-
-        public virtual void Opened()
-        {
         }
 
         public override void UpdateContentLayout()
@@ -407,7 +508,7 @@ namespace ChartPlayer
             this.items = items;
 
             ListDisplay.Items = items;
-            ListDisplay.FirstItem();
+            ListDisplay.GoToFirstItem();
         }
 
         public void AddColumn(ItemDisplayColum<T> column)
@@ -514,6 +615,13 @@ namespace ChartPlayer
 
         public void Sort(ItemDisplayColum<T> column, bool toggleReverse)
         {
+            T selectedItem = default;
+
+            if (ListDisplay.LastSelectedItem != -1)
+            {
+                selectedItem = items[ListDisplay.LastSelectedItem];
+            }
+
             if (toggleReverse && (column == lastSortColumn))
             {
                 lastSortReverse = !lastSortReverse;
@@ -534,7 +642,16 @@ namespace ChartPlayer
                 items.Sort(column.Compare);
             }
 
-            ListDisplay.FirstItem();
+            if (selectedItem == null)
+            {
+                ListDisplay.GoToFirstItem();
+            }
+            else
+            {
+                ListDisplay.LastSelectedItem = items.IndexOf(selectedItem);
+
+                ListDisplay.SetTopItem(ListDisplay.LastSelectedItem);
+            }
         }
 
         public int GetIndexOf(T item)
@@ -558,7 +675,7 @@ namespace ChartPlayer
 
             throw new NotImplementedException();
 
-            ListDisplay.FirstItem();
+            ListDisplay.GoToFirstItem();
         }
 
         public override void HandleInput(InputManager inputManager)
@@ -608,12 +725,12 @@ namespace ChartPlayer
 
             if (inputManager.WasPressed("FirstItem"))
             {
-                ListDisplay.FirstItem();
+                ListDisplay.GoToFirstItem();
             }
 
             if (inputManager.WasPressed("LastItem"))
             {
-                ListDisplay.LastItem();
+                ListDisplay.GoToLastItem();
             }
         }
     }

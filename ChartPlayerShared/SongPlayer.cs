@@ -188,6 +188,11 @@ namespace ChartPlayer
                     float[] inBuffer;
 
                     framesRead = resampler.ResamplePrepare(framesRequested, 2, out inBuffer, out inBufferOffset);
+
+                    // Shouldn't happen, but sanity check
+                    if (framesRead > framesLeft)
+                        framesRead = (int)framesLeft;
+
                     int inAvailable = vorbisReader.ReadSamples(inBuffer, inBufferOffset, framesRead * 2) / 2;
 
                     framesOutput = resampler.ResampleOut(tempBuffer, 0, inAvailable, framesRequested, 2) * 2;
