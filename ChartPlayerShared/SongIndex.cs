@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
-using SharpDX.Direct3D11;
-using SharpDX.Direct3D9;
 using SongFormat;
+using UILayout;
 
 namespace ChartPlayer
 {
@@ -107,7 +106,7 @@ namespace ChartPlayer
 
         void AddSong(string songPath)
         {
-            using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
+            using (Stream songStream = File.OpenRead(Path.Combine(basePath, "song.json")))
             {
                 SongData song = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
 
@@ -157,6 +156,30 @@ namespace ChartPlayer
         string GetTuning(SongInstrumentPart part)
         {
             return part.Tuning.GetTuning() + ((part.CapoFret > 0) ? (" C" + part.CapoFret) : "");
+        }
+
+        public string GetSongPath(SongIndexEntry indexEntry)
+        {
+            return Path.Combine(basePath, indexEntry.FolderPath);
+        }
+
+        public UIImage GetAlbumImage(SongIndexEntry indexEntry)
+        {
+            UIImage image = null;
+
+            try
+            {
+                using (Stream inputStream = File.OpenRead(Path.Combine(GetSongPath(indexEntry), "albumart.png")))
+                {
+                    image = new UIImage(inputStream);
+                }
+            }
+            catch
+            {
+                image = new UIImage(Layout.Current.GetImage("SingleWhitePixel"));
+            }
+
+            return image;
         }
 
         public void SaveStats()

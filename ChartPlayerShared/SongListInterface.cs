@@ -229,21 +229,26 @@ namespace ChartPlayer
             }
         }
 
+        UIImage albumArtToDelete = null;
+
         void UpdateSelectedSongDisplay()
         {
-            string songPath = Path.Combine(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath, selectedSong.FolderPath);
-
-            using (Stream inputStream = File.OpenRead(Path.Combine(songPath, "albumart.png")))
+            if (albumArtToDelete != null)
             {
-                // Should free album image texture memory, but it can't be done immediately as it is still in use by the gpu
+                if (albumArtToDelete.Texture != null)
+                {
+                    albumArtToDelete.Texture.Dispose();
+                }
 
-                //if (albumImage.Image.Texture != null)
-                //{
-                //    albumImage.Image.Texture.Dispose();
-                //}
-
-                albumImage.Image = new UIImage(inputStream);
+                albumArtToDelete = null;
             }
+
+            if (albumImage.Image.Width > 1) // Don't dispose our single white pixel image
+            {
+                albumArtToDelete = albumImage.Image;
+            }
+
+            albumImage.Image = songIndex.GetAlbumImage(selectedSong);
 
             songTitleText.Text = selectedSong.SongName;
             songArtistText.Text = selectedSong.ArtistName;
