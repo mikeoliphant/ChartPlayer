@@ -4,7 +4,6 @@ using System.Linq;
 using UILayout;
 using SongFormat;
 using System.IO;
-using System.Windows.Forms;
 
 namespace ChartPlayer
 {
@@ -21,10 +20,12 @@ namespace ChartPlayer
         List<SongIndexEntry> allSongs;
         List<SongIndexEntry> currentSongs;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
+        HorizontalStack songDisplayStack;
         ImageElement albumImage;
         TextBlock songTitleText;
         TextBlock songArtistText;
         TextBlock songAlbumText;
+        HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
 
         public SongListDisplay()
@@ -76,7 +77,7 @@ namespace ChartPlayer
             };
             SongList.BottomDock.Children.Add(bottomStack);
 
-            HorizontalStack songDisplayStack = new HorizontalStack()
+            songDisplayStack = new HorizontalStack()
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ChildSpacing = 10
@@ -92,13 +93,19 @@ namespace ChartPlayer
 
             VerticalStack songInfoStack = new VerticalStack()
             {
-                DesiredWidth = 400
+                DesiredWidth = 400,
+                VerticalAlignment = EVerticalAlignment.Stretch
             };
             songDisplayStack.Children.Add(songInfoStack);
 
             songInfoStack.Children.Add(songTitleText = new TextBlock());
             songInfoStack.Children.Add(songArtistText = new TextBlock());
             songInfoStack.Children.Add(songAlbumText = new TextBlock());
+
+            songInfoStack.Children.Add(new UIElement { VerticalAlignment = EVerticalAlignment.Stretch });
+
+            arrangementStack = new HorizontalStack { ChildSpacing = 2 };
+            songInfoStack.Children.Add(arrangementStack);
 
             HorizontalStack buttonStack = new HorizontalStack
             {
@@ -115,7 +122,6 @@ namespace ChartPlayer
             buttonInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
             //buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Play", Action = Play });
             buttonInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
             SongList.SetSortColumn("Artist");
@@ -204,6 +210,9 @@ namespace ChartPlayer
 
                 SongList.ListDisplay.LastSelectedItem = -1;
             }
+
+            if (selectedSong != null)
+                UpdateSelectedSongDisplay();
         }
 
         public void Play()
@@ -212,7 +221,7 @@ namespace ChartPlayer
             {
                 Close();
 
-                SongPlayerInterface.Instance.SetSong(selectedSong, CurrentInstrument);
+                SongPlayerInterface.Instance.SetSong(selectedSong, CurrentInstrument, null);
             }
         }
 
@@ -255,7 +264,31 @@ namespace ChartPlayer
             songArtistText.Text = selectedSong.ArtistName;
             songAlbumText.Text = selectedSong.AlbumName;
 
-            UpdateContentLayout();
+            arrangementStack.Children.Clear();
+
+            SongData songData = songIndex.GetSongData(selectedSong);
+
+            var parts = songData.InstrumentParts.Where(p => p.InstrumentType == CurrentInstrument);
+
+            int count = parts.Count();
+
+            if (count > 0)
+            {
+                foreach (SongInstrumentPart part in parts)
+                {
+                    arrangementStack.Children.Add(new TextButton((count == 1) ? "Play" : "Play \"" + part.InstrumentName + "\"")
+                    {
+                        ClickAction = delegate
+                        {
+                            Close();
+
+                            SongPlayerInterface.Instance.SetSong(selectedSong, CurrentInstrument, part.InstrumentName);
+                        }
+                    });
+                }
+            }
+
+            songDisplayStack.UpdateContentLayout();
         }
 
         public void Close()

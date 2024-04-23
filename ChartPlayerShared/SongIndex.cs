@@ -37,14 +37,12 @@ namespace ChartPlayer
             };
 
         public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
-
         public SongStats[] Stats = new SongStats[Enum.GetValues(typeof(ESongInstrumentType)).Length];
-
-        string basePath;
+        public string BasePath { get; private set; }
 
         public SongIndex(string basePath)
         {
-            this.basePath = basePath;
+            this.BasePath = basePath;
 
             if (!string.IsNullOrEmpty(basePath))
             {
@@ -106,7 +104,7 @@ namespace ChartPlayer
 
         void AddSong(string songPath)
         {
-            using (Stream songStream = File.OpenRead(Path.Combine(basePath, "song.json")))
+            using (Stream songStream = File.OpenRead(Path.Combine(BasePath, "song.json")))
             {
                 SongData song = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
 
@@ -117,7 +115,7 @@ namespace ChartPlayer
                         SongName = song.SongName,
                         ArtistName = song.ArtistName,
                         AlbumName = song.AlbumName,
-                        FolderPath = Path.GetRelativePath(basePath, songPath)
+                        FolderPath = Path.GetRelativePath(BasePath, songPath)
                     };
                     
                     foreach (SongInstrumentPart part in song.InstrumentParts.OrderBy(s => s.InstrumentType))
@@ -160,7 +158,7 @@ namespace ChartPlayer
 
         public string GetSongPath(SongIndexEntry indexEntry)
         {
-            return Path.Combine(basePath, indexEntry.FolderPath);
+            return Path.Combine(BasePath, indexEntry.FolderPath);
         }
 
         public UIImage GetAlbumImage(SongIndexEntry indexEntry)
@@ -180,6 +178,23 @@ namespace ChartPlayer
             }
 
             return image;
+        }
+
+        public SongData GetSongData(SongIndexEntry indexEntry)
+        {
+            try
+            {
+                using (Stream songStream = File.OpenRead(Path.Combine(GetSongPath(indexEntry), "song.json")))
+                {
+                    return JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
+                }
+            }
+            catch
+            {
+
+            }
+
+            return null;
         }
 
         public void SaveStats()

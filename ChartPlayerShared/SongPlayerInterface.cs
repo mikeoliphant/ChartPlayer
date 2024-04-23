@@ -239,7 +239,7 @@ namespace ChartPlayer
         {
         }
 
-        public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType)
+        public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType, string partName)
         {
             ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument = songList.CurrentInstrument;
 
@@ -252,40 +252,43 @@ namespace ChartPlayer
                     songData = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
                 }
 
-                foreach (SongInstrumentPart part in songData.InstrumentParts.OrderBy(p => p.InstrumentName))
+                SongInstrumentPart part = null;
+
+                if (!string.IsNullOrEmpty(partName))
                 {
-                    if (part.InstrumentType == instrumentType)
+                    part = songData.InstrumentParts.Where(p => p.InstrumentName == partName).FirstOrDefault();
+                }
+                else
+                {
+                    part = songData.InstrumentParts.OrderBy(p => p.InstrumentName).Where(p => p.InstrumentType == instrumentType).FirstOrDefault();
+                }
+
+                songPlayer = new SongPlayer();
+                songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
+                songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
+
+                songPlayer.SetSong(songPath, songData, part);
+
+                //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
+
+                ChartPlayerGame.Instance.Plugin.SetSongPlayer(songPlayer);
+
+                sectionInterface.SetSongPlayer(songPlayer);
+
+                vocalText.SongPlayer = songPlayer;
+
+                if (part.InstrumentType == ESongInstrumentType.Keys)
+                {
+                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
+                }
+                else
+                {
+                    if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
                     {
-                        songPlayer = new SongPlayer();
-                        songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
-                        songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
-
-                        songPlayer.SetSong(songPath, songData, part);
-
-                        //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
-
-                        ChartPlayerGame.Instance.Plugin.SetSongPlayer(songPlayer);
-
-                        sectionInterface.SetSongPlayer(songPlayer);
-
-                        vocalText.SongPlayer = songPlayer;
-
-                        if (part.InstrumentType == ESongInstrumentType.Keys)
-                        {
-                            ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
-                        }
-                        else
-                        {
-                            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
-                            {
-                                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
-                            }
-
-                            ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
-                        }
-
-                        break;
+                        (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
                     }
+
+                    ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
                 }
 
                 SongStatsEntry stats = songIndex.Stats[(int)songList.CurrentInstrument].GetSongStats(song.FolderPath);
