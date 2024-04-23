@@ -4,6 +4,7 @@ using System.Linq;
 using UILayout;
 using SongFormat;
 using System.IO;
+using System.Windows.Forms;
 
 namespace ChartPlayer
 {
@@ -113,7 +114,7 @@ namespace ChartPlayer
             buttonInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
+            //buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Play", Action = Play });
             buttonInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
@@ -524,7 +525,7 @@ namespace ChartPlayer
             {
                 Padding = new LayoutPadding(1, 0),
                 ClickAction = delegate {
-                    Sort(column, toggleReverse: true);
+                    Sort(column, toggleReverse: true, goToFirstItem: true);
                 }
             });
 
@@ -604,7 +605,7 @@ namespace ChartPlayer
         {
             if (lastSortColumn != null)
             {
-                Sort(lastSortColumn, toggleReverse);
+                Sort(lastSortColumn, toggleReverse, goToFirstItem: true);
             }
         }
 
@@ -614,11 +615,11 @@ namespace ChartPlayer
 
             if (column != null)
             {
-                Sort(column, toggleReverse);
+                Sort(column, toggleReverse, goToFirstItem: true);
             }
         }
 
-        public void Sort(ItemDisplayColum<T> column, bool toggleReverse)
+        public void Sort(ItemDisplayColum<T> column, bool toggleReverse, bool goToFirstItem)
         {
             T selectedItem = default;
 
@@ -647,14 +648,15 @@ namespace ChartPlayer
                 items.Sort(column.Compare);
             }
 
-            if (selectedItem == null)
+            if (selectedItem != null)
+                ListDisplay.LastSelectedItem = items.IndexOf(selectedItem);
+
+            if (goToFirstItem || (selectedItem == null))
             {
                 ListDisplay.GoToFirstItem();
             }
             else
             {
-                ListDisplay.LastSelectedItem = items.IndexOf(selectedItem);
-
                 ListDisplay.SetTopItem(ListDisplay.LastSelectedItem);
             }
         }
@@ -702,7 +704,7 @@ namespace ChartPlayer
             {
                 if (inputManager.WasClicked(column.DisplayName, this))
                 {
-                    Sort(column, toggleReverse: true);
+                    Sort(column, toggleReverse: true, goToFirstItem: true);
 
                     break;
                 }

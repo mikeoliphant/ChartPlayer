@@ -158,7 +158,8 @@ namespace ChartPlayer
             {
                 GameHost.Exit();
 
-                gameThread.Join();
+                if (gameThread != null)
+                    gameThread.Join();
             }
         }
 

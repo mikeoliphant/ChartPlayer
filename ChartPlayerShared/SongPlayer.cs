@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
-using Microsoft.VisualBasic.Logging;
 using NVorbis;
+using RubberBand;
 using SongFormat;
 
 namespace ChartPlayer
@@ -33,7 +33,9 @@ namespace ChartPlayer
         long currentPlaybackSample = 0;
         Thread decodeThread = null;
         float[][] sampleData = new float[2][];
-        double actualPlaybackSampleRate;
+        RubberBandStretcher stretcher = null;
+        float[][] stretchBuf = new float[2][];
+        double pitchShift = 1.0;
 
         public SongPlayer()
         {
@@ -47,12 +49,17 @@ namespace ChartPlayer
         public void SetPlaybackSampleRate(double playbackRate)
         {
             this.PlaybackSampleRate = playbackRate;
+
+            stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
         }
 
         public void SetSong(string songPath, SongData song, SongInstrumentPart part)
         {
             this.Song = song;
             this.SongInstrumentPart = part;
+
+            stretchBuf[0] = new float[1024];
+            stretchBuf[1] = new float[1024];
 
             if (part.InstrumentType == ESongInstrumentType.Keys)
             {
@@ -104,14 +111,14 @@ namespace ChartPlayer
 
             SongLengthSeconds = (float)vorbisReader.TotalTime.TotalSeconds;
 
-            actualPlaybackSampleRate = PlaybackSampleRate;
-
             if (RetuneToEStandard && (tuningOffsetSemitones != 0))
-                actualPlaybackSampleRate = PlaybackSampleRate * Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
+                pitchShift = 1.0 / Math.Pow(2, (double)tuningOffsetSemitones / 12.0);
 
-            resampler.SetRates(vorbisReader.SampleRate, actualPlaybackSampleRate);
+            stretcher.SetPitchScale(pitchShift);
 
-            totalSamples = (long)Math.Ceiling(actualPlaybackSampleRate * SongLengthSeconds);
+            resampler.SetRates(vorbisReader.SampleRate, PlaybackSampleRate);
+
+            totalSamples = (long)Math.Ceiling(PlaybackSampleRate * SongLengthSeconds);
 
             sampleData[0] = new float[totalSamples];
             sampleData[1] = new float[totalSamples];
@@ -143,21 +150,50 @@ namespace ChartPlayer
                 return;
             }
 
-            int samples = (int)Math.Min(leftChannel.Length, totalSamples - currentPlaybackSample);
+            int samplesNeeded = leftChannel.Length;
 
-            for (int i = 0; i < samples; i++)
+            int pos = 0;
+
+            while (samplesNeeded > 0)
             {
-                leftChannel[i] = sampleData[0][currentPlaybackSample + i];
-                rightChannel[i] = sampleData[1][currentPlaybackSample + i];
-            }
+                int avail = stretcher.Available();
 
-            for (int i = samples; i < leftChannel.Length; i++)
-            {
-                leftChannel[i] = 0;
-                rightChannel[i] = 0;
-            }
+                if (avail > 0)
+                {
+                    int toRead = Math.Min(avail, samplesNeeded);
 
-            currentPlaybackSample += samples;
+                    long read = stretcher.Retrieve(stretchBuf, toRead);
+
+                    if (read != toRead)
+                        throw new Exception();
+
+                    for (int i = 0; i < toRead; i++)
+                    {
+                        leftChannel[pos] = stretchBuf[0][i];
+                        leftChannel[pos] = stretchBuf[1][i];
+
+                        pos++;
+                    }
+
+                    samplesNeeded -= toRead;
+
+                    continue;
+                }
+                else
+                {
+                    long stretchSamplesRequired = stretcher.GetSamplesRequired();
+
+                    for (int i = 0; i < stretchSamplesRequired; i++)
+                    {
+                        stretchBuf[0][i] = sampleData[0][currentPlaybackSample + i];
+                        stretchBuf[1][i] = sampleData[1][currentPlaybackSample + i];
+                    }
+
+                    stretcher.Process(stretchBuf, stretchSamplesRequired, final: false);
+
+                    currentPlaybackSample += stretchSamplesRequired;
+                }
+            }
 
             CurrentSecond = ((float)currentPlaybackSample / (float)totalSamples) * SongLengthSeconds;
         }
@@ -178,7 +214,7 @@ namespace ChartPlayer
                 int framesRead = framesRequested;
                 int framesOutput;
 
-                if (actualPlaybackSampleRate == vorbisReader.SampleRate)
+                if (PlaybackSampleRate == vorbisReader.SampleRate)
                 {
                     framesOutput = vorbisReader.ReadSamples(tempBuffer, 0, samplesRequested);
                 }
