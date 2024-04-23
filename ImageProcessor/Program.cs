@@ -33,6 +33,8 @@ namespace ChartPlayerImageProcessor
             Add("ScrollUpArrow");
             Add("ScrollDownArrow");
 
+            Add("HorizontalSlider");
+
             Add("VerticalFretLine");
             Add("HorizontalFretLine");
 

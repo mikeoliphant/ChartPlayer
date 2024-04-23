@@ -53,6 +53,11 @@ namespace ChartPlayer
             stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
         }
 
+        public void SetPlaybackSpeed(float speed)
+        {
+            stretcher.SetTimeRatio(1.0 / speed);
+        }
+
         public void SetSong(string songPath, SongData song, SongInstrumentPart part)
         {
             this.Song = song;

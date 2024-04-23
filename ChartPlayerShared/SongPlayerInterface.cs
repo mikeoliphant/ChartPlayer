@@ -30,6 +30,8 @@ namespace ChartPlayer
         TextBlock songArtistText;
         TextBlock songInstrumentText;
 
+        TextBlock speedText;
+
         string globalSaveFolder;
         string globalOptionsFile;
 
@@ -123,6 +125,33 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(optionsButton);
 
+            NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bottomButtonStack.Children.Add(speedInterface);
+
+            HorizontalStack speedStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            speedInterface.Child = speedStack;
+
+            speedStack.Children.Add(speedText = new TextBlock("Speed: 1.0x")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            });
+           
+            HorizontalSlider speedSlider = new HorizontalSlider("HorizontalSlider")
+            {
+                VerticalAlignment = EVerticalAlignment.Center,
+                DesiredWidth = 100,
+                BackgroundColor = UIColor.Black,
+                ChangeAction = SpeedChanged
+            };
+            speedSlider.SetLevel(1.0f);
+            speedStack.Children.Add(speedSlider);
+
             VerticalStack songInfoStack = new VerticalStack()
             {
                 BackgroundColor = UIColor.Black,
@@ -142,6 +171,15 @@ namespace ChartPlayer
 
             songInstrumentText = new TextBlock();
             songInfoStack.Children.Add(songInstrumentText);
+        }
+
+        void SpeedChanged(float newSpeed)
+        {
+            newSpeed = 0.5f + (newSpeed * 0.5f);
+
+            songPlayer.SetPlaybackSpeed(newSpeed);
+
+            speedText.Text = "Speed: " + newSpeed.ToString("0.0x");
         }
 
         public SongPlayerSettings LoadDefaultOptions()
