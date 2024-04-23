@@ -175,7 +175,7 @@ namespace ChartPlayer
                     for (int i = 0; i < toRead; i++)
                     {
                         leftChannel[pos] = stretchBuf[0][i];
-                        leftChannel[pos] = stretchBuf[1][i];
+                        rightChannel[pos] = stretchBuf[1][i];
 
                         pos++;
                     }
