@@ -27,6 +27,7 @@ namespace ChartPlayer
         TextBlock songAlbumText;
         HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
+        NinePatchWrapper bottomInterface;
 
         public SongListDisplay()
         {
@@ -58,10 +59,10 @@ namespace ChartPlayer
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
-                DisplayName = "LastPlay",
+                DisplayName = "Last Play",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
                 SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateTime.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
-                RequestedDisplayWidth = 70,
+                RequestedDisplayWidth = 80,
                 StartReversed = true
             });
 
@@ -71,23 +72,27 @@ namespace ChartPlayer
             SongList.ListDisplay.Font.SpriteFont.MeasureString("EbEbEbEbEbEb C8", out width, out height);
             SongList.AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
 
-            HorizontalStack bottomStack = new HorizontalStack()
+            bottomInterface = new NinePatchWrapper(Layout.Current.GetImage("PopupBackground"))
             {
-                Padding = new LayoutPadding(10)
+                HorizontalAlignment = EHorizontalAlignment.Stretch
             };
-            SongList.BottomDock.Children.Add(bottomStack);
+            SongList.BottomDock.Children.Add(bottomInterface);
+
+            HorizontalStack bottomStack = new HorizontalStack();
+            bottomInterface.Child = bottomStack;
 
             songDisplayStack = new HorizontalStack()
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
-                ChildSpacing = 10
+                ChildSpacing = 10,
+                Visible = false
             };
             bottomStack.Children.Add(songDisplayStack);
 
             albumImage = new ImageElement("SingleWhitePixel")
             {
-                DesiredWidth = 256,
-                DesiredHeight = 256
+                DesiredWidth = 192,
+                DesiredHeight = 192
             };
             songDisplayStack.Children.Add(albumImage);
 
@@ -235,6 +240,8 @@ namespace ChartPlayer
             {
                 selectedSong = currentSongs[index];
 
+                songDisplayStack.Visible = true;
+
                 UpdateSelectedSongDisplay();
             }
         }
@@ -288,7 +295,7 @@ namespace ChartPlayer
                 }
             }
 
-            songDisplayStack.UpdateContentLayout();
+            UpdateContentLayout();
         }
 
         public void Close()
@@ -558,7 +565,7 @@ namespace ChartPlayer
             {
                 Padding = new LayoutPadding(1, 0),
                 ClickAction = delegate {
-                    Sort(column, toggleReverse: true, goToFirstItem: true);
+                    Sort(column, toggleReverse: true, goToFirstItem: false);
                 }
             });
 
@@ -638,7 +645,7 @@ namespace ChartPlayer
         {
             if (lastSortColumn != null)
             {
-                Sort(lastSortColumn, toggleReverse, goToFirstItem: true);
+                Sort(lastSortColumn, toggleReverse, goToFirstItem: false);
             }
         }
 
@@ -648,7 +655,7 @@ namespace ChartPlayer
 
             if (column != null)
             {
-                Sort(column, toggleReverse, goToFirstItem: true);
+                Sort(column, toggleReverse, goToFirstItem: false);
             }
         }
 
@@ -737,7 +744,7 @@ namespace ChartPlayer
             {
                 if (inputManager.WasClicked(column.DisplayName, this))
                 {
-                    Sort(column, toggleReverse: true, goToFirstItem: true);
+                    Sort(column, toggleReverse: true, goToFirstItem: false);
 
                     break;
                 }
