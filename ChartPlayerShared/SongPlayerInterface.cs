@@ -31,6 +31,7 @@ namespace ChartPlayer
         TextBlock songInstrumentText;
 
         TextBlock speedText;
+        HorizontalSlider speedSlider;
 
         string globalSaveFolder;
         string globalOptionsFile;
@@ -137,12 +138,12 @@ namespace ChartPlayer
             };
             speedInterface.Child = speedStack;
 
-            speedStack.Children.Add(speedText = new TextBlock("Speed: 1.0x")
+            speedStack.Children.Add(speedText = new TextBlock("Speed: 100%")
             {
                 VerticalAlignment = EVerticalAlignment.Center
             });
            
-            HorizontalSlider speedSlider = new HorizontalSlider("HorizontalSlider")
+            speedSlider = new HorizontalSlider("HorizontalSlider")
             {
                 VerticalAlignment = EVerticalAlignment.Center,
                 DesiredWidth = 100,
@@ -177,9 +178,12 @@ namespace ChartPlayer
         {
             newSpeed = 0.5f + (newSpeed * 0.5f);
 
-            songPlayer.SetPlaybackSpeed(newSpeed);
+            if (songPlayer != null)
+            {
+                songPlayer.SetPlaybackSpeed(newSpeed);
+            }
 
-            speedText.Text = "Speed: " + newSpeed.ToString("0.0x");
+            speedText.Text = "Speed: " + (newSpeed * 100).ToString("0") + "%";
         }
 
         public SongPlayerSettings LoadDefaultOptions()
@@ -265,6 +269,7 @@ namespace ChartPlayer
 
                 songPlayer = new SongPlayer();
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
+                SpeedChanged(speedSlider.Level);
                 songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
 
                 songPlayer.SetSong(songPath, songData, part);
