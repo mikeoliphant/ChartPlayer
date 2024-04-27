@@ -188,6 +188,16 @@ namespace ChartPlayer
                 {
                     long stretchSamplesRequired = stretcher.GetSamplesRequired();
 
+                    if (stretchSamplesRequired > (totalSamples - currentPlaybackSample))
+                    {
+                        // We're at the end
+
+                        leftChannel.Clear();
+                        rightChannel.Clear();
+
+                        return;
+                    }
+
                     for (int i = 0; i < stretchSamplesRequired; i++)
                     {
                         stretchBuf[0][i] = sampleData[0][currentPlaybackSample + i];
