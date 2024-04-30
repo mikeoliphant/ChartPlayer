@@ -40,7 +40,7 @@ namespace ChartPlayer
         public SongStats[] Stats = new SongStats[Enum.GetValues(typeof(ESongInstrumentType)).Length];
         public string BasePath { get; private set; }
 
-        public SongIndex(string basePath)
+        public SongIndex(string basePath, bool forceRescan)
         {
             this.BasePath = basePath;
 
@@ -48,7 +48,7 @@ namespace ChartPlayer
             {
                 string indexFile = Path.Combine(basePath, "index.json");
 
-                if (File.Exists(indexFile))
+                if (File.Exists(indexFile) && !forceRescan)
                 {
                     using (Stream indexStream = File.OpenRead(indexFile))
                     {
@@ -104,7 +104,7 @@ namespace ChartPlayer
 
         void AddSong(string songPath)
         {
-            using (Stream songStream = File.OpenRead(Path.Combine(BasePath, "song.json")))
+            using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
             {
                 SongData song = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
 

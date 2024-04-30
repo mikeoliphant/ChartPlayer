@@ -61,7 +61,7 @@ namespace ChartPlayer
 
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
-            songIndex = new SongIndex(songBasePath);
+            songIndex = new SongIndex(songBasePath, forceRescan: false);
 
             songList.SetSongIndex(songIndex);
 
@@ -184,6 +184,13 @@ namespace ChartPlayer
             }
 
             speedText.Text = "Speed: " + (newSpeed * 100).ToString("0") + "%";
+        }
+
+        public void RescanSongIndex()
+        {
+            songIndex = new SongIndex(songBasePath, forceRescan: true);
+
+            songList.SetSongIndex(songIndex);
         }
 
         public SongPlayerSettings LoadDefaultOptions()
@@ -382,7 +389,7 @@ namespace ChartPlayer
             {
                 songBasePath = settings.SongPath;
 
-                songIndex = new SongIndex(songBasePath);
+                songIndex = new SongIndex(songBasePath, forceRescan: false);
 
                 songList.SetSongIndex(songIndex);
             }
