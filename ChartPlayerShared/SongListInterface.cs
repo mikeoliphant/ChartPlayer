@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
-using System.IO;
 
 namespace ChartPlayer
 {
@@ -42,20 +41,27 @@ namespace ChartPlayer
 
             SongList.ListDisplay.SelectAction = SongSelected;
 
-            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" });
-            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName" });
+            ItemDisplayColum<SongIndexEntry> titleColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Title", PropertyName = "SongName" };
+            ItemDisplayColum<SongIndexEntry> artistColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Artist", PropertyName = "ArtistName", SecondarySortColumn = titleColumn };
+
+            SongList.AddColumn(titleColumn);
+            SongList.AddColumn(artistColumn);
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "Parts",
                 PropertyName = "Arrangements",
                 RequestedDisplayWidth = 50,
+                SecondarySortColumn = artistColumn,
+                TertiarySortColumn = titleColumn
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
                 RequestedDisplayWidth = 50,
-                StartReversed = true
+                StartReversed = true,
+                SecondarySortColumn = artistColumn,
+                TertiarySortColumn = titleColumn
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
@@ -70,7 +76,14 @@ namespace ChartPlayer
             float height = 0;
 
             SongList.ListDisplay.Font.SpriteFont.MeasureString("EbEbEbEbEbEb C8", out width, out height);
-            SongList.AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry> { DisplayName = "Tuning", PropertyName = "LeadGuitarTuning", RequestedDisplayWidth = width });
+            SongList.AddColumn(tuningColumn = new ItemDisplayColum<SongIndexEntry>
+            {
+                DisplayName = "Tuning",
+                PropertyName = "LeadGuitarTuning",
+                RequestedDisplayWidth = width,
+                SecondarySortColumn = artistColumn,
+                TertiarySortColumn = titleColumn
+            });
 
             bottomInterface = new NinePatchWrapper(Layout.Current.GetImage("PopupBackground"))
             {
@@ -370,6 +383,8 @@ namespace ChartPlayer
         public string SortPropertyName { get; set; }
         public Func<T, object> SortValueFunc { get; set; }
         public bool StartReversed { get; set; }
+        public ItemDisplayColum<T> SecondarySortColumn { get; set; }
+        public ItemDisplayColum<T> TertiarySortColumn { get; set; }
         public string DisplayName { get; set; }
         public float DisplayOffset { get; set; }
         public float DisplayWidth { get; set; }
@@ -420,26 +435,22 @@ namespace ChartPlayer
             if (bObj == null)
                 return -1;
 
-            return ((IComparable)aObj).CompareTo((IComparable)bObj);
+            int compare = ((IComparable)aObj).CompareTo((IComparable)bObj);
+
+            if ((compare == 0) && (SecondarySortColumn != null))
+            {
+                compare = SecondarySortColumn.Compare(a, b);
+
+                if ((compare == 0) && (TertiarySortColumn != null))
+                    return TertiarySortColumn.Compare(a, b);
+            }
+
+            return compare;
         }
 
         public int CompareReverse(T a, T b)
         {
-            object aObj = GetSortValue(b);
-            object bObj = GetSortValue(a);
-
-            if (aObj == null)
-            {
-                if (bObj == null)
-                    return 0;
-
-                return 1;
-            }
-
-            if (bObj == null)
-                return -1;
-
-            return ((IComparable)aObj).CompareTo((IComparable)bObj);
+            return Compare(b, a);
         }
     }
 
