@@ -51,8 +51,7 @@ namespace ChartPlayer
                 DisplayName = "Parts",
                 PropertyName = "Arrangements",
                 RequestedDisplayWidth = 50,
-                SecondarySortColumn = artistColumn,
-                TertiarySortColumn = titleColumn
+                SecondarySortColumn = artistColumn
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
@@ -60,8 +59,7 @@ namespace ChartPlayer
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
                 RequestedDisplayWidth = 50,
                 StartReversed = true,
-                SecondarySortColumn = artistColumn,
-                TertiarySortColumn = titleColumn
+                SecondarySortColumn = artistColumn
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
@@ -69,7 +67,8 @@ namespace ChartPlayer
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
                 SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateTime.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
                 RequestedDisplayWidth = 80,
-                StartReversed = true
+                StartReversed = true,
+                SecondarySortColumn = artistColumn
             });
 
             float width = 0;
@@ -81,8 +80,7 @@ namespace ChartPlayer
                 DisplayName = "Tuning",
                 PropertyName = "LeadGuitarTuning",
                 RequestedDisplayWidth = width,
-                SecondarySortColumn = artistColumn,
-                TertiarySortColumn = titleColumn
+                SecondarySortColumn = artistColumn
             });
 
             bottomInterface = new NinePatchWrapper(Layout.Current.GetImage("PopupBackground"))
@@ -385,7 +383,6 @@ namespace ChartPlayer
         public Func<T, object> SortValueFunc { get; set; }
         public bool StartReversed { get; set; }
         public ItemDisplayColum<T> SecondarySortColumn { get; set; }
-        public ItemDisplayColum<T> TertiarySortColumn { get; set; }
         public string DisplayName { get; set; }
         public float DisplayOffset { get; set; }
         public float DisplayWidth { get; set; }
@@ -438,12 +435,14 @@ namespace ChartPlayer
 
             int compare = ((IComparable)aObj).CompareTo((IComparable)bObj);
 
+            if ((aObj is string) && ((aObj as string).StartsWith("Men")) && ((bObj as string).StartsWith("Men")))
+            {
+
+            }
+
             if ((compare == 0) && (SecondarySortColumn != null))
             {
-                compare = SecondarySortColumn.Compare(a, b);
-
-                if ((compare == 0) && (TertiarySortColumn != null))
-                    return TertiarySortColumn.Compare(a, b);
+                return SecondarySortColumn.Compare(a, b);
             }
 
             return compare;
