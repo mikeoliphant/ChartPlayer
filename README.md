@@ -13,6 +13,7 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 * Support for guitar and bass guitar
 * Note detection
 * Pitch shifting of songs that are slightly off of standard tuning
+* Adjustable song playback speed
 
 # Downloading
 
