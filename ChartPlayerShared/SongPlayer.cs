@@ -36,6 +36,7 @@ namespace ChartPlayer
         RubberBandStretcher stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
+        float playbackSpeed = 1.0f;
 
         public SongPlayer()
         {
@@ -55,6 +56,8 @@ namespace ChartPlayer
 
         public void SetPlaybackSpeed(float speed)
         {
+            playbackSpeed = speed;
+
             stretcher.SetTimeRatio(1.0 / speed);
         }
 
@@ -155,58 +158,79 @@ namespace ChartPlayer
                 return;
             }
 
-            int samplesNeeded = leftChannel.Length;
-
-            int pos = 0;
-
-            while (samplesNeeded > 0)
+            if ((pitchShift == 1.0f) && (playbackSpeed == 1.0f))
             {
-                int avail = stretcher.Available();
+                int samples = (int)Math.Min(leftChannel.Length, totalSamples - currentPlaybackSample);
 
-                if (avail > 0)
+                for (int i = 0; i < samples; i++)
                 {
-                    int toRead = Math.Min(avail, samplesNeeded);
-
-                    long read = stretcher.Retrieve(stretchBuf, toRead);
-
-                    if (read != toRead)
-                        throw new Exception();
-
-                    for (int i = 0; i < toRead; i++)
-                    {
-                        leftChannel[pos] = stretchBuf[0][i];
-                        rightChannel[pos] = stretchBuf[1][i];
-
-                        pos++;
-                    }
-
-                    samplesNeeded -= toRead;
-
-                    continue;
+                    leftChannel[i] = sampleData[0][currentPlaybackSample + i];
+                    rightChannel[i] = sampleData[1][currentPlaybackSample + i];
                 }
-                else
+
+                for (int i = samples; i < leftChannel.Length; i++)
                 {
-                    long stretchSamplesRequired = stretcher.GetSamplesRequired();
+                    leftChannel[i] = 0;
+                    rightChannel[i] = 0;
+                }
 
-                    if (stretchSamplesRequired > (totalSamples - currentPlaybackSample))
+                currentPlaybackSample += samples;
+            }
+            else
+            {
+                int samplesNeeded = leftChannel.Length;
+
+                int pos = 0;
+
+                while (samplesNeeded > 0)
+                {
+                    int avail = stretcher.Available();
+
+                    if (avail > 0)
                     {
-                        // We're at the end
+                        int toRead = Math.Min(avail, samplesNeeded);
 
-                        leftChannel.Clear();
-                        rightChannel.Clear();
+                        long read = stretcher.Retrieve(stretchBuf, toRead);
 
-                        return;
+                        if (read != toRead)
+                            throw new Exception();
+
+                        for (int i = 0; i < toRead; i++)
+                        {
+                            leftChannel[pos] = stretchBuf[0][i];
+                            rightChannel[pos] = stretchBuf[1][i];
+
+                            pos++;
+                        }
+
+                        samplesNeeded -= toRead;
+
+                        continue;
                     }
-
-                    for (int i = 0; i < stretchSamplesRequired; i++)
+                    else
                     {
-                        stretchBuf[0][i] = sampleData[0][currentPlaybackSample + i];
-                        stretchBuf[1][i] = sampleData[1][currentPlaybackSample + i];
+                        long stretchSamplesRequired = stretcher.GetSamplesRequired();
+
+                        if (stretchSamplesRequired > (totalSamples - currentPlaybackSample))
+                        {
+                            // We're at the end
+
+                            leftChannel.Clear();
+                            rightChannel.Clear();
+
+                            return;
+                        }
+
+                        for (int i = 0; i < stretchSamplesRequired; i++)
+                        {
+                            stretchBuf[0][i] = sampleData[0][currentPlaybackSample + i];
+                            stretchBuf[1][i] = sampleData[1][currentPlaybackSample + i];
+                        }
+
+                        stretcher.Process(stretchBuf, stretchSamplesRequired, final: false);
+
+                        currentPlaybackSample += stretchSamplesRequired;
                     }
-
-                    stretcher.Process(stretchBuf, stretchSamplesRequired, final: false);
-
-                    currentPlaybackSample += stretchSamplesRequired;
                 }
             }
 

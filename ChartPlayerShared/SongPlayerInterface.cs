@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -8,7 +7,6 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
-using SharpDX.Direct2D1;
 using System.Xml.Serialization;
 
 namespace ChartPlayer
@@ -144,7 +142,7 @@ namespace ChartPlayer
             {
                 VerticalAlignment = EVerticalAlignment.Center
             });
-           
+
             speedSlider = new HorizontalSlider("HorizontalSlider")
             {
                 VerticalAlignment = EVerticalAlignment.Center,
