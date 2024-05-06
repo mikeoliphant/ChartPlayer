@@ -33,6 +33,8 @@ namespace ChartPlayer
         TextBlock speedText;
         HorizontalSlider speedSlider;
 
+        TextToggleButton hideNotesButton;
+
         string globalSaveFolder;
         string globalOptionsFile;
 
@@ -153,6 +155,12 @@ namespace ChartPlayer
             speedSlider.SetLevel(1.0f);
             speedStack.Children.Add(speedSlider);
 
+            hideNotesButton = new TextToggleButton("Show Notes", "Hide Notes")
+            {
+                ClickAction = ToggleNotes
+            };
+            bottomButtonStack.Children.Add(hideNotesButton);
+
             VerticalStack songInfoStack = new VerticalStack()
             {
                 BackgroundColor = UIColor.Black,
@@ -172,6 +180,14 @@ namespace ChartPlayer
 
             songInstrumentText = new TextBlock();
             songInfoStack.Children.Add(songInstrumentText);
+        }
+
+        void ToggleNotes()
+        {
+            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
+            {
+                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
+            }
         }
 
         void SpeedChanged(float newSpeed)
@@ -301,6 +317,8 @@ namespace ChartPlayer
                     }
 
                     ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer, 3);
+
+                    (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
                 }
 
                 SongStatsEntry stats = songIndex.Stats[(int)songList.CurrentInstrument].GetSongStats(song.FolderPath);
