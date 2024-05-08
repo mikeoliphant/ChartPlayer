@@ -59,6 +59,13 @@ namespace ChartPlayer
                 ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings = LoadDefaultOptions();
             }
 
+            if (!string.IsNullOrEmpty(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortColumn))
+            {
+                songList.SetCurrentInstrument(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument);
+                songList.SongList.SetSortColumn(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortColumn);
+                songList.SongList.CurrentSortReverse = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortReversed;
+            }
+
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
             songIndex = new SongIndex(songBasePath, forceRescan: false);
@@ -105,8 +112,6 @@ namespace ChartPlayer
                     }
                     else
                     {
-                        songList.SetCurrentInstrument(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument);
-
                         ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
                         Layout.Current.ShowPopup(songList);
@@ -267,6 +272,8 @@ namespace ChartPlayer
         public void SetSong(SongIndexEntry song, ESongInstrumentType instrumentType, string partName)
         {
             ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.CurrentInstrument = songList.CurrentInstrument;
+            ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortColumn = (songList.SongList.CurrentSortColumn != null) ? songList.SongList.CurrentSortColumn.DisplayName : null;
+            ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortReversed = songList.SongList.CurrentSortReverse;
 
             try
             {

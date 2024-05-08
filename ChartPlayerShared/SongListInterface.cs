@@ -190,46 +190,43 @@ namespace ChartPlayer
 
         public void SetCurrentInstrument(ESongInstrumentType type)
         {
-            if (currentSongs.Count == 0)
-                return;
-
-            SongIndexEntry topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
-
             if (CurrentInstrument != type)
             {
+                CurrentInstrument = type;
+
+                if ((currentSongs == null) || (currentSongs.Count == 0))
+                    return;
+
+                SongIndexEntry topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
+
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
 
-                if (CurrentInstrument != type)
+                SetCurrentSongs();
+
+                int songIndex = -1;
+
+                if (selectedSong != null)
                 {
-                    CurrentInstrument = type;
-
-                    SetCurrentSongs();
+                    songIndex = SongList.ListDisplay.Items.IndexOf(selectedSong);
                 }
+
+                if (songIndex != -1)
+                {
+                    SongList.ListDisplay.SetTopItem(songIndex);
+                    SongList.ListDisplay.LastSelectedItem = songIndex;
+                }
+                else
+                {
+                    int topIndex = SongList.GetIndexOf(topSong);
+
+                    SongList.ListDisplay.SetTopItem(topIndex);
+
+                    SongList.ListDisplay.LastSelectedItem = -1;
+                }
+
+                if (selectedSong != null)
+                    UpdateSelectedSongDisplay();
             }
-
-            int songIndex = -1;
-
-            if (selectedSong != null)
-            {
-                songIndex = SongList.ListDisplay.Items.IndexOf(selectedSong);
-            }
-
-            if (songIndex != -1)
-            {
-                SongList.ListDisplay.SetTopItem(songIndex);
-                SongList.ListDisplay.LastSelectedItem = songIndex;
-            }
-            else
-            {
-                int topIndex = SongList.GetIndexOf(topSong);
-
-                SongList.ListDisplay.SetTopItem(topIndex);
-
-                SongList.ListDisplay.LastSelectedItem = -1;
-            }
-
-            if (selectedSong != null)
-                UpdateSelectedSongDisplay();
         }
 
         public void Play()
@@ -477,12 +474,12 @@ namespace ChartPlayer
         public MultiColumnItemDisplaySwipeList<T> ListDisplay { get; private set; }
         internal List<ItemDisplayColum<T>> DisplayColumns { get; private set; }
         public Dock BottomDock { get; private set; }
+        public ItemDisplayColum<T> CurrentSortColumn { get; private set; }
+        public bool CurrentSortReverse { get; set; }
 
         List<T> items;
         Dock topDock;
         HorizontalStack headerStack;
-        ItemDisplayColum<T> lastSortColumn;
-        bool lastSortReverse;
 
         public MultiColumnItemDisplay(UIColor backgroundColor)
         {
@@ -644,19 +641,21 @@ namespace ChartPlayer
 
         public void SetSortColumn(string columnName)
         {
-            lastSortColumn = GetColumn(columnName);
+            SetSortColumn(GetColumn(columnName));
         }
 
         public void SetSortColumn(ItemDisplayColum<T> column)
         {
-            lastSortColumn = column;
+            CurrentSortColumn = column;
+
+            CurrentSortReverse = column.StartReversed;
         }
 
         public void Sort(bool toggleReverse)
         {
-            if (lastSortColumn != null)
+            if (CurrentSortColumn != null)
             {
-                Sort(lastSortColumn, toggleReverse, goToFirstItem: false);
+                Sort(CurrentSortColumn, toggleReverse, goToFirstItem: false);
             }
         }
 
@@ -679,18 +678,14 @@ namespace ChartPlayer
                 selectedItem = items[ListDisplay.LastSelectedItem];
             }
 
-            if (toggleReverse && (column == lastSortColumn))
+            if (toggleReverse && (column == CurrentSortColumn))
             {
-                lastSortReverse = !lastSortReverse;
-            }
-            else
-            {
-                lastSortReverse = column.StartReversed;
+                CurrentSortReverse = !CurrentSortReverse;
             }
 
-            lastSortColumn = column;
+            CurrentSortColumn = column;
 
-            if (lastSortReverse)
+            if (CurrentSortReverse)
             {
                 items.Sort(column.CompareReverse);
             }
@@ -714,7 +709,7 @@ namespace ChartPlayer
 
         public int GetIndexOf(T item)
         {
-            Comparison<T> compare = lastSortReverse ? lastSortColumn.CompareReverse : lastSortColumn.Compare;
+            Comparison<T> compare = CurrentSortReverse ? CurrentSortColumn.CompareReverse : CurrentSortColumn.Compare;
 
             for (int i = 0; i < items.Count; i++)
             {

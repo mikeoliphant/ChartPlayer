@@ -15,15 +15,8 @@ namespace ChartPlayer
         public bool InvertStrings { get; set; } = false;
         public bool RetuneToEStandard { get; set; } = true;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
-        public List<string> StringColors { get; set; } = new List<string>
-        {
-            "FF0000",   // Red
-            "FFFF00",    // Yellow
-            "99FFFF",   // Cyan            
-            "FFA500",   // Orange
-            "19CC00",    // Green
-            "CC00CC"    // Purple
-        };
+        public string SongListSortColumn { get; set; } = null;
+        public bool SongListSortReversed { get; set; } = false;
     }
 
     public class SongPlayerSettingsInterface : InputDialog
