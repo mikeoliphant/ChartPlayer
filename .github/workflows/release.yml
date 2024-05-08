@@ -51,7 +51,12 @@ jobs:
       run: msbuild .\ChartPlayer.sln /p:Configuration=Release
       
     - name: Add Plugin Archive
-      run: Compress-Archive -Path ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net6.0-windows\* -Destination ChartPlayerVST3Plugin.zip
+      working-directory: ${{github.workspace}}
+      run: |
+        mkdir plugin-build
+        move ChartPlayerPlugin\bin\Release\net6.0-windows plugin-build\ChartPlayer
+        cp ChartPlayerPlugin\README.txt plugin-build
+        Compress-Archive -Path plugin-build -Destination ChartPlayerVST3Plugin.zip
     
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
