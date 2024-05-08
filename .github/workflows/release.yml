@@ -56,7 +56,7 @@ jobs:
         mkdir plugin-build
         move ChartPlayerPlugin\bin\Release\net6.0-windows plugin-build\ChartPlayer
         cp ChartPlayerPlugin\README.txt plugin-build
-        Compress-Archive -Path plugin-build -Destination ChartPlayerVST3Plugin.zip
+        Compress-Archive -Path plugin-build\* -Destination ChartPlayerVST3Plugin.zip
     
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
