@@ -104,19 +104,7 @@ namespace ChartPlayer
 
             TextButton songsButton = new TextButton("Songs")
             {
-                ClickAction = delegate
-                {
-                    if (songIndex.Songs.Count == 0)
-                    {
-                        ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".");
-                    }
-                    else
-                    {
-                        ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
-
-                        Layout.Current.ShowPopup(songList);
-                    }
-                }
+                ClickAction = ShowSongs
             };
             bottomButtonStack.Children.Add(songsButton);
 
@@ -183,6 +171,22 @@ namespace ChartPlayer
 
             songInstrumentText = new TextBlock();
             songInfoStack.Children.Add(songInstrumentText);
+
+            ShowSongs();
+        }
+
+        void ShowSongs()
+        {
+            if (songIndex.Songs.Count == 0)
+            {
+                ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".");
+            }
+            else
+            {
+                ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+                Layout.Current.ShowPopup(songList);
+            }
         }
 
         void ToggleNotes()

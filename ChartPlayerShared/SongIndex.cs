@@ -57,11 +57,14 @@ namespace ChartPlayer
                 }
                 else
                 {
-                    IndexFolder(basePath);
-
-                    using (Stream indexStream = File.Create(indexFile))
+                    if (Directory.Exists(basePath))
                     {
-                        JsonSerializer.Serialize(indexStream, Songs);
+                        IndexFolder(basePath);
+
+                        using (Stream indexStream = File.Create(indexFile))
+                        {
+                            JsonSerializer.Serialize(indexStream, Songs);
+                        }
                     }
                 }
 
