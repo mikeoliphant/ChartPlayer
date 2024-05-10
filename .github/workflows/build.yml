@@ -22,7 +22,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         msbuild .\ChartPlayer.sln /t:ImageProcessor /p:Configuration="Release" 
-        ImageProcessor\bin\Release\net6.0-windows\ImageProcessor.exe
+        ImageProcessor\bin\Release\net8.0-windows\ImageProcessor.exe
         
     - name: Run MSBuild
       working-directory: ${{github.workspace}}
@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ChartPlayerVST3Plugin
-        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net6.0-windows
+        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net8.0-windows
