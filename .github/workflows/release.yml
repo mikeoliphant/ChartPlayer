@@ -44,7 +44,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         msbuild .\ChartPlayer.sln /t:ImageProcessor /p:Configuration="Release" 
-        ImageProcessor\bin\Release\net6.0-windows\ImageProcessor.exe
+        ImageProcessor\bin\Release\net8.0-windows\ImageProcessor.exe
         
     - name: Run MSBuild
       working-directory: ${{github.workspace}}
@@ -54,7 +54,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir plugin-build
-        move ChartPlayerPlugin\bin\Release\net6.0-windows plugin-build\ChartPlayer
+        move ChartPlayerPlugin\bin\Release\net8.0-windows plugin-build\ChartPlayer
         cp ChartPlayerPlugin\README.txt plugin-build
         Compress-Archive -Path plugin-build\* -Destination ChartPlayerVST3Plugin.zip
     
