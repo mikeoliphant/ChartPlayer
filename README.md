@@ -15,6 +15,10 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 * Pitch shifting of songs that are slightly off of standard tuning
 * Adjustable song playback speed
 
+# Platforms Supported
+
+ChartPlayer currently runs only under Windows, but the core code is designed to be cross-platform. MacOS and Linux support is certainly possible for the future.
+
 # Downloading
 
 You can download the VST plugin from the releases section [here](https://github.com/mikeoliphant/ChartPlayer/releases/latest).
