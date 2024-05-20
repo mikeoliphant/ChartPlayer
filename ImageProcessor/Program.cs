@@ -21,10 +21,6 @@ namespace ChartPlayerImageProcessor
             AddFont("MainFont", "Segoe UI", FontStyle.Bold, 14);
             AddFont("LargeFont", "Segoe UI", FontStyle.Bold, 32);
 
-            Bitmap logo = CreateText("chartplayer", new Font("Segoe UI Black", 40));
-            Bitmap logoShadow = AddShadow(logo);
-            Add("ChartPlayerLogo", logoShadow);
-
             PushDirectory("UserInterface");
 
             Add("SingleWhitePixel");
