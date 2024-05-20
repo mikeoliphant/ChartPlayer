@@ -48,9 +48,9 @@ namespace ChartPlayer
             }
         }
 
-        public Matrix GetViewMatrix()
+        public virtual Matrix GetViewMatrix()
         {
-            return Matrix.CreateLookAt(Position, Position + Forward, Up);
+            return Matrix.CreateLookAt(Position, Position + Forward, Up);;
         }
 
         public float GetDistanceForWidth(float width)

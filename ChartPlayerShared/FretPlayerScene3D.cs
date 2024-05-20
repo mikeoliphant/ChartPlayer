@@ -11,7 +11,8 @@ namespace ChartPlayer
     public class FretCamera : Camera3D
     {
         public float CameraDistance { get; private set; } = 70;
-        public float FocusDist { get; set; }
+        public float FocusDist { get; set; } = 600;
+
         float targetCameraDistance = 64;
         float positionFret = 3;
 
@@ -22,6 +23,11 @@ namespace ChartPlayer
             Forward = new Vector3(0, 0, -1);
 
             FieldOfView = (float)Math.PI / 4.0f;
+        }
+
+        public override Matrix GetViewMatrix()
+        {
+            return base.GetViewMatrix(); // * Matrix.CreateScale(-1, 1, 1);
         }
 
         public void Update(float minFret, float maxFret, float targetFocusFret, float focusY)
@@ -67,9 +73,9 @@ namespace ChartPlayer
         static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         public bool DisplayNotes { get; set; } = true;
+        public float NoteDisplaySeconds { get; set; } = 3;
 
         SongPlayer player;
-        float secondsLong;
         UIColor whiteHalfAlpha;
         UIColor whiteThreeQuartersAlpha;
         float currentTime;
@@ -102,14 +108,11 @@ namespace ChartPlayer
         int[] currentStringFingers;
         int startNotePosition = 0;
 
-        public FretPlayerScene3D(SongPlayer player, float secondsLong)
+        public FretPlayerScene3D(SongPlayer player)
         {
             this.player = player;
-            this.secondsLong = secondsLong;
 
             Camera = fretCamera = new FretCamera();
-
-            fretCamera.FocusDist = secondsLong * timeScale;
 
             numberStrings = new string[numFrets + 1];
             for (int i = 0; i < numberStrings.Length; i++)
@@ -259,7 +262,9 @@ namespace ChartPlayer
                     firstNote = null;
 
                     startTime = currentTime;
-                    endTime = currentTime + secondsLong;
+                    endTime = currentTime + NoteDisplaySeconds;
+
+                    timeScale = 600 / NoteDisplaySeconds;
 
                     for (int fret = 0; fret < numFrets; fret++)
                     {

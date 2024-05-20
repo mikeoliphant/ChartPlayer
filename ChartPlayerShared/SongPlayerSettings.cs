@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace ChartPlayer
         public string SongPath { get; set; } = null;
         public bool InvertStrings { get; set; } = false;
         public bool RetuneToEStandard { get; set; } = true;
+        public float NoteDisplaySeconds { get; set; } = 3;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
         public string SongListSortColumn { get; set; } = null;
         public bool SongListSortReversed { get; set; } = false;
@@ -45,7 +47,7 @@ namespace ChartPlayer
 
         void UpdateDisplay()
         {
-            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, VerticalAlignment = EVerticalAlignment.Stretch };
+            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch};
             SetContents(vStack);
 
             HorizontalStack songPathStack = new HorizontalStack()
@@ -59,45 +61,80 @@ namespace ChartPlayer
             songPathStack.Children.Add(songPathText = new TextBlock(newSettings.SongPath)
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Center
+                VerticalAlignment = EVerticalAlignment.Center,
+                TextColor = UIColor.Yellow
             });
             songPathStack.Children.Add(new TextButton("Select")
             {
                 ClickAction = SelectSongPath
             });
 
-            HorizontalStack invertStack = new HorizontalStack()
+            vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
+            vStack.Children.Add(CreateTextToggleOption("RetuneToEStandard", newSettings, "Re-tune to E Standard:", "Yes", "No"));
+            vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+        }
+
+        UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)
+        {
+            PropertyInfo prop = obj.GetType().GetProperty(property);
+
+            HorizontalStack hStack = new HorizontalStack()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 ChildSpacing = 20
             };
-            vStack.Children.Add(invertStack);
 
-            invertStack.Children.Add(new TextBlock("String Orientation:") { VerticalAlignment = EVerticalAlignment.Center });
+            hStack.Children.Add(new TextBlock(description) { VerticalAlignment = EVerticalAlignment.Center });
 
-            invertStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
+            hStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
-            TextToggleButton invertStringsButton = new TextToggleButton("Low On Top", "Low On Bottom") { ClickAction = delegate { newSettings.InvertStrings = !newSettings.InvertStrings; } };
-            invertStringsButton.SetPressed(newSettings.InvertStrings);
-            invertStack.Children.Add(invertStringsButton);
+            TextToggleButton button = new TextToggleButton(option1, option2) { ClickAction = delegate { prop.SetValue(obj, !(bool)prop.GetValue(obj)); } };
+            button.SetPressed((bool)prop.GetValue(obj));
+            hStack.Children.Add(button);
 
-            HorizontalStack retuneStack = new HorizontalStack()
+            return hStack;
+        }
+
+        UIElement CreateFloatOption(string property, object obj, string description, float minValue, float maxValue, int numDecimals)
+        {
+            PropertyInfo prop = obj.GetType().GetProperty(property);
+
+            HorizontalStack hStack = new HorizontalStack()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 ChildSpacing = 20
             };
-            vStack.Children.Add(retuneStack);
 
-            retuneStack.Children.Add(new TextBlock("Re-tune to E Standard:") { VerticalAlignment = EVerticalAlignment.Center });
+            hStack.Children.Add(new TextBlock(description) { VerticalAlignment = EVerticalAlignment.Center });
 
-            retuneStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
+            hStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
-            TextToggleButton retuneButton = new TextToggleButton("Yes", "No")
+            TextBlock numberText = new TextBlock { TextColor = UIColor.Yellow };
+            hStack.Children.Add(numberText);
+
+            string format = "n" + numDecimals;
+
+            HorizontalSlider hSlider = new HorizontalSlider("HorizontalSlider")
             {
-                ClickAction = delegate { newSettings.RetuneToEStandard = !newSettings.RetuneToEStandard; }
+                VerticalAlignment = EVerticalAlignment.Center,
+                DesiredWidth = 100,
+                BackgroundColor = UIColor.Black,
+                ChangeAction = delegate (float percent)
+                {
+                    float value = minValue + ((maxValue - minValue) * percent);
+                    prop.SetValue(obj, value);
+                    numberText.Text = value.ToString(format);
+                }
             };
-            retuneButton.SetPressed(newSettings.RetuneToEStandard);
-            retuneStack.Children.Add(retuneButton);
+
+            float currentValue = (float)prop.GetValue(obj);
+
+            numberText.Text = currentValue.ToString(format);
+            hSlider.SetLevel((currentValue - minValue) / (maxValue - minValue));
+
+            hStack.Children.Add(hSlider);
+
+            return hStack;
         }
 
         void CopySettings(SongPlayerSettings fromSettings, SongPlayerSettings toSettings)
