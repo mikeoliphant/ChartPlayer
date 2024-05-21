@@ -33,6 +33,10 @@ namespace ChartPlayer
 
         TextToggleButton hideNotesButton;
 
+        StringBuilderTextBlock scoreText;
+        int lastTotalNotes = -1;
+        int lastDetectedNotes = -1;
+
         string globalSaveFolder;
         string globalOptionsFile;
 
@@ -151,6 +155,12 @@ namespace ChartPlayer
                 ClickAction = ToggleNotes
             };
             bottomButtonStack.Children.Add(hideNotesButton);
+
+            scoreText = new StringBuilderTextBlock("0/0")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            };
+            bottomButtonStack.Children.Add(scoreText);
 
             VerticalStack songInfoStack = new VerticalStack()
             {
@@ -403,7 +413,6 @@ namespace ChartPlayer
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
         }
 
-
         void ApplySettings(SongPlayerSettings settings)
         {
             if (songPlayer != null)
@@ -425,6 +434,42 @@ namespace ChartPlayer
 
                 songList.SetSongIndex(songIndex);
             }
+        }
+
+        public void SeekTime(float secs)
+        {
+            songPlayer.SeekTime(secs);
+
+            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+
+            if (fretScene != null)
+            {
+                fretScene.ResetScore();
+            }
+        }
+
+        protected override void DrawContents()
+        {
+            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+
+            if (fretScene != null)
+            {
+                int totalNotes = fretScene.NumNotesTotal;
+                int detectedNotes = fretScene.NumNotesDetected;
+
+                if ((totalNotes != lastTotalNotes) || (detectedNotes != lastDetectedNotes))
+                {
+                    lastTotalNotes = totalNotes;
+                    lastDetectedNotes = detectedNotes;
+
+                    scoreText.StringBuilder.Clear();
+                    scoreText.StringBuilder.AppendNumber(detectedNotes);
+                    scoreText.StringBuilder.Append("/");
+                    scoreText.StringBuilder.AppendNumber(totalNotes);
+                }
+            }
+
+            base.DrawContents();
         }
     }
 
@@ -497,7 +542,7 @@ namespace ChartPlayer
 
                 if (Layout.Current.InputManager.IsDown("PreciseClick"))
                 {
-                    songPlayer.SeekTime(time);
+                    SongPlayerInterface.Instance.SeekTime(time);
                 }
                 else if (touch.TouchState == ETouchState.Pressed)
                 {
@@ -505,7 +550,7 @@ namespace ChartPlayer
                     {
                         if ((time >= section.StartTime) && (time < section.EndTime))
                         {
-                            songPlayer.SeekTime(section.StartTime);
+                            SongPlayerInterface.Instance.SeekTime(section.StartTime);
                         }
                     }
                 }
@@ -522,11 +567,11 @@ namespace ChartPlayer
 
             if (inputManager.WasClicked("FastForward", this))
             {
-                songPlayer.SeekTime(songPlayer.CurrentSecond + 0.2f);
+                SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond + 0.2f);
             }
             else if (inputManager.WasClicked("Rewind", this))
             {
-                songPlayer.SeekTime(songPlayer.CurrentSecond - 0.2f);
+                SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond - 0.2f);
             }
         }
 

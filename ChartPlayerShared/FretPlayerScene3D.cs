@@ -74,6 +74,8 @@ namespace ChartPlayer
 
         public bool DisplayNotes { get; set; } = true;
         public float NoteDisplaySeconds { get; set; } = 3;
+        public int NumNotesDetected { get; private set; } = 0;
+        public int NumNotesTotal { get; private set; } = 0;
 
         SongPlayer player;
         UIColor whiteHalfAlpha;
@@ -102,6 +104,7 @@ namespace ChartPlayer
         NoteDetector noteDetector;
         Thread noteDetectThread;
 
+        sbyte[] notesDetected;
         SongNote? currentChordNote;
         SongNote? currentFingerNote;
         SongNote?[] currentStringNotes;
@@ -145,6 +148,8 @@ namespace ChartPlayer
 
             noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
             noteDetectThread.Start();
+
+            notesDetected = new sbyte[player.SongInstrumentNotes.Notes.Count];
 
             // Sort notes by time and then by string
             player.SongInstrumentNotes.Notes = player.SongInstrumentNotes.Notes.OrderBy(n => n.TimeOffset).ThenByDescending(n => GetStringOffset(n.String)).ToList();
@@ -234,6 +239,14 @@ namespace ChartPlayer
             noteDetectThread.Join();
         }
 
+        public void ResetScore()
+        {
+            Array.Clear(notesDetected);
+
+            NumNotesDetected = 0;
+            NumNotesTotal = 0;
+        }
+
         public override void Draw()
         {
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
@@ -321,90 +334,120 @@ namespace ChartPlayer
                         startNotePosition++;
                     }
 
-                    if (DisplayNotes)
+                    int pos = 0;
+
+                    // Draw hand position areas on timeline
+                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
+                        SongNote note = allNotes[pos];
 
-                        int pos = 0;
+                        if (note.TimeOffset > endTime)
+                            break;
 
-                        // Draw hand position areas on timeline
-                        for (pos = startNotePosition; pos < allNotes.Count; pos++)
+                        if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
                         {
-                            SongNote note = allNotes[pos];
-
-                            if (note.TimeOffset > endTime)
-                                break;
-
-                            if ((note.TimeOffset > currentTime) && ((lastHandFret != -1) && (lastHandFret != note.HandFret)))
+                            if (DisplayNotes)
                             {
                                 DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, note.TimeOffset, 0, handPositionColor);
-
-                                lastTime = note.TimeOffset;
                             }
-
-                            lastHandFret = note.HandFret;
+                            lastTime = note.TimeOffset;
                         }
 
-                        if (lastHandFret != -1)
+                        lastHandFret = note.HandFret;
+                    }
+
+                    if (lastHandFret != -1)
+                    {
+                        if (DisplayNotes)
                         {
                             DrawFlatImage(Layout.Current.GetImage("SingleWhitePixel"), lastHandFret - 1, lastHandFret + 3, lastTime, endTime, 0, handPositionColor);
                         }
+                    }
+                
+                    for (int str = 0; str < numStrings; str++)
+                    {
+                        currentStringNotes[str] = null;
+                        currentStringFingers[str] = -1;
+                    }
 
-                        for (int str = 0; str < numStrings; str++)
+                    int lastNote = pos;
+
+                    if (lastNote == allNotes.Count)
+                        lastNote--;
+
+                    currentChordNote = null;
+                    currentFingerNote = null;
+
+                    // Find current active notes
+                    for (pos = lastNote; pos >= startNotePosition; pos--)
+                    {
+                        SongNote note = allNotes[pos];
+
+                        if (note.TimeOffset > currentTime)
+                            continue;
+
+                        if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
                         {
-                            currentStringNotes[str] = null;
-                            currentStringFingers[str] = -1;
+                            if ((note.TimeOffset <= currentTime) && !currentChordNote.HasValue)
+                                currentChordNote = note;
+                        }
+                        else
+                        {
+                            if (!currentStringNotes[note.String].HasValue)
+                            {
+                                if ((note.TimeOffset + Math.Max(note.TimeLength, 0.2f) > currentTime))
+                                    currentStringNotes[note.String] = note;
+                            }
                         }
 
-                        int lastNote = pos;
+                        if (note.TimeOffset <= currentTime)
+                        {
+                            if (note.FingerID != -1)
+                            {
+                                if (!currentFingerNote.HasValue)
+                                    currentFingerNote = note;
+                            }
+                        }
+                    }
 
-                        if (lastNote == allNotes.Count)
-                            lastNote--;
+                    float startWithMinSustain = startTime - 0.3f;
 
-                        currentChordNote = null;
-                        currentFingerNote = null;
-
-                        // Find current active notes
+                    // Draw the notes
+                    if (startNotePosition < allNotes.Count)
+                    {
                         for (pos = lastNote; pos >= startNotePosition; pos--)
                         {
                             SongNote note = allNotes[pos];
 
-                            if (note.TimeOffset > currentTime)
+                            if (note.TimeOffset > endTime)
                                 continue;
 
-                            if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
-                            {
-                                if ((note.TimeOffset <= currentTime) && !currentChordNote.HasValue)
-                                    currentChordNote = note;
-                            }
-                            else
-                            {
-                                if (!currentStringNotes[note.String].HasValue)
-                                {
-                                    if ((note.TimeOffset + Math.Max(note.TimeLength, 0.2f) > currentTime))
-                                        currentStringNotes[note.String] = note;
-                                }
-                            }
+                            isDetected = false;
 
                             if (note.TimeOffset <= currentTime)
                             {
-                                if (note.FingerID != -1)
+                                isDetected = NoteDetect(note);
+
+                                if (notesDetected[pos] == 0)
                                 {
-                                    if (!currentFingerNote.HasValue)
-                                        currentFingerNote = note;
+                                    // Mark note as played
+                                    notesDetected[pos] = -1;
+
+                                    NumNotesTotal++;
                                 }
                             }
-                        }
 
-                        float startWithMinSustain = startTime - 0.3f;
-
-                        // Draw the notes
-                        if (startNotePosition < allNotes.Count)
-                        {
-                            for (pos = lastNote; pos >= startNotePosition; pos--)
+                            if (DisplayNotes)
                             {
-                                SongNote note = allNotes[pos];
-
                                 DrawNote(note);
+                            }
+
+                            if (isDetected && (notesDetected[pos] != 1))
+                            {
+                                // Mark as detected
+                                notesDetected[pos] = 1;
+
+                                NumNotesDetected++;
                             }
                         }
                     }
@@ -437,7 +480,6 @@ namespace ChartPlayer
 
                     if (DisplayNotes)
                     {
-
                         // Draw current notes
                         if (currentChordNote.HasValue)
                         {
@@ -522,16 +564,6 @@ namespace ChartPlayer
 
         void DrawNote(SongNote note)
         {
-            if (note.TimeOffset > endTime)
-                return;
-
-            isDetected = false;
-
-            if (note.TimeOffset <= currentTime)
-            {
-                isDetected = NoteDetect(note);
-            }
-
             if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
             {
                 //if ((note.TimeOffset <= currentTime) && !currentChordNote.HasValue)
