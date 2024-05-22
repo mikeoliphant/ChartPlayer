@@ -28,3 +28,16 @@ To install, unpack the .zip file and copy the extracted folder to "C:\Program Fi
 # Where to get songs
 
 See the [OpenSongChart github repository](https://github.com/mikeoliphant/OpenSongChart).
+
+# Building From Source
+
+Make sure you clone this github repo recursively:
+
+```bash
+git clone --recurse-submodules https://github.com/mikeoliphant/ChartPlayer
+```
+
+Building should be straightforward using Visual Studio.
+
+**NOTE:** Build and run the "ImageProcessor" project first - it creates texture assets that are required for the main build.
+
