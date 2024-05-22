@@ -30,6 +30,9 @@ namespace ChartPlayerImageProcessor
             Add("ButtonPressed");
             Add("ButtonUnpressed");
 
+            Add("Play");
+            Add("Pause");
+
             Add("ScrollUpArrow");
             Add("ScrollDownArrow");
 

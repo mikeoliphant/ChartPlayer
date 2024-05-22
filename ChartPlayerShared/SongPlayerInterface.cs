@@ -37,6 +37,8 @@ namespace ChartPlayer
         int lastTotalNotes = -1;
         int lastDetectedNotes = -1;
 
+        ImageToggleButton pauseButton;
+
         string globalSaveFolder;
         string globalOptionsFile;
 
@@ -161,6 +163,20 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center
             };
             bottomButtonStack.Children.Add(scoreText);
+
+            Dock playDock = new Dock()
+            {
+                DesiredWidth = 300
+            };
+            bottomButtonStack.Children.Add(playDock);
+
+            pauseButton = new ImageToggleButton("Play", "Pause")
+            {
+                HorizontalAlignment = EHorizontalAlignment.Center,
+                VerticalAlignment = EVerticalAlignment.Center,
+                ClickAction = TogglePaused
+            };
+            playDock.Children.Add(pauseButton);
 
             VerticalStack songInfoStack = new VerticalStack()
             {
@@ -381,10 +397,7 @@ namespace ChartPlayer
 
             if (inputManager.WasPressed("PauseGame"))
             {
-                if (songPlayer != null)
-                {
-                    songPlayer.Paused = !songPlayer.Paused;
-                }
+                TogglePaused();
             }
 
             Vector2 mousePosition = inputManager.MousePosition;
@@ -411,6 +424,16 @@ namespace ChartPlayer
             SetThreadExecutionState(ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+        }
+
+        public void TogglePaused()
+        {
+            if (songPlayer != null)
+            {
+                songPlayer.Paused = !songPlayer.Paused;
+            }
+
+            pauseButton.SetPressed(songPlayer.Paused);
         }
 
         void ApplySettings(SongPlayerSettings settings)
