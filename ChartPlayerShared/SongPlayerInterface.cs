@@ -125,6 +125,18 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(optionsButton);
 
+            TextButton helpButton = new TextButton("?")
+            {
+                ClickAction = delegate
+                {
+                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+                    Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
+                        "Left/Right arrows to move forward/back.")));
+                }
+            };
+            bottomButtonStack.Children.Add(helpButton);
+
             NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
