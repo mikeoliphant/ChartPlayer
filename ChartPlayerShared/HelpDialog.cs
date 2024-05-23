@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using UILayout;
 
@@ -15,7 +16,7 @@ namespace ChartPlayer
                 ChildSpacing = 20
             };
 
-            contents.Children.Add(new TextBlock("ChartPlayer\nCopyright (c) 2024 Mike Oliphant"));
+            contents.Children.Add(new TextBlock("ChartPlayer v0.1.2\nCopyright (c) 2024 Mike Oliphant"));
 
             contents.Children.Add(helpElement);
 
@@ -25,6 +26,13 @@ namespace ChartPlayer
             {
                 Text = "Close",
                 CloseOnInput = true
+            });
+
+            AddInput(new DialogInput()
+            {
+                Text = "View Github Project",
+                CloseOnInput = false,
+                Action = () => { Process.Start(new ProcessStartInfo("https://github.com/mikeoliphant/ChartPlayer") { UseShellExecute = true }); }
             });
         }
     }
