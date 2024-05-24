@@ -5,6 +5,7 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
+using System.Windows.Forms;
 
 namespace ChartPlayer
 {
@@ -12,6 +13,7 @@ namespace ChartPlayer
     {
         public float CameraDistance { get; private set; } = 70;
         public float FocusDist { get; set; } = 600;
+        public bool MirrorLeftRight { get; set; } = false;
 
         float targetCameraDistance = 64;
         float positionFret = 3;
@@ -27,7 +29,10 @@ namespace ChartPlayer
 
         public override Matrix GetViewMatrix()
         {
-            return base.GetViewMatrix(); // * Matrix.CreateScale(-1, 1, 1);
+            if (MirrorLeftRight)
+                return base.GetViewMatrix() * Matrix.CreateScale(-1, 1, 1);
+
+            return base.GetViewMatrix();
         }
 
         public void Update(float minFret, float maxFret, float targetFocusFret, float focusY)
@@ -73,6 +78,15 @@ namespace ChartPlayer
         static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         public bool DisplayNotes { get; set; } = true;
+        public bool LeftyMode
+        {
+            get => lefyMode;
+            set
+            {
+                lefyMode = value;
+                fretCamera.MirrorLeftRight = lefyMode;
+            }
+        }
         public float NoteDisplaySeconds { get; set; } = 3;
         public int NumNotesDetected { get; private set; } = 0;
         public int NumNotesTotal { get; private set; } = 0;
@@ -91,6 +105,7 @@ namespace ChartPlayer
         SongNote? firstNote;
         int numStrings;
         bool isDetected = false;
+        bool lefyMode = false;
 
         FretCamera fretCamera;
 
@@ -1204,7 +1219,18 @@ namespace ChartPlayer
 
             Rectangle drawRect = Rectangle.Empty;
 
-            for (int i = 0; i < text.Length; i++)
+            int start = 0;
+            int end = text.Length;
+            int inc = 1;
+
+            if (LeftyMode)
+            {
+                start = text.Length - 1;
+                end = -1;
+                inc = -1;
+            }
+
+            for (int i = start; i != end; i += inc)
             {
                 float z = timeCenter - (textHeight / 2);
 
@@ -1217,9 +1243,19 @@ namespace ChartPlayer
                 drawRect.Width = glyph.Width;
                 drawRect.Height = glyph.Height;
 
-                DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, heightOffset, z), color, new Vector3(x, heightOffset, z + ((float)glyph.Height * imageScale)), color,
-                    new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z + ((float)glyph.Height * imageScale)), color,
-                    new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z), color);
+                if (LeftyMode)
+                {
+                    DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z), color, new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z + ((float)glyph.Height * imageScale)), color,
+                        new Vector3(x, heightOffset, z + ((float)glyph.Height * imageScale)), color,
+                        new Vector3(x, heightOffset, z), color);
+                }
+                else
+                {
+                    DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, heightOffset, z), color, new Vector3(x, heightOffset, z + ((float)glyph.Height * imageScale)), color,
+                        new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z + ((float)glyph.Height * imageScale)), color,
+                        new Vector3(x + ((float)glyph.Width * imageScale), heightOffset, z), color);
+
+                }
 
                 x += (glyph.Width + font.SpriteFont.Spacing) * imageScale;
             }
@@ -1255,7 +1291,18 @@ namespace ChartPlayer
 
             Rectangle drawRect = Rectangle.Empty;
 
-            for (int i = 0; i < text.Length; i++)
+            int start = 0;
+            int end = text.Length;
+            int inc = 1;
+
+            if (LeftyMode)
+            {
+                start = text.Length - 1;
+                end = -1;
+                inc = -1;
+            }
+
+            for (int i = start; i != end; i += inc)
             {
                 float y = verticalCenter - (textHeight / 2);
 
@@ -1268,8 +1315,17 @@ namespace ChartPlayer
                 drawRect.Width = glyph.Width;
                 drawRect.Height = glyph.Height;
 
-                DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, y, timeCenter), color, new Vector3(x, y + ((float)glyph.Height * imageScale), timeCenter), color,
-                    new Vector3(x + ((float)glyph.Width * imageScale), y + ((float)glyph.Height * imageScale), timeCenter), color, new Vector3(x + ((float)glyph.Width * imageScale), y, timeCenter), color);
+                if (LeftyMode)
+                {
+                    DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x + ((float)glyph.Width * imageScale), y, timeCenter), color, new Vector3(x + ((float)glyph.Width * imageScale), y + ((float)glyph.Height * imageScale), timeCenter), color,
+                        new Vector3(x, y + ((float)glyph.Height * imageScale), timeCenter), color, new Vector3(x, y, timeCenter), color);
+                }
+                else
+                {
+                    DrawQuad(font.SpriteFont.FontImage, drawRect, new Vector3(x, y, timeCenter), color, new Vector3(x, y + ((float)glyph.Height * imageScale), timeCenter), color,
+                        new Vector3(x + ((float)glyph.Width * imageScale), y + ((float)glyph.Height * imageScale), timeCenter), color, new Vector3(x + ((float)glyph.Width * imageScale), y, timeCenter), color);
+                }
+                
 
                 x += (glyph.Width + font.SpriteFont.Spacing) * imageScale;
             }

@@ -363,7 +363,11 @@ namespace ChartPlayer
                         (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
                     }
 
-                    ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer) { NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDisplaySeconds };
+                    ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer)
+                    {
+                        LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDisplaySeconds
+                    };
 
                     (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
                 }
@@ -457,6 +461,7 @@ namespace ChartPlayer
 
             if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
             {
+                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
                 (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).NoteDisplaySeconds = settings.NoteDisplaySeconds;
             }
 

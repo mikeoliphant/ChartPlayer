@@ -14,6 +14,7 @@ namespace ChartPlayer
     {
         public string SongPath { get; set; } = null;
         public bool InvertStrings { get; set; } = false;
+        public bool LeftyMode { get; set; } = false;
         public bool RetuneToEStandard { get; set; } = true;
         public float NoteDisplaySeconds { get; set; } = 3;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
@@ -70,6 +71,7 @@ namespace ChartPlayer
             });
 
             vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
+            vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
             vStack.Children.Add(CreateTextToggleOption("RetuneToEStandard", newSettings, "Re-tune to E Standard:", "Yes", "No"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
         }
