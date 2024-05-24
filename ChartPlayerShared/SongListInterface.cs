@@ -139,6 +139,14 @@ namespace ChartPlayer
             buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
             //buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
             buttonInputStack.AddInput(new DialogInput { Text = "ReScan", Action = delegate { SongPlayerInterface.Instance.RescanSongIndex(); } });
+            buttonInputStack.AddInput(new DialogInput
+            {
+                Text = "?",
+                Action = delegate
+                {
+                    Layout.Current.ShowPopup(new HelpDialog(new TextBlock("Click to select song.\n\nDrag to scroll, or use arrow keys and page up/down.\n\nClick column titles to sort.")));
+                }
+            });
             buttonInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
             SongList.SetSortColumn("Artist");
