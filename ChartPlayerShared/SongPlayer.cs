@@ -52,6 +52,9 @@ namespace ChartPlayer
             this.PlaybackSampleRate = playbackRate;
 
             stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
+
+            stretcher.SetTimeRatio(1.0 / playbackSpeed);
+            stretcher.SetPitchScale(pitchShift);
         }
 
         public void SetPlaybackSpeed(float speed)
