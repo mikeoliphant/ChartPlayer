@@ -8,6 +8,7 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using System.Windows.Forms;
 
 namespace ChartPlayer
 {
@@ -33,6 +34,7 @@ namespace ChartPlayer
 
         TextToggleButton hideNotesButton;
 
+        UIElementWrapper scoreTextWrapper;
         StringBuilderTextBlock scoreText;
         int lastTotalNotes = -1;
         int lastDetectedNotes = -1;
@@ -170,11 +172,37 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(hideNotesButton);
 
-            scoreText = new StringBuilderTextBlock("0/0")
+            NinePatchWrapper scoreInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bottomButtonStack.Children.Add(scoreInterface);
+
+            HorizontalStack scoreStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                DesiredWidth = 200,
+                ChildSpacing = 10
+            };
+            scoreInterface.Child = scoreStack;
+
+            scoreStack.Children.Add(new TextBlock("Accuracy: ")
             {
                 VerticalAlignment = EVerticalAlignment.Center
+            });
+
+            scoreTextWrapper = new UIElementWrapper()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(scoreText);
+            scoreStack.Children.Add(scoreTextWrapper);
+
+            scoreText = new StringBuilderTextBlock("0/0")
+            {
+                HorizontalAlignment = EHorizontalAlignment.Center,
+                VerticalAlignment = EVerticalAlignment.Center,
+            };
+            scoreTextWrapper.Child = scoreText;
 
             Dock playDock = new Dock()
             {
@@ -506,6 +534,8 @@ namespace ChartPlayer
                     scoreText.StringBuilder.AppendNumber(detectedNotes);
                     scoreText.StringBuilder.Append("/");
                     scoreText.StringBuilder.AppendNumber(totalNotes);
+
+                    scoreTextWrapper.UpdateContentLayout();
                 }
             }
 
