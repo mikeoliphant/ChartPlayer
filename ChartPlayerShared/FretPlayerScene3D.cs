@@ -116,6 +116,8 @@ namespace ChartPlayer
         UIImage[] stringNoteImages;
         UIImage[] stringNoteTrailImages;
 
+        double[] stringOffsetSemitones;
+
         NoteDetector noteDetector;
         Thread noteDetectThread;
 
@@ -160,6 +162,20 @@ namespace ChartPlayer
             currentStringNotes = new SongNote?[numStrings];
             currentStringFingers = new int[numStrings];
             currentStringDetected = new bool[numStrings];
+
+            stringOffsetSemitones = new double[numStrings];
+
+            double baseOffset = 0;
+
+            if (player.RetuneToEStandard)
+            {
+                baseOffset = -player.TuningOffsetSemitones;
+            }
+
+            for (int str = 0; str < numStrings; str++)
+            {
+                stringOffsetSemitones[str] = baseOffset + player.SongInstrumentPart.Tuning.StringSemitoneOffsets[str];
+            }
 
             noteDetector = new NoteDetector();
             noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
@@ -1361,22 +1377,24 @@ namespace ChartPlayer
         static int A4MidiNoteNum = 69;
         static double HalfStepRatio = Math.Pow(2.0, (1.0 / 12.0));
 
-        static double GetMidiNoteFrequency(int midiNoteNum)
+        static double GetMidiNoteFrequency(double midiNoteNum)
         {
-            int noteDiff = A4MidiNoteNum - midiNoteNum;
+            double noteDiff = A4MidiNoteNum - midiNoteNum;
 
             return A4Frequency / Math.Pow(HalfStepRatio, noteDiff);
         }
 
         double GetNoteFrequency(int strng, int fret)
         {
+            double semitoneOffset = fret + stringOffsetSemitones[strng];
+
             if (numStrings == 6)
             {
-                return GetMidiNoteFrequency(GuitarStringNotes[strng] + fret);
+                return GetMidiNoteFrequency(GuitarStringNotes[strng] + semitoneOffset);
             }
             else
             {
-                return GetMidiNoteFrequency(BassStringNotes[strng] + fret);
+                return GetMidiNoteFrequency(BassStringNotes[strng] + semitoneOffset);
             }
         }
 
