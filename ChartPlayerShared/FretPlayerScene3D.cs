@@ -122,7 +122,9 @@ namespace ChartPlayer
         sbyte[] notesDetected;
         SongNote? currentChordNote;
         SongNote? currentFingerNote;
+        bool currentChordDetected;
         SongNote?[] currentStringNotes;
+        bool[] currentStringDetected;
         int[] currentStringFingers;
         int startNotePosition = 0;
 
@@ -157,6 +159,7 @@ namespace ChartPlayer
 
             currentStringNotes = new SongNote?[numStrings];
             currentStringFingers = new int[numStrings];
+            currentStringDetected = new bool[numStrings];
 
             noteDetector = new NoteDetector();
             noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
@@ -325,6 +328,7 @@ namespace ChartPlayer
 
                     startNotePosition = MathUtil.Clamp(startNotePosition, 0, allNotes.Count - 1);
 
+                    // Move backward until we find a note that is not visible (or we hit the start)
                     while (startNotePosition > 0)
                     {
                         SongNote note = allNotes[startNotePosition];
@@ -337,6 +341,7 @@ namespace ChartPlayer
                         startNotePosition--;
                     }
 
+                    // Now move forward until we find a note that is visible (or we hit the end)
                     while (startNotePosition < allNotes.Count)
                     {
                         SongNote note = allNotes[startNotePosition];
@@ -379,10 +384,12 @@ namespace ChartPlayer
                         }
                     }
                 
+                    // Clear our string info
                     for (int str = 0; str < numStrings; str++)
                     {
                         currentStringNotes[str] = null;
                         currentStringFingers[str] = -1;
+                        currentStringDetected[str] = false;
                     }
 
                     int lastNote = pos;
@@ -392,6 +399,7 @@ namespace ChartPlayer
 
                     currentChordNote = null;
                     currentFingerNote = null;
+                    currentChordDetected = false;
 
                     // Find current active notes
                     for (pos = lastNote; pos >= startNotePosition; pos--)
@@ -425,7 +433,18 @@ namespace ChartPlayer
                         }
                     }
 
-                    float startWithMinSustain = startTime - 0.3f;
+                    if (currentChordNote.HasValue)
+                    {
+                        currentChordDetected = NoteDetect(currentChordNote.Value);
+                    }
+
+                    for (int str = 0; str < numStrings; str++)
+                    {
+                        if (currentStringNotes[str].HasValue)
+                        {
+                            currentStringDetected[str] = NoteDetect(currentStringNotes[str].Value);
+                        }
+                    }
 
                     // Draw the notes
                     if (startNotePosition < allNotes.Count)
@@ -441,7 +460,7 @@ namespace ChartPlayer
 
                             if (note.TimeOffset <= currentTime)
                             {
-                                isDetected = NoteDetect(note);
+                                isDetected = note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) ? currentChordDetected : currentStringDetected[note.String];
 
                                 if (notesDetected[pos] == 0)
                                 {
@@ -498,6 +517,8 @@ namespace ChartPlayer
                         // Draw current notes
                         if (currentChordNote.HasValue)
                         {
+                            isDetected = currentChordDetected;
+
                             DrawChordOutline(currentChordNote.Value);
 
                             if (!currentChordNote.Value.Techniques.HasFlag(ESongNoteTechnique.ChordNote))
@@ -509,6 +530,8 @@ namespace ChartPlayer
                             if (currentStringNotes[str].HasValue)
                             {
                                 SongNote stringNote = currentStringNotes[str].Value;
+
+                                isDetected = currentStringDetected[str];
 
                                 DrawSingleNote(stringNote, drawCurrent: true, isGhost: false);
                             }
