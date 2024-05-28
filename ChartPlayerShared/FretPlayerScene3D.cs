@@ -460,7 +460,7 @@ namespace ChartPlayer
 
                             if (note.TimeOffset <= currentTime)
                             {
-                                isDetected = note.Techniques.HasFlag(ESongNoteTechnique.ChordNote) ? currentChordDetected : currentStringDetected[note.String];
+                                isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : currentStringDetected[note.String];
 
                                 if (notesDetected[pos] == 0)
                                 {
