@@ -15,7 +15,7 @@ namespace ChartPlayer
         public string SongPath { get; set; } = null;
         public bool InvertStrings { get; set; } = false;
         public bool LeftyMode { get; set; } = false;
-        public bool RetuneToEStandard { get; set; } = true;
+        public bool RetuneToEStandard { get; set; } = false;
         public float NoteDisplaySeconds { get; set; } = 3;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
         public string SongListSortColumn { get; set; } = null;
