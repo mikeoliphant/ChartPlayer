@@ -33,7 +33,7 @@ namespace ChartPlayer
             // Unique 64bit ID for the plugin
             PluginID = 0x5DE6625BF8214E2F;
 
-            Logger.ImmediateMode = true;
+            //Logger.ImmediateMode = true;
 
             HasUserInterface = true;
             EditorWidth = 1024;

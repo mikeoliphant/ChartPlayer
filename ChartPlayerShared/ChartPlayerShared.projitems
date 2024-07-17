@@ -13,9 +13,6 @@
     <None Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ChartPlayerGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ChartPlayerPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera3D.cs" />

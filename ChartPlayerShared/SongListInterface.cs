@@ -202,12 +202,12 @@ namespace ChartPlayer
             {
                 CurrentInstrument = type;
 
+                tuningColumn.PropertyName = type.ToString() + "Tuning";
+
                 if ((currentSongs == null) || (currentSongs.Count == 0))
                     return;
 
                 SongIndexEntry topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
-
-                tuningColumn.PropertyName = type.ToString() + "Tuning";
 
                 SetCurrentSongs();
 
@@ -724,15 +724,6 @@ namespace ChartPlayer
             }
 
             return -1;
-        }
-
-        public void Randomize()
-        {
-            //PixGame.Random.RandomizeList(items);
-
-            throw new NotImplementedException();
-
-            ListDisplay.GoToFirstItem();
         }
 
         public override void HandleInput(InputManager inputManager)
