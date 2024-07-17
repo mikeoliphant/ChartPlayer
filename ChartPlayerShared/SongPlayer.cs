@@ -99,6 +99,17 @@ namespace ChartPlayer
 
             TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
 
+            TuningOffsetSemitones %= 12;
+
+            if (TuningOffsetSemitones > 6)
+            {
+                TuningOffsetSemitones = 12 - TuningOffsetSemitones;
+            }
+            else if (TuningOffsetSemitones < -6)
+            {
+                TuningOffsetSemitones += 12;
+            }
+
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
 
             if (vocalPart != null)
