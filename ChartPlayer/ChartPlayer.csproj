@@ -23,10 +23,10 @@
 		<TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="AudioPlugSharp" Version="0.6.3" />
+		<PackageReference Include="AudioPlugSharp" Version="0.6.5" />
 		<PackageReference Include="AudioPlugSharpHost" Version="0.6.3" />
-		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
+		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.2.1105" />
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
 		<PackageReference Include="rubberband-sharp" Version="1.0.0" />
 	</ItemGroup>

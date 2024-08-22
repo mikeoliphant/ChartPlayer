@@ -327,7 +327,7 @@ namespace ChartPlayer
                     {
                         lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
 
-                        DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, .08f);
+                        DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, beat.IsMeasure ? .12f : .08f);
                     }
 
                     float secsBehind = 1f;
