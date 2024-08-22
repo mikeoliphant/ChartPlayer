@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ChartPlayer
 {
@@ -711,6 +712,27 @@ namespace ChartPlayer
             }
         }
 
+        public int GetFirstMatchIndex(ReadOnlySpan<char> text)
+        {
+            if (CurrentSortColumn != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    object val = CurrentSortColumn.GetSortValue(items[i]);
+
+                    if (val is string)
+                    {
+                        if (MemoryExtensions.StartsWith((val as string), text, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return i;
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        }
+
         public int GetIndexOf(T item)
         {
             Comparison<T> compare = CurrentSortReverse ? CurrentSortColumn.CompareReverse : CurrentSortColumn.Compare;
@@ -724,6 +746,20 @@ namespace ChartPlayer
             }
 
             return -1;
+        }
+
+        char[] textMatch = new char[1];
+
+        public override bool HandleTextInput(char c)
+        {
+            textMatch[0] = c;
+
+            int index = GetFirstMatchIndex(textMatch);
+
+            if (index != -1)
+                ListDisplay.SetTopItem(index);
+
+            return true;
         }
 
         public override void HandleInput(InputManager inputManager)
