@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSheetProcessor", "Depe
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "Dependencies\OpenSongChart\SongFormat\SongFormat.shproj", "{595D9376-81D5-4163-9045-BD1D72A45B16}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.WindowsDX", "Dependencies\UILayout\UILayout.MonoGame.WindowsDX\UILayout.MonoGame.WindowsDX.csproj", "{5C17386C-1BB3-4F61-860D-1987A1FCF984}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Build CLI|Any CPU = Debug Build CLI|Any CPU
@@ -104,6 +106,24 @@ Global
 		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x64.Build.0 = Release|Any CPU
 		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x86.ActiveCfg = Release|Any CPU
 		{CBE11591-E599-4978-86ED-F2423F17BFB7}.Release|x86.Build.0 = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|x64.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Debug|x86.Build.0 = Debug|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x64.ActiveCfg = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x64.Build.0 = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x86.ActiveCfg = Release|Any CPU
+		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +137,8 @@ Global
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout\UILayout.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{7da2b397-a39f-4e5b-96ed-f206329982c9}*SharedItemsImports = 13
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
