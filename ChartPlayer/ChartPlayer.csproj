@@ -28,17 +28,12 @@
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
-		<PackageReference Include="rubberband-sharp" Version="1.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\UILayout\UILayout.MonoGame\UILayout.MonoGame.csproj" />
+	  <ProjectReference Include="..\ChartPlayerPlugin\ChartPlayerPlugin.csproj" />
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
 		<Exec Command="dotnet tool restore" />
 	</Target>
-	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
-	<Import Project="..\Dependencies\UILayout\UILayout\UILayout.projitems" Label="Shared" />
-	<Import Project="..\Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems" Label="Shared" />
-	<Import Project="..\Dependencies\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
 </Project>

@@ -132,10 +132,6 @@ Global
 		SolutionGuid = {AD240CF6-8533-4CAC-BEB9-3C93FFD34FF7}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		ChartPlayerShared\ChartPlayerShared.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
-		Dependencies\UILayout\UILayout\UILayout.projitems*{197584b3-f240-40ab-9e35-dbd2ac539ac7}*SharedItemsImports = 5
 		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5

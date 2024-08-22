@@ -16,7 +16,9 @@ namespace ChartPlayer
                 ChildSpacing = 20
             };
 
-            contents.Children.Add(new TextBlock("ChartPlayer v0.1.4\nCopyright (c) 2024 Mike Oliphant"));
+            Version version = this.GetType().Assembly.GetName().Version;
+
+            contents.Children.Add(new TextBlock("ChartPlayer v" + version.Major + "." + version.Minor + "." + version.Build + "\nCopyright (c) 2024 Mike Oliphant"));
 
             contents.Children.Add(helpElement);
 
