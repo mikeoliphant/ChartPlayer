@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ChartPlayerVST3Plugin
-        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net8.0-windows
+        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net6.0-windows7
