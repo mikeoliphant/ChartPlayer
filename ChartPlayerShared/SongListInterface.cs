@@ -748,16 +748,30 @@ namespace ChartPlayer
             return -1;
         }
 
-        char[] textMatch = new char[1];
+        char[] textMatch = new char[100];
+        int textMatchCharPos = 0;
+        DateTime lastCharTime = DateTime.MinValue;
 
         public override bool HandleTextInput(char c)
         {
-            textMatch[0] = c;
+            double secsElapsed = (DateTime.Now - lastCharTime).TotalSeconds;
 
-            int index = GetFirstMatchIndex(textMatch);
+            if (secsElapsed > 1)
+            {
+                textMatchCharPos = 0;
+            }
+
+            textMatch[textMatchCharPos] = c;
+
+            if (textMatchCharPos < (textMatch.Length - 1))
+                textMatchCharPos++;
+
+            int index = GetFirstMatchIndex(new ReadOnlySpan<char>(textMatch, 0, textMatchCharPos));
 
             if (index != -1)
                 ListDisplay.SetTopItem(index);
+
+            lastCharTime = DateTime.Now;
 
             return true;
         }
