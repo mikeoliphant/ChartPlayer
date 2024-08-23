@@ -9,6 +9,7 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 # Features
 
 * Song browser
+* Very fast startup and song loading
 * 3D, "note highway" display
 * Support for guitar and bass guitar
 * Note detection
