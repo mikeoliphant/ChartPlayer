@@ -295,6 +295,13 @@ namespace ChartPlayer
 
                 for (int i = 0; i < framesOutput; i += 2)
                 {
+                    if (currentOutputOffset == totalSamples)
+                    {
+                        // We're past the end of our buffer
+
+                        break;
+                    }
+
                     sampleData[0][currentOutputOffset] = tempBuffer[i];
                     sampleData[1][currentOutputOffset] = tempBuffer[i + 1];
 
