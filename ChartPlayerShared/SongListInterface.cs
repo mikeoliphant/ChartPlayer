@@ -782,14 +782,14 @@ namespace ChartPlayer
 
             int wheelDelta = inputManager.MouseWheelDelta;
 
-            if (wheelDelta > 0)
-            {
-                ListDisplay.PreviousItem();
-            }
-            else if (wheelDelta < 0)
-            {
-                ListDisplay.NextItem();
-            }
+            //if (wheelDelta > 0)
+            //{
+            //    ListDisplay.ScrollBackward();
+            //}
+            //else if (wheelDelta < 0)
+            //{
+            //    ListDisplay.ScrollForward();
+            //}
 
             if (inputManager.WasPressed("NextPage"))
             {
