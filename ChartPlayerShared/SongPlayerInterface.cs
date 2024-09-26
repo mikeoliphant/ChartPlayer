@@ -74,6 +74,8 @@ namespace ChartPlayer
                 songList.SongList.CurrentSortReverse = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongListSortReversed;
             }
 
+            ChartPlayerGame.Instance.Scale = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.UIScale;
+
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
             songIndex = new SongIndex(songBasePath, forceRescan: false);
@@ -502,6 +504,9 @@ namespace ChartPlayer
 
                 songList.SetSongIndex(songIndex);
             }
+
+            ChartPlayerGame.Instance.Scale = settings.UIScale;
+            Layout.Current.UpdateLayout();
         }
 
         public void SeekTime(float secs)

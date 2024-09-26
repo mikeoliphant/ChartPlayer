@@ -20,6 +20,7 @@ namespace ChartPlayer
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
         public string SongListSortColumn { get; set; } = null;
         public bool SongListSortReversed { get; set; } = false;
+        public float UIScale { get; set; } = 1.0f;
     }
 
     public class SongPlayerSettingsInterface : InputDialog
@@ -74,6 +75,7 @@ namespace ChartPlayer
             vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
             vStack.Children.Add(CreateTextToggleOption("RetuneToEStandard", newSettings, "Re-tune to E Standard:", "Yes", "No"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+            vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
         }
 
         UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)
