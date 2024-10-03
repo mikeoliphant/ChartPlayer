@@ -4,18 +4,31 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Security.Policy;
 using System.Windows.Forms;
 using SongFormat;
 using UILayout;
 
 namespace ChartPlayer
 {
+    public enum ESongTuningMode
+    {
+        None,
+        A440,
+        EStandard,
+        EbStandard,
+        DStandard,
+        CSharpStandard,
+        CStandard,
+        BStandard
+    }
+
     public class SongPlayerSettings
     {
         public string SongPath { get; set; } = null;
         public bool InvertStrings { get; set; } = false;
         public bool LeftyMode { get; set; } = false;
-        public bool RetuneToEStandard { get; set; } = false;
+        public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public float NoteDisplaySeconds { get; set; } = 3;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
         public string SongListSortColumn { get; set; } = null;
@@ -73,7 +86,7 @@ namespace ChartPlayer
 
             vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
             vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
-            vStack.Children.Add(CreateTextToggleOption("RetuneToEStandard", newSettings, "Re-tune to E Standard:", "Yes", "No"));
+            vStack.Children.Add(CreateEnumOption("SongTuningMode", newSettings, "Song Re-Tuning"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
             vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
         }
@@ -94,6 +107,50 @@ namespace ChartPlayer
 
             TextToggleButton button = new TextToggleButton(option1, option2) { ClickAction = delegate { prop.SetValue(obj, !(bool)prop.GetValue(obj)); } };
             button.SetPressed((bool)prop.GetValue(obj));
+            hStack.Children.Add(button);
+
+            return hStack;
+        }
+
+        UIElement CreateEnumOption(string property, object obj, string description)
+        {
+            PropertyInfo prop = obj.GetType().GetProperty(property);
+
+            HorizontalStack hStack = new HorizontalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                ChildSpacing = 20
+            };
+
+            hStack.Children.Add(new TextBlock(description) { VerticalAlignment = EVerticalAlignment.Center });
+
+            hStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
+
+            Type enumType = prop.PropertyType;
+
+            TextButton button = new TextButton(Enum.GetName(enumType, prop.GetValue(obj)));
+
+            List<MenuItem> items = new List<MenuItem>();
+
+            foreach (int value in Enum.GetValues(enumType))
+            {
+                items.Add(new ContextMenuItem()
+                {
+                    Text = Enum.GetName(enumType, value),
+                    AfterCloseAction = delegate
+                    {
+                        prop.SetValue(obj, value);
+                        button.Text = Enum.GetName(enumType, prop.GetValue(obj));
+                    }
+                });
+            }
+
+            Menu menu = new Menu(items);
+
+            button.ClickAction = delegate
+            {
+                Layout.Current.ShowPopup(menu, button.ContentBounds.Center);
+            };
             hStack.Children.Add(button);
 
             return hStack;

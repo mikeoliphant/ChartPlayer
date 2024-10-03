@@ -23,7 +23,7 @@ namespace ChartPlayer
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
         public bool Paused { get; set; } = false;
-        public bool RetuneToEStandard { get; set; } = false;
+        public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
 
         VorbisReader vorbisReader;
@@ -110,6 +110,11 @@ namespace ChartPlayer
                 TuningOffsetSemitones += 12;
             }
 
+            if (SongTuningMode > ESongTuningMode.EStandard)
+            {
+                TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
+            }
+
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
 
             if (vocalPart != null)
@@ -133,7 +138,7 @@ namespace ChartPlayer
 
             SongLengthSeconds = (float)vorbisReader.TotalTime.TotalSeconds;
 
-            if (RetuneToEStandard && (TuningOffsetSemitones != 0))
+            if ((SongTuningMode != ESongTuningMode.None) && (TuningOffsetSemitones != 0))
                 pitchShift = 1.0 / Math.Pow(2, (double)TuningOffsetSemitones / 12.0);
 
             stretcher.SetPitchScale(pitchShift);

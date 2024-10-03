@@ -370,7 +370,7 @@ namespace ChartPlayer
                 songPlayer = new SongPlayer();
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
                 SpeedChanged(speedSlider.Level);
-                songPlayer.RetuneToEStandard = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.RetuneToEStandard;
+                songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;
 
                 songPlayer.SetSong(songPath, songData, part);
 
@@ -486,7 +486,7 @@ namespace ChartPlayer
         {
             if (songPlayer != null)
             {
-                songPlayer.RetuneToEStandard = settings.RetuneToEStandard;
+                songPlayer.SongTuningMode = settings.SongTuningMode;
             }
 
             if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)

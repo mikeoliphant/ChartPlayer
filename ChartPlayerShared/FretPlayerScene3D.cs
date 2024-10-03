@@ -167,7 +167,7 @@ namespace ChartPlayer
 
             double baseOffset = 0;
 
-            if (player.RetuneToEStandard)
+            if (player.SongTuningMode != ESongTuningMode.None)
             {
                 baseOffset = -player.TuningOffsetSemitones;
             }
