@@ -33,6 +33,8 @@ namespace ChartPlayerImageProcessor
             Add("Play");
             Add("Pause");
 
+            Add("ScrollBar");
+            Add("ScrollBarGutter");
             Add("ScrollUpArrow");
             Add("ScrollDownArrow");
 

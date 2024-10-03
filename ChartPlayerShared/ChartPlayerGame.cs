@@ -37,9 +37,6 @@ namespace ChartPlayer
             DefaultPressedNinePatch = GetImage("ButtonPressed");
             DefaultUnpressedNinePatch = GetImage("ButtonUnpressed");
 
-            AddImage("ScrollBar", GetImage("ButtonPressed"));
-            AddImage("ScrollBarGutter", GetImage("ButtonUnpressed"));
-
             InputManager.AddMapping("PreviousPage", new KeyMapping(InputKey.PageUp) { DoRepeat = true });
             InputManager.AddMapping("NextPage", new KeyMapping(InputKey.PageDown) { DoRepeat = true });
             InputManager.AddMapping("NextItem", new KeyMapping(InputKey.Down) { DoRepeat = true });
