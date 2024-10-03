@@ -170,6 +170,11 @@ namespace ChartPlayer
 
         void SetCurrentSongs()
         {
+            SongIndexEntry topSong = null;
+            
+            if (currentSongs != null)
+                topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
+
             switch (CurrentInstrument)
             {
                 case ESongInstrumentType.LeadGuitar:
@@ -195,6 +200,33 @@ namespace ChartPlayer
             SongList.SetItems(currentSongs);
 
             SongList.Sort();
+
+            int songIndex = -1;
+
+            if (selectedSong != null)
+            {
+                songIndex = SongList.GetIndexOf(selectedSong);
+            }
+
+            if (songIndex != -1)
+            {
+                SongList.ListDisplay.SetTopItem(songIndex);
+                SongList.ListDisplay.LastSelectedItem = songIndex;
+            }
+            else
+            {
+                if (topSong != null)
+                {
+                    int topIndex = SongList.GetIndexOf(topSong);
+
+                    SongList.ListDisplay.SetTopItem(topIndex);
+
+                    SongList.ListDisplay.LastSelectedItem = -1;
+                }
+            }
+
+            if (selectedSong != null)
+                UpdateSelectedSongDisplay();
         }
 
         public void SetCurrentInstrument(ESongInstrumentType type)
@@ -208,33 +240,7 @@ namespace ChartPlayer
                 if ((currentSongs == null) || (currentSongs.Count == 0))
                     return;
 
-                SongIndexEntry topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
-
                 SetCurrentSongs();
-
-                int songIndex = -1;
-
-                if (selectedSong != null)
-                {
-                    songIndex = SongList.ListDisplay.Items.IndexOf(selectedSong);
-                }
-
-                if (songIndex != -1)
-                {
-                    SongList.ListDisplay.SetTopItem(songIndex);
-                    SongList.ListDisplay.LastSelectedItem = songIndex;
-                }
-                else
-                {
-                    int topIndex = SongList.GetIndexOf(topSong);
-
-                    SongList.ListDisplay.SetTopItem(topIndex);
-
-                    SongList.ListDisplay.LastSelectedItem = -1;
-                }
-
-                if (selectedSong != null)
-                    UpdateSelectedSongDisplay();
             }
         }
 
