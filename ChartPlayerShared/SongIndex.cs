@@ -163,19 +163,19 @@ namespace ChartPlayer
                         {
                             indexEntry.Arrangements += "L";
 
-                            indexEntry.LeadGuitarTuning = GetTuning(part);
+                            indexEntry.LeadGuitarTuning = GetTuning(song, part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.RhythmGuitar)
                         {
                             indexEntry.Arrangements += "R";
 
-                            indexEntry.RhythmGuitarTuning = GetTuning(part);
+                            indexEntry.RhythmGuitarTuning = GetTuning(song, part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.BassGuitar)
                         {
                             indexEntry.Arrangements += "B";
 
-                            indexEntry.BassGuitarTuning = GetTuning(part);
+                            indexEntry.BassGuitarTuning = GetTuning(song,part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
@@ -190,9 +190,9 @@ namespace ChartPlayer
             }
         }
 
-        string GetTuning(SongInstrumentPart part)
+        string GetTuning(SongData song, SongInstrumentPart part)
         {
-            return part.Tuning.GetTuning() + ((part.CapoFret > 0) ? (" C" + part.CapoFret) : "");
+            return part.Tuning.GetTuning() + ((part.CapoFret > 0) ? (" C" + part.CapoFret) : "") + ((song.A440CentsOffset != 0) ? "*" : "");
         }
 
         public string GetSongPath(SongIndexEntry indexEntry)
