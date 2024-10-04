@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
+using System.Text.RegularExpressions;
 
 namespace ChartPlayer
 {
@@ -25,6 +26,7 @@ namespace ChartPlayer
         TextBlock songArtistText;
         TextBlock songAlbumText;
         TextToggleButton songFavoriteButton;
+        HorizontalStack tagStack;
         HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
         HorizontalStack filterStack;
@@ -140,6 +142,12 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center
             });
 
+            tagStack = new HorizontalStack()
+            {
+                ChildSpacing = 2
+            };
+            songInfoStack.Children.Add(tagStack);
+
             songInfoStack.Children.Add(new UIElement { VerticalAlignment = EVerticalAlignment.Stretch });
 
             arrangementStack = new HorizontalStack { ChildSpacing = 2 };
@@ -210,12 +218,7 @@ namespace ChartPlayer
             {
                 if (inputManager.WasClicked("ToggleFavorite", this))
                 {
-                    SongStatsEntry stats = songIndex.Stats[(int)CurrentInstrument].GetSongStats(selectedSong.FolderPath);
-
-                    if (selectedSong.Stats[(int)CurrentInstrument] == null)
-                    {
-                        selectedSong.Stats[(int)CurrentInstrument] = stats;
-                    }
+                    SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
 
                     songFavoriteButton.Toggle();
 
@@ -432,12 +435,7 @@ namespace ChartPlayer
             songFavoriteButton.SetPressed(selectedSong.HasTag("*", CurrentInstrument));
             songFavoriteButton.ClickAction = delegate
             {
-                SongStatsEntry stats = songIndex.Stats[(int)CurrentInstrument].GetSongStats(selectedSong.FolderPath);
-
-                if (selectedSong.Stats[(int)CurrentInstrument] == null)
-                {
-                    selectedSong.Stats[(int)CurrentInstrument] = stats;
-                }
+                SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
 
                 if (songFavoriteButton.IsPressed)
                     selectedSong.Stats[(int)CurrentInstrument].AddTag("*");
@@ -446,6 +444,44 @@ namespace ChartPlayer
 
                 songIndex.SaveStats();
             };
+
+            tagStack.Children.Clear();
+
+            if (selectedSong.Stats[(int)CurrentInstrument] != null)
+            {
+                var tags = selectedSong.Stats[(int)CurrentInstrument].Tags;
+
+                if (tags != null)
+                {
+                    foreach (string tag in tags)
+                    {
+                        if (tag != "*")
+                        {
+                            tagStack.Children.Add(new TextButton(tag)
+                            {
+                                ClickAction = delegate
+                                {
+                                    Layout.Current.ShowConfirmationPopup("Remove \"" + tag + "\" tag?", delegate
+                                    {
+                                        SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
+
+                                        stats.RemoveTag(tag);
+
+                                        songIndex.SaveStats();
+
+                                        UpdateSelectedSongDisplay();
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            tagStack.Children.Add(new TextButton("+Tag")
+            {
+                ClickAction = AddTag
+            });
 
             arrangementStack.Children.Clear();
 
@@ -472,6 +508,61 @@ namespace ChartPlayer
             }
 
             UpdateContentLayout();
+        }
+
+        void AddTag()
+        {
+            List<MenuItem> items = new List<MenuItem>();
+
+            foreach (string tag in songIndex.AllTags)
+            {
+                if (tag == "*")
+                    continue;
+
+                items.Add(new ContextMenuItem()
+                {
+                    Text = tag,
+                    AfterCloseAction = delegate
+                    {
+                        SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
+
+                        stats.AddTag(tag);
+
+                        songIndex.SaveStats();
+
+                        UpdateSelectedSongDisplay();
+                    }
+                });
+            }
+
+            items.Add(new ContextMenuItem()
+            {
+                Text = "New Tag",
+                AfterCloseAction = delegate
+                {
+                    Layout.Current.GetKeyboardInput("New Tag", null, delegate (string text, object data)
+                    {
+                        text = Regex.Replace(text, "[^A-Za-z0-9 -_]", "");
+
+                        songIndex.AddTag(text);
+
+                        SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
+
+                        stats.AddTag(text);
+
+                        songIndex.SaveStats();
+
+                        UpdateSelectedSongDisplay();
+                    }, null);
+                }
+            });
+
+            items.Add(new ContextMenuItem()
+            {
+                Text = "Cancel"
+            });
+
+            Layout.Current.ShowPopup(new Menu(items), tagStack.ContentBounds.Center);
         }
 
         public void Close()

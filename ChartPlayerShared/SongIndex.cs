@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
 using System.Xml.Serialization;
+using Microsoft.Xna.Framework.Media;
+using SharpDX.DirectWrite;
 using SongFormat;
 using UILayout;
 
@@ -63,6 +65,14 @@ namespace ChartPlayer
             }
         }
 
+        public void AddTag(string tag)
+        {
+            if (tagDict.ContainsKey(tag))
+                tagDict[tag]++;
+            else
+                tagDict[tag] = 1;
+        }
+
         public SongIndex(string basePath, bool forceRescan)
         {
             this.BasePath = basePath;
@@ -107,10 +117,7 @@ namespace ChartPlayer
                         {
                             foreach (string tag in entry.Tags)
                             {
-                                if (tagDict.ContainsKey(tag))
-                                    tagDict[tag]++;
-                                else
-                                    tagDict[tag] = 1;
+                                AddTag(tag);
                             }
                         }
                     }
@@ -124,6 +131,25 @@ namespace ChartPlayer
                     }
                 }
             }
+        }
+
+        public SongStatsEntry GetSongStats(SongIndexEntry song, ESongInstrumentType instrumentType)
+        {
+            SongStatsEntry stats = Stats[(int)instrumentType].Songs.Where(s => s.Song == song.FolderPath).FirstOrDefault();
+
+            if (stats == null)
+            {
+                stats = new SongStatsEntry { Song = song.FolderPath };
+
+                Stats[(int)instrumentType].Songs.Add(stats);
+            }
+
+            if (song.Stats[(int)instrumentType] == null)
+            {
+                song.Stats[(int)instrumentType] = stats;
+            }
+
+            return stats;
         }
 
         void IndexFolder(string folderPath)
@@ -314,20 +340,6 @@ namespace ChartPlayer
             {
                 JsonSerializer.Serialize(indexStream, this);
             }
-        }
-
-        public SongStatsEntry GetSongStats(string songPath)
-        {
-            SongStatsEntry stats = Songs.Where(s => s.Song == songPath).FirstOrDefault();
-
-            if (stats == null)
-            {
-                stats = new SongStatsEntry { Song = songPath };
-
-                Songs.Add(stats);
-            }
-
-            return stats;
         }
     }
 }

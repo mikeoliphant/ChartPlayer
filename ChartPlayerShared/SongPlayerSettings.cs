@@ -183,6 +183,13 @@ namespace ChartPlayer
                 ChangeAction = delegate (float percent)
                 {
                     float value = minValue + ((maxValue - minValue) * percent);
+
+                    float pow = (int)Math.Pow(10, numDecimals);
+
+                    value = (int)(value * pow);
+
+                    value /= pow;
+
                     prop.SetValue(obj, value);
                     numberText.Text = value.ToString(format);
                 }

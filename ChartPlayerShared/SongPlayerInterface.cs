@@ -402,12 +402,7 @@ namespace ChartPlayer
                     (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
                 }
 
-                SongStatsEntry stats = songIndex.Stats[(int)songList.CurrentInstrument].GetSongStats(song.FolderPath);
-
-                if (song.Stats[(int)songList.CurrentInstrument] == null)
-                {
-                    song.Stats[(int)songList.CurrentInstrument] = stats;
-                }
+                SongStatsEntry stats = songIndex.GetSongStats(song, songList.CurrentInstrument);
 
                 stats.LastPlayed = DateTime.Now;
                 stats.NumPlays++;
