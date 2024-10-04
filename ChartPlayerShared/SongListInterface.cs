@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UILayout;
 using SongFormat;
-using System.Reflection.Metadata.Ecma335;
 
 namespace ChartPlayer
 {
@@ -25,9 +24,13 @@ namespace ChartPlayer
         TextBlock songTitleText;
         TextBlock songArtistText;
         TextBlock songAlbumText;
+        TextToggleButton songFavoriteButton;
         HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
+        HorizontalStack filterStack;
+        TextButton filterButton;
         NinePatchWrapper bottomInterface;
+        string currentFilterTag = null;
 
         public SongListDisplay()
         {
@@ -90,7 +93,10 @@ namespace ChartPlayer
             };
             SongList.BottomDock.Children.Add(bottomInterface);
 
-            HorizontalStack bottomStack = new HorizontalStack();
+            HorizontalStack bottomStack = new HorizontalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch
+            };
             bottomInterface.Child = bottomStack;
 
             songDisplayStack = new HorizontalStack()
@@ -118,6 +124,21 @@ namespace ChartPlayer
             songInfoStack.Children.Add(songTitleText = new TextBlock());
             songInfoStack.Children.Add(songArtistText = new TextBlock());
             songInfoStack.Children.Add(songAlbumText = new TextBlock());
+
+            HorizontalStack favoriteStack = new HorizontalStack()
+            {
+                ChildSpacing = 2
+            };
+            songInfoStack.Children.Add(favoriteStack);
+
+            favoriteStack.Children.Add(new TextBlock("Favorite:")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            });
+            favoriteStack.Children.Add(songFavoriteButton = new TextToggleButton("Yes", "No")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            });
 
             songInfoStack.Children.Add(new UIElement { VerticalAlignment = EVerticalAlignment.Stretch });
 
@@ -150,6 +171,28 @@ namespace ChartPlayer
             });
             buttonInputStack.AddInput(new DialogInput { Text = "Close", Action = Close });
 
+            bottomStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
+
+            filterStack = new HorizontalStack
+            {
+                HorizontalAlignment = EHorizontalAlignment.Right,
+                VerticalAlignment = EVerticalAlignment.Top,
+                Padding = new LayoutPadding(0, 5),
+                ChildSpacing = 2
+            };
+
+            bottomStack.Children.Add(filterStack);
+
+            filterStack.Children.Add(new TextBlock("Filter:")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            });
+
+            filterStack.Children.Add(filterButton = new TextButton("All")
+            {
+                VerticalAlignment = EVerticalAlignment.Center
+            });
+
             SongList.SetSortColumn("Artist");
 
             CloseAction = Close;
@@ -166,36 +209,47 @@ namespace ChartPlayer
             this.allSongs = songIndex.Songs;
 
             SetCurrentSongs();
+
+            UpdateTagFilter();
         }
 
         void SetCurrentSongs()
         {
             SongIndexEntry topSong = null;
-            
-            if (currentSongs != null)
+
+            if ((allSongs == null) || (allSongs.Count == 0))
+                return;
+
+            if ((currentSongs != null) && (currentSongs.Count > 0))
                 topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
+
+            IEnumerable<SongIndexEntry> songs = allSongs;
 
             switch (CurrentInstrument)
             {
                 case ESongInstrumentType.LeadGuitar:
-                    currentSongs = allSongs.Where(s => (s.LeadGuitarTuning != null)).ToList();
+                    songs = songs.Where(s => (s.LeadGuitarTuning != null));
                     break;
                 case ESongInstrumentType.RhythmGuitar:
-                    currentSongs = allSongs.Where(s => (s.RhythmGuitarTuning != null)).ToList();
+                    songs = songs.Where(s => (s.RhythmGuitarTuning != null));
                     break;
                 case ESongInstrumentType.BassGuitar:
-                    currentSongs = allSongs.Where(s => (s.BassGuitarTuning != null)).ToList();
+                    songs = songs.Where(s => (s.BassGuitarTuning != null));
                     break;
                 case ESongInstrumentType.Keys:
-                    currentSongs = allSongs;
                     break;
                 case ESongInstrumentType.Vocals:
-                    currentSongs = allSongs;
                     break;
                 default:
-                    currentSongs = allSongs;
                     break;
             }
+
+            if (currentFilterTag != null)
+            {
+                songs = songs.Where(s => s.HasTag(currentFilterTag, CurrentInstrument));
+            }
+
+            currentSongs = songs.ToList();
 
             SongList.SetItems(currentSongs);
 
@@ -237,9 +291,6 @@ namespace ChartPlayer
 
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
 
-                if ((currentSongs == null) || (currentSongs.Count == 0))
-                    return;
-
                 SetCurrentSongs();
             }
         }
@@ -270,6 +321,56 @@ namespace ChartPlayer
             }
         }
 
+        void UpdateTagFilter()
+        {
+            List<MenuItem> items = new List<MenuItem>();
+
+            items.Add(new ContextMenuItem()
+            {
+                Text = "All",
+                AfterCloseAction = delegate
+                {
+                    filterButton.Text = "All";
+                    filterStack.UpdateContentLayout();
+
+                    currentFilterTag = null;
+
+                    SetCurrentSongs();
+                }
+            });
+
+            foreach (string tag in songIndex.AllTags)
+            {
+                string text = tag;
+
+                if (tag == "*")
+                {
+                    text = "Favorite";
+                }
+
+                items.Add(new ContextMenuItem()
+                {
+                    Text = text,
+                    AfterCloseAction = delegate
+                    {
+                        filterButton.Text = text;
+                        filterStack.UpdateContentLayout();
+
+                        currentFilterTag = tag;
+
+                        SetCurrentSongs();
+                    }
+                });
+            }
+
+            Menu menu = new Menu(items);
+
+            filterButton.ClickAction = delegate
+            {
+                Layout.Current.ShowPopup(menu, filterButton.ContentBounds.Center);
+            };
+        }
+
         UIImage albumArtToDelete = null;
 
         void UpdateSelectedSongDisplay()
@@ -294,6 +395,23 @@ namespace ChartPlayer
             songTitleText.Text = selectedSong.SongName;
             songArtistText.Text = selectedSong.ArtistName;
             songAlbumText.Text = selectedSong.AlbumName;
+            songFavoriteButton.SetPressed(selectedSong.HasTag("*", CurrentInstrument));
+            songFavoriteButton.ClickAction = delegate
+            {
+                SongStatsEntry stats = songIndex.Stats[(int)CurrentInstrument].GetSongStats(selectedSong.FolderPath);
+
+                if (selectedSong.Stats[(int)CurrentInstrument] == null)
+                {
+                    selectedSong.Stats[(int)CurrentInstrument] = stats;
+                }
+
+                if (songFavoriteButton.IsPressed)
+                    selectedSong.Stats[(int)CurrentInstrument].AddTag("*");
+                else
+                    selectedSong.Stats[(int)CurrentInstrument].RemoveTag("*");
+
+                songIndex.SaveStats();
+            };
 
             arrangementStack.Children.Clear();
 
@@ -693,7 +811,10 @@ namespace ChartPlayer
 
             if (ListDisplay.LastSelectedItem != -1)
             {
-                selectedItem = items[ListDisplay.LastSelectedItem];
+                if (ListDisplay.LastSelectedItem < items.Count)
+                {
+                    selectedItem = items[ListDisplay.LastSelectedItem];
+                }
             }
 
             if (CurrentSortReverse)

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 using System.Xml.Serialization;
 using SongFormat;
 using UILayout;
@@ -24,6 +26,17 @@ namespace ChartPlayer
         [XmlIgnore]
         [JsonIgnore]
         public SongStatsEntry[] Stats { get; set; } = new SongStatsEntry[Enum.GetValues(typeof(ESongInstrumentType)).Length];
+
+        public bool HasTag(string tag, ESongInstrumentType instrument)
+        {
+            if (Stats[(int)instrument] == null)
+                return false;
+
+            if (Stats[(int)instrument].Tags == null)
+                return false;
+
+            return Stats[(int)instrument].Tags.Contains(tag);
+        }
     }
 
     public class SongIndex
@@ -39,6 +52,16 @@ namespace ChartPlayer
         public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
         public SongStats[] Stats = new SongStats[Enum.GetValues(typeof(ESongInstrumentType)).Length];
         public string BasePath { get; private set; }
+
+        Dictionary<string, int> tagDict = new Dictionary<string, int>();
+
+        public IEnumerable<string> AllTags
+        {
+            get
+            {
+                return tagDict.OrderByDescending(t => t.Value).Select(t => t.Key);
+            }
+        }
 
         public SongIndex(string basePath, bool forceRescan)
         {
@@ -68,6 +91,8 @@ namespace ChartPlayer
                     }
                 }
 
+                tagDict["*"] = 1;
+
                 foreach (ESongInstrumentType type in Enum.GetValues(typeof(ESongInstrumentType)))
                 {
                     Stats[(int)type] = SongStats.Load(basePath, type);
@@ -77,6 +102,17 @@ namespace ChartPlayer
                     foreach (SongStatsEntry entry in Stats[(int)type].Songs)
                     {
                         statsDict[entry.Song] = entry;
+
+                        if (entry.Tags != null)
+                        {
+                            foreach (string tag in entry.Tags)
+                            {
+                                if (tagDict.ContainsKey(tag))
+                                    tagDict[tag]++;
+                                else
+                                    tagDict[tag] = 1;
+                            }
+                        }
                     }
 
                     foreach (SongIndexEntry indexEntry in Songs)
@@ -216,6 +252,26 @@ namespace ChartPlayer
         public DateTime LastPlayed { get; set; } = DateTime.MinValue;
         public int NumPlays { get; set; } = 0;
         public List<string> Tags { get; set; } = null;
+
+        public void AddTag(string tag)
+        {
+            if (Tags == null)
+                Tags = new List<string>();
+
+            if (!Tags.Contains(tag))
+                Tags.Add(tag);
+        }
+
+        public void RemoveTag(string tag)
+        {
+            if (Tags == null)
+                return;
+
+            Tags.Remove(tag);
+
+            if (Tags.Count == 0)
+                Tags = null;
+        }
     }
 
     public class SongStats

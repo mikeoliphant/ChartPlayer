@@ -101,8 +101,10 @@ namespace ChartPlayer
         {
             Logger.Log("Starting Game");
 
+#if RELEASE
             try
             {
+#endif
                 int screenWidth = (int)EditorWidth;
                 int screenHeight = (int)EditorHeight;
 
@@ -133,11 +135,13 @@ namespace ChartPlayer
                 EditorHeight = (uint)GameHost.ScreenHeight;
 
                 GameHost = null;
-            }
+#if RELEASE
+        }
             catch (Exception ex)
             {
                 Logger.Log("Run game failed with: " + ex.ToString());
             }
+#endif
         }
 
         public override void ResizeEditor(uint newWidth, uint newHeight)
@@ -172,8 +176,10 @@ namespace ChartPlayer
         {
             base.Process();
 
+#if RELEASE
             try
             {
+#endif
                 Host.ProcessAllEvents();
 
                 var input = stereoInput.GetAudioBuffer(0);
@@ -200,11 +206,13 @@ namespace ChartPlayer
                     left.Clear();
                     right.Clear();
                 }
+#if RELEASE
             }
             catch (Exception ex)
             {
                 Logger.Log("Process failed with: " + ex.ToString());
             }
+#endif
         }
     }
 
