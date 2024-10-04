@@ -43,6 +43,7 @@ namespace ChartPlayer
             InputManager.AddMapping("PreviousItem", new KeyMapping(InputKey.Up) { DoRepeat = true });
             InputManager.AddMapping("FirstItem", new KeyMapping(InputKey.Home));
             InputManager.AddMapping("LastItem", new KeyMapping(InputKey.End));
+            InputManager.AddMapping("PlayCurrent", new KeyMapping(InputKey.Enter));
             InputManager.AddMapping("PreciseClick", new KeyMapping(InputKey.LeftShift, InputKey.RightShift));
             InputManager.AddMapping("FastForward", new KeyMapping(InputKey.Right) {  DoRepeat = true });
             InputManager.AddMapping("Rewind", new KeyMapping(InputKey.Left) {  DoRepeat = true });

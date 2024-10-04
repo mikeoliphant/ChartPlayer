@@ -206,9 +206,9 @@ namespace ChartPlayer
         {
             base.HandleInput(inputManager);
 
-            if (inputManager.WasClicked("ToggleFavorite", this))
+            if (selectedSong != null)
             {
-                if (selectedSong != null)
+                if (inputManager.WasClicked("ToggleFavorite", this))
                 {
                     SongStatsEntry stats = songIndex.Stats[(int)CurrentInstrument].GetSongStats(selectedSong.FolderPath);
 
@@ -227,6 +227,11 @@ namespace ChartPlayer
                     UpdateSelectedSongDisplay();
 
                     songIndex.SaveStats();
+                }
+
+                if (inputManager.WasClicked("PlayCurrent", this))
+                {
+                    Play();
                 }
             }
         }
