@@ -202,6 +202,35 @@ namespace ChartPlayer
         {
         }
 
+        public override void HandleInput(InputManager inputManager)
+        {
+            base.HandleInput(inputManager);
+
+            if (inputManager.WasClicked("ToggleFavorite", this))
+            {
+                if (selectedSong != null)
+                {
+                    SongStatsEntry stats = songIndex.Stats[(int)CurrentInstrument].GetSongStats(selectedSong.FolderPath);
+
+                    if (selectedSong.Stats[(int)CurrentInstrument] == null)
+                    {
+                        selectedSong.Stats[(int)CurrentInstrument] = stats;
+                    }
+
+                    songFavoriteButton.Toggle();
+
+                    if (songFavoriteButton.IsPressed)
+                        selectedSong.Stats[(int)CurrentInstrument].AddTag("*");
+                    else
+                        selectedSong.Stats[(int)CurrentInstrument].RemoveTag("*");
+
+                    UpdateSelectedSongDisplay();
+
+                    songIndex.SaveStats();
+                }
+            }
+        }
+
         public void SetSongIndex(SongIndex songIndex)
         {
             this.songIndex = songIndex;

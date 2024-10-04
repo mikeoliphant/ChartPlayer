@@ -46,6 +46,10 @@ namespace ChartPlayer
             InputManager.AddMapping("PreciseClick", new KeyMapping(InputKey.LeftShift, InputKey.RightShift));
             InputManager.AddMapping("FastForward", new KeyMapping(InputKey.Right) {  DoRepeat = true });
             InputManager.AddMapping("Rewind", new KeyMapping(InputKey.Left) {  DoRepeat = true });
+            InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.LeftShift });
+            InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.RightShift });
+            InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.Multiply));
+
 
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
