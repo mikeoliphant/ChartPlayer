@@ -21,8 +21,9 @@ jobs:
     - name: Run Image Processor
       working-directory: ${{github.workspace}}
       run: |
-        msbuild .\ChartPlayer.sln /t:ImageProcessor /p:Configuration="Release" 
-        ImageProcessor\bin\Release\net8.0\ImageProcessor.exe
+        msbuild .\ChartPlayer.sln /t:ImageProcessor /p:Configuration="Release"
+        cd ImageProcessor\bin\Release\net8.0
+        .\ImageProcessor.exe
         
     - name: Run MSBuild
       working-directory: ${{github.workspace}}
