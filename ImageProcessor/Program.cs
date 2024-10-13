@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 
 namespace ChartPlayerImageProcessor
@@ -18,8 +17,10 @@ namespace ChartPlayerImageProcessor
         {
             BeginSpriteSheetGroup("UISheet");
 
-            AddFont("MainFont", "Segoe UI", FontStyle.Bold, 14);
-            AddFont("LargeFont", "Segoe UI", FontStyle.Bold, 32);
+            string font = Path.Combine(SrcPath, "Inter_18pt-Bold.ttf");
+
+            AddFont("MainFont", font, 16);
+            AddFont("LargeFont", font, 32);
 
             PushDirectory("UserInterface");
 

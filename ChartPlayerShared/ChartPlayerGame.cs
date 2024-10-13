@@ -27,7 +27,6 @@ namespace ChartPlayer
             GraphicsContext.SingleWhitePixelImage = GetImage("SingleWhitePixel");
 
             DefaultFont = GetFont("MainFont");
-            DefaultFont.SpriteFont.Spacing = -1;
             DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
 
             DefaultForegroundColor = UIColor.White;

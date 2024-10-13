@@ -368,7 +368,7 @@ namespace ChartPlayer
                 AfterCloseAction = delegate
                 {
                     filterButton.Text = "All";
-                    filterStack.UpdateContentLayout();
+                    bottomInterface.UpdateContentLayout();
 
                     currentFilterTag = null;
 
@@ -391,7 +391,7 @@ namespace ChartPlayer
                     AfterCloseAction = delegate
                     {
                         filterButton.Text = text;
-                        filterStack.UpdateContentLayout();
+                        bottomInterface.UpdateContentLayout();
 
                         currentFilterTag = tag;
 
