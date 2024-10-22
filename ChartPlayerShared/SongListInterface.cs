@@ -56,14 +56,14 @@ namespace ChartPlayer
             {
                 DisplayName = "Parts",
                 PropertyName = "Arrangements",
-                RequestedDisplayWidth = 50,
+                RequestedDisplayWidth = 80,
                 SecondarySortColumn = artistColumn
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
-                RequestedDisplayWidth = 50,
+                RequestedDisplayWidth = 70,
                 StartReversed = true,
                 SecondarySortColumn = artistColumn
             });
