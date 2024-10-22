@@ -9,6 +9,7 @@ using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using System.Windows.Forms;
+using SharpDX.MediaFoundation;
 
 namespace ChartPlayer
 {
@@ -38,6 +39,13 @@ namespace ChartPlayer
         StringBuilderTextBlock scoreText;
         int lastTotalNotes = -1;
         int lastDetectedNotes = -1;
+
+        StringBuilderTextBlock playTimeText;
+
+        int currentMinute = 0;
+        int currentSecond = 0;
+
+        HorizontalSlider playTimeSlider;
 
         ImageToggleButton pauseButton;
 
@@ -103,23 +111,32 @@ namespace ChartPlayer
             };
             topStack.Children.Add(vocalText);
 
+            HorizontalStack bottomStack = new HorizontalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Bottom,
+            };
+            children.Add(bottomStack);
+
             HorizontalStack bottomButtonStack = new HorizontalStack()
             {
                 Padding = new LayoutPadding(5),
-                HorizontalAlignment = EHorizontalAlignment.Left,
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2
             };
-            Children.Add(bottomButtonStack);
+            bottomStack.Children.Add(bottomButtonStack);
 
             TextButton songsButton = new TextButton("Songs")
             {
+                VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = ShowSongs
             };
             bottomButtonStack.Children.Add(songsButton);
 
             TextButton optionsButton = new TextButton("Options")
             {
+                VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
@@ -131,6 +148,7 @@ namespace ChartPlayer
 
             TextButton helpButton = new TextButton("?")
             {
+                VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
@@ -155,7 +173,7 @@ namespace ChartPlayer
 
             speedStack.Children.Add(speedText = new TextBlock("Speed: 100%")
             {
-                VerticalAlignment = EVerticalAlignment.Center
+                VerticalAlignment = EVerticalAlignment.Stretch
             });
 
             speedSlider = new HorizontalSlider("HorizontalSlider")
@@ -170,6 +188,7 @@ namespace ChartPlayer
 
             hideNotesButton = new TextToggleButton("Show Notes", "Hide Notes")
             {
+                VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = ToggleNotes
             };
             bottomButtonStack.Children.Add(hideNotesButton);
@@ -206,11 +225,19 @@ namespace ChartPlayer
             };
             scoreTextWrapper.Child = scoreText;
 
-            Dock playDock = new Dock()
+            NinePatchWrapper playTimeInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
             {
-                DesiredWidth = 300
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                HorizontalAlignment = EHorizontalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(playDock);
+            bottomButtonStack.Children.Add(playTimeInterface);
+
+            HorizontalStack playTimeStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                HorizontalAlignment = EHorizontalAlignment.Stretch
+            };
+            playTimeInterface.Child = playTimeStack;
 
             pauseButton = new ImageToggleButton("Play", "Pause")
             {
@@ -218,18 +245,43 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center,
                 ClickAction = TogglePaused
             };
-            playDock.Children.Add(pauseButton);
+            playTimeStack.Children.Add(pauseButton);
+
+            UIElementWrapper playTimeTextWrapper = new UIElementWrapper()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                DesiredWidth = 80
+            };
+            playTimeStack.Children.Add(playTimeTextWrapper);
+
+            playTimeText = new StringBuilderTextBlock("0:00")
+            {
+                HorizontalAlignment = EHorizontalAlignment.Center,
+                VerticalAlignment = EVerticalAlignment.Center,
+            };
+            playTimeTextWrapper.Child = playTimeText;
+
+            playTimeSlider = new HorizontalSlider("HorizontalSlider")
+            {
+                VerticalAlignment = EVerticalAlignment.Center,
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                BackgroundColor = UIColor.Black,
+                ChangeAction = PlayTimeChanged
+            };
+            playTimeSlider.SetLevel(0);
+            playTimeStack.Children.Add(playTimeSlider);
 
             VerticalStack songInfoStack = new VerticalStack()
             {
-                BackgroundColor = UIColor.Black,
-                Padding = new LayoutPadding(5),
+                BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
+                Margin = new LayoutPadding(20, 0, 0, 0),
+                Padding = new LayoutPadding(10),
                 HorizontalAlignment = EHorizontalAlignment.Right,
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2
             };
 
-            Children.Add(songInfoStack);
+            bottomStack.Children.Add(songInfoStack);
 
             songNameText = new TextBlock();
             songInfoStack.Children.Add(songNameText);
@@ -262,6 +314,14 @@ namespace ChartPlayer
             if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
             {
                 (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
+            }
+        }
+
+        void PlayTimeChanged(float newPlayPercent)
+        {
+            if (songPlayer != null)
+            {
+                SeekTime(songPlayer.SongLengthSeconds * newPlayPercent);
             }
         }
 
@@ -518,6 +578,27 @@ namespace ChartPlayer
 
         protected override void DrawContents()
         {
+            if (songPlayer != null)
+            {
+                float newSecondFloat = songPlayer.CurrentSecond;
+
+                int newMinute = (int)(newSecondFloat / 60);
+                int newSecond = (int)newSecondFloat % 60;
+
+                if ((newMinute != currentMinute) || (newSecond != currentSecond))
+                {
+                    currentMinute = newMinute;
+                    currentSecond = newSecond;
+
+                    playTimeText.StringBuilder.Clear();
+                    playTimeText.StringBuilder.AppendNumber(currentMinute);
+                    playTimeText.StringBuilder.Append(':');
+                    playTimeText.StringBuilder.AppendNumber(currentSecond, 2);
+                }
+
+                playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
+            }
+
             FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
 
             if (fretScene != null)
