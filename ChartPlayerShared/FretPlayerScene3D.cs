@@ -90,6 +90,7 @@ namespace ChartPlayer
         public float NoteDisplaySeconds { get; set; } = 3;
         public int NumNotesDetected { get; private set; } = 0;
         public int NumNotesTotal { get; private set; } = 0;
+        public float CurrentBPM { get; private set; } = 0;
 
         SongPlayer player;
         UIColor whiteHalfAlpha;
@@ -323,11 +324,25 @@ namespace ChartPlayer
 
                     UIColor lineColor = UIColor.White;
 
+                    CurrentBPM = 0;
+                    float lastBeatTime = 0;
+
                     foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
                     {
                         lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
 
                         DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, beat.IsMeasure ? .12f : .08f);
+
+                        if (lastBeatTime == 0)
+                        {
+                            lastBeatTime = beat.TimeOffset;
+                        }
+                        else if (CurrentBPM == 0)
+                        {
+                            float delta = beat.TimeOffset - lastBeatTime;
+
+                            CurrentBPM = (float)((1.0 / delta) * 60);
+                        }
                     }
 
                     float secsBehind = 1f;

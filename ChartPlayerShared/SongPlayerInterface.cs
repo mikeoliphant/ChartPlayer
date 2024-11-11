@@ -45,6 +45,10 @@ namespace ChartPlayer
         int currentMinute = 0;
         int currentSecond = 0;
 
+        NinePatchWrapper bpmInterface;
+        StringBuilderTextBlock bpmText;
+        float lastBPM = 0;
+
         int songBPM = 0;
 
         HorizontalSlider playTimeSlider;
@@ -187,6 +191,24 @@ namespace ChartPlayer
             };
             speedSlider.SetLevel(1.0f);
             speedStack.Children.Add(speedSlider);
+
+            bpmInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bottomButtonStack.Children.Add(bpmInterface);
+
+            HorizontalStack bpmStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bpmInterface.Child = bpmStack;
+
+            bpmStack.Children.Add(bpmText = new StringBuilderTextBlock("BPM:")
+            {
+                DesiredWidth = 170,
+                VerticalAlignment = EVerticalAlignment.Stretch
+            });
 
             hideNotesButton = new TextToggleButton("Show Notes", "Hide Notes")
             {
@@ -499,6 +521,10 @@ namespace ChartPlayer
 
                 songBPM = beatHistogram.OrderByDescending(b => b.Value).FirstOrDefault().Key;
 
+                bpmText.StringBuilder.Clear();
+                bpmText.StringBuilder.Append("BPM: ");
+                bpmText.StringBuilder.AppendNumber(songBPM);
+
                 UpdateContentLayout();
 
                 GC.Collect();
@@ -643,6 +669,26 @@ namespace ChartPlayer
                     scoreText.StringBuilder.AppendNumber(totalNotes);
 
                     scoreTextWrapper.UpdateContentLayout();
+                }
+
+                float bpm = fretScene.CurrentBPM;
+
+                bpm = ((int)(bpm * 10)) / 10.0f;
+
+                if (bpm != lastBPM)
+                {
+                    bpmText.StringBuilder.Clear();
+                    bpmText.StringBuilder.Append("BPM: ");
+                    bpmText.StringBuilder.AppendNumber(songBPM);
+                    bpmText.StringBuilder.Append(" (");
+                    bpmText.StringBuilder.AppendNumber((int)bpm);
+                    bpmText.StringBuilder.Append('.');
+                    bpmText.StringBuilder.AppendNumber((int)((bpm - Math.Floor(bpm)) * 10));
+                    bpmText.StringBuilder.Append(')');
+
+                    lastBPM = bpm;
+
+                    bpmInterface.UpdateContentLayout();
                 }
             }
 
