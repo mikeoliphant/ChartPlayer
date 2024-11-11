@@ -671,7 +671,7 @@ namespace ChartPlayer
                     scoreTextWrapper.UpdateContentLayout();
                 }
 
-                float bpm = fretScene.CurrentBPM;
+                float bpm = fretScene.CurrentBPM * songPlayer.PlaybackSpeed;
 
                 bpm = ((int)(bpm * 10)) / 10.0f;
 
@@ -679,7 +679,7 @@ namespace ChartPlayer
                 {
                     bpmText.StringBuilder.Clear();
                     bpmText.StringBuilder.Append("BPM: ");
-                    bpmText.StringBuilder.AppendNumber(songBPM);
+                    bpmText.StringBuilder.AppendNumber((int)(Math.Round(songBPM * songPlayer.PlaybackSpeed)));
                     bpmText.StringBuilder.Append(" (");
                     bpmText.StringBuilder.AppendNumber((int)bpm);
                     bpmText.StringBuilder.Append('.');

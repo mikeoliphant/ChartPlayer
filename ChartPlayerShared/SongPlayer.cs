@@ -15,6 +15,7 @@ namespace ChartPlayer
         public double PlaybackSampleRate { get; private set; } = 48000;
         public double SongSampleRate { get; private set; }
         public float CurrentSecond { get; private set; } = 0;
+        public float PlaybackSpeed { get; private set; } = 1.0f;
         public float SongLengthSeconds { get; private set; } = 0;
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
@@ -36,7 +37,6 @@ namespace ChartPlayer
         RubberBandStretcher stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
-        float playbackSpeed = 1.0f;
 
         public SongPlayer()
         {
@@ -53,13 +53,13 @@ namespace ChartPlayer
 
             stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
 
-            stretcher.SetTimeRatio(1.0 / playbackSpeed);
+            stretcher.SetTimeRatio(1.0 / PlaybackSpeed);
             stretcher.SetPitchScale(pitchShift);
         }
 
         public void SetPlaybackSpeed(float speed)
         {
-            playbackSpeed = speed;
+            PlaybackSpeed = speed;
 
             stretcher.SetTimeRatio(1.0 / speed);
         }
@@ -177,7 +177,7 @@ namespace ChartPlayer
                 return;
             }
 
-            if ((pitchShift == 1.0f) && (playbackSpeed == 1.0f))
+            if ((pitchShift == 1.0f) && (PlaybackSpeed == 1.0f))
             {
                 int samples = (int)Math.Min(leftChannel.Length, totalSamples - currentPlaybackSample);
 
