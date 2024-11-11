@@ -45,6 +45,8 @@ namespace ChartPlayer
         int currentMinute = 0;
         int currentSecond = 0;
 
+        int songBPM = 0;
+
         HorizontalSlider playTimeSlider;
 
         ImageToggleButton pauseButton;
@@ -472,6 +474,30 @@ namespace ChartPlayer
                 songNameText.Text = song.SongName;
                 songArtistText.Text = song.ArtistName;
                 songInstrumentText.Text = songPlayer.SongInstrumentPart.ToString();
+
+                float lastBeatTime = 0;
+
+                Dictionary<int, int> beatHistogram = new();
+
+                foreach (SongBeat beat in songPlayer.SongStructure.Beats)
+                {
+                    if (lastBeatTime > 0)
+                    {
+                        float delta = beat.TimeOffset - lastBeatTime;
+
+                        int currentCount = 0;
+
+                        int bpm = (int)Math.Round((1.0 / delta) * 60);
+
+                        beatHistogram.TryGetValue(bpm, out currentCount);
+
+                        beatHistogram[bpm] = currentCount + 1;
+                    }
+
+                    lastBeatTime = beat.TimeOffset;
+                }
+
+                songBPM = beatHistogram.OrderByDescending(b => b.Value).FirstOrDefault().Key;
 
                 UpdateContentLayout();
 
