@@ -51,17 +51,23 @@ namespace ChartPlayer
         {
             this.PlaybackSampleRate = playbackRate;
 
-            stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
+            // stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
 
-            stretcher.SetTimeRatio(1.0 / PlaybackSpeed);
-            stretcher.SetPitchScale(pitchShift);
+            if (stretcher != null)
+            {
+                stretcher.SetTimeRatio(1.0 / PlaybackSpeed);
+                stretcher.SetPitchScale(pitchShift);
+            }
         }
 
         public void SetPlaybackSpeed(float speed)
         {
             PlaybackSpeed = speed;
 
-            stretcher.SetTimeRatio(1.0 / speed);
+            if (stretcher != null)
+            {
+                stretcher.SetTimeRatio(1.0 / speed);
+            }
         }
 
         public void SetSong(string songPath, SongData song, SongInstrumentPart part)
@@ -141,7 +147,10 @@ namespace ChartPlayer
             if ((SongTuningMode != ESongTuningMode.None) && (TuningOffsetSemitones != 0))
                 pitchShift = 1.0 / Math.Pow(2, (double)TuningOffsetSemitones / 12.0);
 
-            stretcher.SetPitchScale(pitchShift);
+            if (stretcher != null)
+            {
+                stretcher.SetPitchScale(pitchShift);
+            }
 
             resampler.SetRates(vorbisReader.SampleRate, PlaybackSampleRate);
 
@@ -177,7 +186,7 @@ namespace ChartPlayer
                 return;
             }
 
-            if ((pitchShift == 1.0f) && (PlaybackSpeed == 1.0f))
+            if ((stretcher == null) || ((pitchShift == 1.0f) && (PlaybackSpeed == 1.0f)))
             {
                 int samples = (int)Math.Min(leftChannel.Length, totalSamples - currentPlaybackSample);
 

@@ -5,7 +5,6 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
-using System.Windows.Forms;
 
 namespace ChartPlayer
 {

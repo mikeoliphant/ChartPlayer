@@ -4,3 +4,6 @@
 [submodule "Dependencies/OpenSongChart"]
 	path = Dependencies/OpenSongChart
 	url = https://github.com/mikeoliphant/OpenSongChart
+[submodule "Dependencies/JackSharp"]
+	path = Dependencies/JackSharp
+	url = https://github.com/mikeoliphant/JackSharp

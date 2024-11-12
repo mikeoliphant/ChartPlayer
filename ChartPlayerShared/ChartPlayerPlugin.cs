@@ -2,10 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows.Forms;
 using AudioPlugSharp;
-using Microsoft.Xna.Framework;
-using SharpDX;
 using UILayout;
 
 namespace ChartPlayer
