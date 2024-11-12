@@ -96,15 +96,13 @@ namespace ChartPlayer
 
             jackProcessor.ProcessFunc = Process;
 
-            if (!jackProcessor.Start())
-            {
-            }
-
-
             Plugin.InitializeProcessing();
 
             Plugin.SetMaxAudioBufferSize(MaxAudioBufferSize, BitsPerSample);
 
+            if (!jackProcessor.Start())
+            {
+            }
 
             Plugin.ShowEditor(IntPtr.Zero);
             Exit();
