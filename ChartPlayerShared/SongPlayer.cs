@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using NVorbis;
-using RubberBand;
+using RubberBandSharp;
 using SongFormat;
 
 namespace ChartPlayer
@@ -34,7 +34,7 @@ namespace ChartPlayer
         long currentPlaybackSample = 0;
         Thread decodeThread = null;
         float[][] sampleData = new float[2][];
-        RubberBandStretcher stretcher = null;
+        RubberBandStretcherStereo stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
 
@@ -51,7 +51,11 @@ namespace ChartPlayer
         {
             this.PlaybackSampleRate = playbackRate;
 
-            // stretcher = new RubberBandStretcher((int)playbackRate, 2, RubberBandStretcher.Options.ProcessRealTime | RubberBandStretcher.Options.WindowShort | RubberBandStretcher.Options.FormantPreserved | RubberBandStretcher.Options.PitchHighConsistency);
+            stretcher = new RubberBandStretcherStereo((int)playbackRate,
+                RubberBandStretcher.Options.ProcessRealTime |
+                RubberBandStretcher.Options.WindowShort |
+                RubberBandStretcher.Options.FormantPreserved |
+                RubberBandStretcher.Options.PitchHighConsistency);
 
             if (stretcher != null)
             {
@@ -206,7 +210,7 @@ namespace ChartPlayer
             }
             else
             {
-                int samplesNeeded = leftChannel.Length;
+                uint samplesNeeded = (uint)leftChannel.Length;
 
                 int pos = 0;
 
@@ -216,9 +220,9 @@ namespace ChartPlayer
 
                     if (avail > 0)
                     {
-                        int toRead = Math.Min(avail, samplesNeeded);
+                        uint toRead = (uint)Math.Min(avail, samplesNeeded);
 
-                        long read = stretcher.Retrieve(stretchBuf, toRead);
+                        uint read = stretcher.Retrieve(stretchBuf[0], stretchBuf[1], toRead);
 
                         if (read != toRead)
                             throw new Exception();
@@ -237,7 +241,7 @@ namespace ChartPlayer
                     }
                     else
                     {
-                        long stretchSamplesRequired = stretcher.GetSamplesRequired();
+                        uint stretchSamplesRequired = stretcher.GetSamplesRequired();
 
                         if (stretchSamplesRequired > (totalSamples - currentPlaybackSample))
                         {
@@ -255,7 +259,7 @@ namespace ChartPlayer
                             stretchBuf[1][i] = sampleData[1][currentPlaybackSample + i];
                         }
 
-                        stretcher.Process(stretchBuf, stretchSamplesRequired, final: false);
+                        stretcher.Process(stretchBuf[0], stretchBuf[1], stretchSamplesRequired, isFinal: false);
 
                         currentPlaybackSample += stretchSamplesRequired;
                     }
