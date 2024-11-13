@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
-using System.Windows.Forms;
 using SongFormat;
 using UILayout;
 
@@ -241,15 +239,12 @@ namespace ChartPlayer
 
         void SelectSongPath()
         {
-            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            string newPath = Layout.Current.GetFolder(newSettings.SongPath);
 
-            dialog.SelectedPath = newSettings.SongPath;
-
-            if (dialog.ShowDialog() == DialogResult.OK)
+            if (!string.IsNullOrEmpty(newPath))
             {
-                newSettings.SongPath = dialog.SelectedPath;
-
-                songPathText.Text = newSettings.SongPath;
+                newSettings.SongPath = newPath;
+                songPathText.Text = newPath;
 
                 Layout.Current.UpdateLayout();
             }

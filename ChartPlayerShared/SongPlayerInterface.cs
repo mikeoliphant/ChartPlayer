@@ -8,8 +8,6 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
-using System.Windows.Forms;
-using SharpDX.MediaFoundation;
 
 namespace ChartPlayer
 {
@@ -433,7 +431,7 @@ namespace ChartPlayer
 
             try
             {
-                string songPath = Path.Combine(songBasePath, song.FolderPath);
+                string songPath = songIndex.GetSongPath(song);
 
                 using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
                 {
@@ -452,6 +450,7 @@ namespace ChartPlayer
                 }
 
                 songPlayer = new SongPlayer();
+
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
                 SpeedChanged(speedSlider.Level);
                 songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;
@@ -535,11 +534,13 @@ namespace ChartPlayer
             }
         }
 
+#if WINDOWS
         [DllImport("kernel32.dll")]
         public static extern uint SetThreadExecutionState(uint esFlags);
         public const uint ES_CONTINUOUS = 0x80000000;
         public const uint ES_SYSTEM_REQUIRED = 0x00000001;
         public const uint ES_DISPLAY_REQUIRED = 0x00000002;
+#endif
 
         Vector2 lastMousePosition;
         int mouseIdleFrames = 0;
@@ -574,7 +575,9 @@ namespace ChartPlayer
             }
 
             // Keep the monitor from turning off
+#if WINDOWS
             SetThreadExecutionState(ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED);
+#endif
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
         }

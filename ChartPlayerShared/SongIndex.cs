@@ -8,7 +8,6 @@ using System.Text.Json.Serialization;
 using System.Web;
 using System.Xml.Serialization;
 using Microsoft.Xna.Framework.Media;
-using SharpDX.DirectWrite;
 using SongFormat;
 using UILayout;
 
@@ -223,7 +222,14 @@ namespace ChartPlayer
 
         public string GetSongPath(SongIndexEntry indexEntry)
         {
-            return Path.Combine(BasePath, indexEntry.FolderPath);
+            string folder = indexEntry.FolderPath;
+
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                folder = folder.Replace('\\', Path.DirectorySeparatorChar);
+            }           
+
+            return Path.Combine(BasePath, folder);
         }
 
         public UIImage GetAlbumImage(SongIndexEntry indexEntry)

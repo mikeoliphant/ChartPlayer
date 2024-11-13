@@ -6,7 +6,7 @@ namespace ChartPlayer
 {
     public class ChartPlayerGame : MonoGameLayout
     {
-        public static new ChartPlayerGame Instance { get; private set; }
+        public static ChartPlayerGame Instance { get; private set; }
 
         public ChartPlayerPlugin Plugin { get; set; }
         public Scene3D Scene3D { get; set; }

@@ -19,7 +19,7 @@
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
 		<PackageReference Include="NVorbis" Version="0.10.5" />
-		<PackageReference Include="rubberband-sharp" Version="1.0.0" />
+		<PackageReference Include="RubberBandSharp" Version="0.0.1" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">

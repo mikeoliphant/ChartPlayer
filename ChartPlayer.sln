@@ -21,6 +21,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "Dependencies\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.WindowsDX", "Dependencies\UILayout\UILayout.MonoGame.WindowsDX\UILayout.MonoGame.WindowsDX.csproj", "{5C17386C-1BB3-4F61-860D-1987A1FCF984}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartPlayerJack", "ChartPlayerJack\ChartPlayerJack.csproj", "{F80B24E8-B74B-476A-9652-40A0E64FBEEE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.DesktopGL", "Dependencies\UILayout\UILayout.MonoGame.DesktopGL\UILayout.MonoGame.DesktopGL.csproj", "{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Build CLI|Any CPU = Debug Build CLI|Any CPU
@@ -124,6 +128,42 @@ Global
 		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x64.Build.0 = Release|Any CPU
 		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x86.ActiveCfg = Release|Any CPU
 		{5C17386C-1BB3-4F61-860D-1987A1FCF984}.Release|x86.Build.0 = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|x64.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Debug|x86.Build.0 = Debug|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|x64.ActiveCfg = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|x64.Build.0 = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{F80B24E8-B74B-476A-9652-40A0E64FBEEE}.Release|x86.Build.0 = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x64.Build.0 = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +172,8 @@ Global
 		SolutionGuid = {AD240CF6-8533-4CAC-BEB9-3C93FFD34FF7}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{0a1d37db-eaf4-43b0-a13a-a55dd97397d1}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout\UILayout.projitems*{0a1d37db-eaf4-43b0-a13a-a55dd97397d1}*SharedItemsImports = 5
 		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
@@ -144,5 +186,7 @@ Global
 		Dependencies\UILayout\UILayout\UILayout.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d7307594-237f-43da-bd6b-d0bc2bd9b276}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{e89d1bac-28e4-434d-857a-3be1d35e279c}*SharedItemsImports = 13
+		ChartPlayerShared\ChartPlayerShared.projitems*{f80b24e8-b74b-476a-9652-40a0e64fbeee}*SharedItemsImports = 5
+		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{f80b24e8-b74b-476a-9652-40a0e64fbeee}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
