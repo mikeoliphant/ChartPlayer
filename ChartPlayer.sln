@@ -21,11 +21,9 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SongFormat", "Dependencies\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.WindowsDX", "Dependencies\UILayout\UILayout.MonoGame.WindowsDX\UILayout.MonoGame.WindowsDX.csproj", "{5C17386C-1BB3-4F61-860D-1987A1FCF984}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartPlayerJack", "ChartPlayerJack\ChartPlayerJack.csproj", "{F80B24E8-B74B-476A-9652-40A0E64FBEEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartPlayerJack", "ChartPlayerJack\ChartPlayerJack.csproj", "{F80B24E8-B74B-476A-9652-40A0E64FBEEE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UILayout.MonoGame.DesktopGL", "Dependencies\UILayout\UILayout.MonoGame.DesktopGL\UILayout.MonoGame.DesktopGL.csproj", "{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackSharp", "Dependencies\JackSharp\JackSharp\JackSharp.csproj", "{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,24 +164,6 @@ Global
 		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x64.Build.0 = Release|Any CPU
 		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x86.ActiveCfg = Release|Any CPU
 		{0A1D37DB-EAF4-43B0-A13A-A55DD97397D1}.Release|x86.Build.0 = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|Any CPU.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|x64.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|x64.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|x86.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug Build CLI|x86.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|x64.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Debug|x86.Build.0 = Debug|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|x64.ActiveCfg = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|x64.Build.0 = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|x86.ActiveCfg = Release|Any CPU
-		{F9DEAA22-42A9-470F-A89D-AB9AABE0D83F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
