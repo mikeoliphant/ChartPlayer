@@ -79,11 +79,7 @@ namespace ChartPlayer
 
             Plugin.HideEditor();
 
-            //if (AsioDriver != null)
-            //{
-            //    AsioDriver.Stop();
-            //    AsioDriver.Release();
-            //}
+            jackProcessor.Stop();
         }
 
         public void Run()

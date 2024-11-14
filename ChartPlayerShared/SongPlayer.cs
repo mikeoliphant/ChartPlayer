@@ -51,11 +51,15 @@ namespace ChartPlayer
         {
             this.PlaybackSampleRate = playbackRate;
 
-            stretcher = new RubberBandStretcherStereo((int)playbackRate,
-                RubberBandStretcher.Options.ProcessRealTime |
-                RubberBandStretcher.Options.WindowShort |
-                RubberBandStretcher.Options.FormantPreserved |
-                RubberBandStretcher.Options.PitchHighConsistency);
+            try
+            {
+                stretcher = new RubberBandStretcherStereo((int)playbackRate,
+                    RubberBandStretcher.Options.ProcessRealTime |
+                    RubberBandStretcher.Options.WindowShort |
+                    RubberBandStretcher.Options.FormantPreserved |
+                    RubberBandStretcher.Options.PitchHighConsistency);
+            }
+            catch { }
 
             if (stretcher != null)
             {
