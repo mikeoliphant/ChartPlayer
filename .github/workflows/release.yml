@@ -69,27 +69,18 @@ jobs:
         asset_name: ChartPlayerVST3Plugin.zip
         asset_content_type: application/zip
 
-  build-linux-x64:
-    name: Build Linux-x64
-    needs: create_release
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3.3.0
-      with:
-        submodules: recursive
-
-    - name: Publish
+    - name: Publish Linux-x64
       working-directory: ${{github.workspace}}
       run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime linux-x64 --self-contained true
 
-    - name: Add Linux Archive
+    - name: Add Linux-x64 Archive
       working-directory: ${{github.workspace}}
       run: |
         mkdir linux-x64-build
         move ChartPlayerJack\bin\Release\net8.0\publish\linux-x64 linux-x64-build\ChartPlayer
         Compress-Archive -Path linux-x64-build\* -Destination ChartPlayerLinux.zip
 
-    - name: Upload Archive Asset
+    - name: Upload Linux-x64 Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
