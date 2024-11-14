@@ -55,11 +55,11 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir plugin-build
-        move ChartPlayerPlugin\bin\Release\net6.0-windows7 plugin-build\ChartPlayer
+        move ChartPlayerPlugin\bin\Release\net8.0-windows plugin-build\ChartPlayer
         cp ChartPlayerPlugin\README.txt plugin-build
         Compress-Archive -Path plugin-build\* -Destination ChartPlayerVST3Plugin.zip
     
-    - name: Upload Release Asset
+    - name: Upload Plugin Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,3 +68,25 @@ jobs:
         asset_path: ./ChartPlayerVST3Plugin.zip
         asset_name: ChartPlayerVST3Plugin.zip
         asset_content_type: application/zip
+
+    - name: Publish Linux-x64
+      working-directory: ${{github.workspace}}
+      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime linux-x64 --self-contained true
+
+    - name: Add Linux-x64 Archive
+      working-directory: ${{github.workspace}}
+      run: |
+        mkdir linux-x64-build
+        move ChartPlayerJack\bin\Release\net8.0\publish\linux-x64 linux-x64-build\ChartPlayer
+        Compress-Archive -Path linux-x64-build\* -Destination ChartPlayerLinux.zip
+
+    - name: Upload Linux-x64 Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ./ChartPlayerLinux.zip
+        asset_name: ChartPlayerLinux.zip
+        asset_content_type: application/zip
+      
