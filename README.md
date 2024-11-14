@@ -32,7 +32,7 @@ To install, unpack the .zip file and copy the extracted folder to "C:\Program Fi
 
 Unpack the .zip file and run "ChartPlayerJack" from the resulting folder.
 
-You need to have a running Jack instance for it to work. It will attempt to connect to your jack input/output ports.
+You need to have a running [Jack](https://jackaudio.org/) instance for it to work. It will attempt to connect to your jack input/output ports.
 
 For speed/pitch shifting to work, you need to have Rubber Band (librubberband2) installed.
 
