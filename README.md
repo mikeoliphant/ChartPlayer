@@ -1,6 +1,6 @@
 # ChartPlayer
 
-ChartPlayer is an application for playing along to charts in [OpenSongChart](https://github.com/mikeoliphant/OpenSongChart) format.
+ChartPlayer is a cross-platform application for playing along to charts in [OpenSongChart](https://github.com/mikeoliphant/OpenSongChart) format.
 
 It runs as a VST plugin inside your DAW so that you can use any other plugin you like (ie: guitar amp simulation) for your instrument sounds.
 
@@ -18,13 +18,25 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 
 # Platforms Supported
 
-ChartPlayer currently runs only under Windows, but the core code is designed to be cross-platform. MacOS and Linux support is certainly possible for the future.
+ChartPlayer has been tested on Windows and Linux (x64 and arm64). Chances are it will work on macOS, but it hasn't been tested.
 
 # Downloading
 
-You can download the VST plugin from the releases section [here](https://github.com/mikeoliphant/ChartPlayer/releases/latest).
+You can download ChartPlayer from releases section [here](https://github.com/mikeoliphant/ChartPlayer/releases/latest).
+
+# Running as a VST in Windows
 
 To install, unpack the .zip file and copy the extracted folder to "C:\Program Files\Common Files\VST3".
+
+# Running under Jack in Linux
+
+Unpack the .zip file and run "ChartPlayerJack" from the resulting folder.
+
+You need to have a running Jack instance for it to work. It will attempt to connect to your jack input/output ports.
+
+For speed/pitch shifting to work, you need to have Rubber Band (librubberband2) installed.
+
+For file browser input to work, you need to have [Zenity](https://help.gnome.org/users/zenity/stable/index.html.en) installed.
 
 # Where to get songs
 
