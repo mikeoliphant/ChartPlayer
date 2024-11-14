@@ -51,11 +51,15 @@ namespace ChartPlayer
         {
             this.PlaybackSampleRate = playbackRate;
 
-            stretcher = new RubberBandStretcherStereo((int)playbackRate,
-                RubberBandStretcher.Options.ProcessRealTime |
-                RubberBandStretcher.Options.WindowShort |
-                RubberBandStretcher.Options.FormantPreserved |
-                RubberBandStretcher.Options.PitchHighConsistency);
+            try
+            {
+                stretcher = new RubberBandStretcherStereo((int)playbackRate,
+                    RubberBandStretcher.Options.ProcessRealTime |
+                    RubberBandStretcher.Options.WindowShort |
+                    RubberBandStretcher.Options.FormantPreserved |
+                    RubberBandStretcher.Options.PitchHighConsistency);
+            }
+            catch { }
 
             if (stretcher != null)
             {
@@ -253,13 +257,8 @@ namespace ChartPlayer
                             return;
                         }
 
-                        for (int i = 0; i < stretchSamplesRequired; i++)
-                        {
-                            stretchBuf[0][i] = sampleData[0][currentPlaybackSample + i];
-                            stretchBuf[1][i] = sampleData[1][currentPlaybackSample + i];
-                        }
-
-                        stretcher.Process(stretchBuf[0], stretchBuf[1], stretchSamplesRequired, isFinal: false);
+                        stretcher.Process(new ReadOnlySpan<float>(sampleData[0], (int)currentPlaybackSample, (int)stretchSamplesRequired),
+                            new ReadOnlySpan<float>(sampleData[1], (int)currentPlaybackSample, (int)stretchSamplesRequired), stretchSamplesRequired, isFinal: false);
 
                         currentPlaybackSample += stretchSamplesRequired;
                     }
