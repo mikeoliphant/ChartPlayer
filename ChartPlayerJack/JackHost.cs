@@ -88,7 +88,7 @@ namespace ChartPlayer
             MaxAudioBufferSize = 512;
             BitsPerSample = EAudioBitsPerSample.Bits32;
 
-            jackProcessor = new("ChartPlayer", 1, 2);
+            jackProcessor = new("ChartPlayer", 1, 2, 0, 0, autoconnect: true);
 
             jackProcessor.ProcessFunc = Process;
 
@@ -96,7 +96,7 @@ namespace ChartPlayer
 
             Plugin.SetMaxAudioBufferSize(MaxAudioBufferSize, BitsPerSample);
 
-            if (!jackProcessor.Start())
+            if (jackProcessor.Start())
             {
             }
 
