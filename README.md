@@ -30,7 +30,11 @@ To install, unpack the .zip file and copy the extracted folder to "C:\Program Fi
 
 # Running under Jack in Linux or MacOS
 
-Unpack the .zip file and run "ChartPlayerJack" from the resulting folder (you will likely have to make it executable "**chmod u+x ChartPlayerJack**").
+Unpack the .zip file and run "ChartPlayerJack" from the resulting folder (you will likely have to make it executable:
+
+```
+chmod u+x ChartPlayerJack
+```
 
 You need to have a running [Jack](https://jackaudio.org/) instance for it to work. It will attempt to connect to your jack input/output ports.
 
