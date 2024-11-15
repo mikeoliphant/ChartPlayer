@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<Version>0.1.9</Version>
+		<Version>0.1.10</Version>
 		<TargetFramework>net8.0</TargetFramework>
 		<RollForward>Major</RollForward>
 		<PublishReadyToRun>false</PublishReadyToRun>
@@ -22,10 +22,10 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AudioPlugSharp" Version="0.6.7" />
-		<PackageReference Include="JackSharpCore" Version="0.1.1" />
-		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
-		<PackageReference Include="RubberBandSharp" Version="0.0.5" />
+		<PackageReference Include="JackSharpCore" Version="0.1.2" />
+		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105" />
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
+		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Dependencies\UILayout\UILayout.MonoGame.DesktopGL\UILayout.MonoGame.DesktopGL.csproj" />
