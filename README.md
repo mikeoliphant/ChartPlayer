@@ -28,7 +28,7 @@ You can download ChartPlayer from releases section [here](https://github.com/mik
 
 To install, unpack the .zip file and copy the extracted folder to "C:\Program Files\Common Files\VST3".
 
-# Running under Jack in Linux
+# Running under Jack in Linux or MacOS
 
 Unpack the .zip file and run "ChartPlayerJack" from the resulting folder.
 
