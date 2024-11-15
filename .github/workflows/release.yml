@@ -118,6 +118,16 @@ jobs:
     - name: Add OSX-arm64 Archive
       working-directory: ${{github.workspace}}
       run: |
-        mkdir osx-x64-build
+        mkdir osx-arm64-build
         move ChartPlayerJack\bin\Release\net8.0\osx-arm64\publish osx-arm64-build\ChartPlayer
         Compress-Archive -Path osx-arm64-build\* -Destination ChartPlayerMacArm64.zip
+        
+    - name: Upload OSX-arm64 Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_path: ./ChartPlayerMacArm64.zip
+        asset_name: ChartPlayerMacArm64.zip
+        asset_content_type: application/zip
