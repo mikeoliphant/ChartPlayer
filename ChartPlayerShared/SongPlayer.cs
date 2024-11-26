@@ -177,7 +177,7 @@ namespace ChartPlayer
             CurrentSecond = seekTime;
         }
 
-        public void ReadSamples(Span<double> leftChannel, Span<double> rightChannel)
+        public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)
         {
             if (seekTime != -1)
             {

@@ -11,11 +11,11 @@ namespace ChartPlayer
     {
         public ChartPlayerSaveState ChartPlayerSaveState { get { return (SaveStateData as ChartPlayerSaveState) ?? new ChartPlayerSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
-        public SampleHistory<double> SampleHistory { get; private set; } = new SampleHistory<double>();
+        public SampleHistory<float> SampleHistory { get; private set; } = new SampleHistory<float>();
         public MonoGameHost GameHost { get; private set; } = null;
 
-        AudioIOPort stereoInput;
-        AudioIOPort stereoOutput;
+        FloatAudioIOPort stereoInput;
+        FloatAudioIOPort stereoOutput;
         Thread gameThread = null;
 
         public ChartPlayerPlugin()
@@ -36,6 +36,8 @@ namespace ChartPlayer
             EditorWidth = 1024;
             EditorHeight = 720;
 
+            SampleFormatsSupported = EAudioBitsPerSample.Bits32;
+
             SaveStateData = new ChartPlayerSaveState();
         }
 
@@ -45,12 +47,12 @@ namespace ChartPlayer
 
             InputPorts = new AudioIOPort[]
             {
-                stereoInput = new AudioIOPort("Stereo Input", EAudioChannelConfiguration.Stereo),
+                stereoInput = new FloatAudioIOPort("Stereo Input", EAudioChannelConfiguration.Stereo),
             };
 
             OutputPorts = new AudioIOPort[]
             {
-                stereoOutput = new AudioIOPort("Stereo Output", EAudioChannelConfiguration.Stereo)
+                stereoOutput = new FloatAudioIOPort("Stereo Output", EAudioChannelConfiguration.Stereo)
             };
         }
 
@@ -190,7 +192,7 @@ namespace ChartPlayer
                 {
                     SongPlayer.ReadSamples(left, right);
 
-                    double gain = 0.25f;
+                    float gain = 0.25f;
 
                     for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
                     {

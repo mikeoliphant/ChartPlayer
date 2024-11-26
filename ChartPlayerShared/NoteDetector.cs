@@ -59,7 +59,7 @@ namespace ChartPlayer
             return (fftData.Length * (frequency / ChartPlayerGame.Instance.Plugin.Host.SampleRate));
         }
 
-        void ConvertToComplex(ReadOnlySpan<double> samples, int offset)
+        void ConvertToComplex(ReadOnlySpan<float> samples, int offset)
         {
             for (int pos = 0; pos < samples.Length; pos++)
             {
@@ -70,7 +70,7 @@ namespace ChartPlayer
 
         void UpdateFFT()
         {
-            SampleHistory<double> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
+            SampleHistory<float> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
 
             history.Process(ConvertToComplex, fftData.Length);
 
