@@ -1,5 +1,5 @@
 ﻿using System;
-using AudioPlugSharpJack
+using AudioPlugSharpJack;
 
 namespace ChartPlayer
 {
