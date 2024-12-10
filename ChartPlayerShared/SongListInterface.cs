@@ -210,6 +210,13 @@ namespace ChartPlayer
         {
         }
 
+        public override bool HandleTouch(in Touch touch)
+        {
+            base.HandleTouch(touch);
+
+            return true;
+        }
+
         public override void HandleInput(InputManager inputManager)
         {
             base.HandleInput(inputManager);
