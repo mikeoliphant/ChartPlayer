@@ -554,6 +554,11 @@ namespace ChartPlayer
                 TogglePaused();
             }
 
+            if (inputManager.WasClicked("Exit", this))
+            {
+                ShowSongs();
+            }
+
             Vector2 mousePosition = inputManager.MousePosition;
 
             if (Vector2.Distance(mousePosition, lastMousePosition) > 10)
