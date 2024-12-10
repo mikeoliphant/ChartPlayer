@@ -224,15 +224,10 @@ namespace ChartPlayer
             HorizontalStack scoreStack = new HorizontalStack()
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
-                DesiredWidth = 200,
+                DesiredWidth = 210,
                 ChildSpacing = 10
             };
             scoreInterface.Child = scoreStack;
-
-            scoreStack.Children.Add(new TextBlock("Accuracy: ")
-            {
-                VerticalAlignment = EVerticalAlignment.Center
-            });
 
             scoreTextWrapper = new UIElementWrapper()
             {
@@ -675,6 +670,23 @@ namespace ChartPlayer
                     scoreText.StringBuilder.AppendNumber(detectedNotes);
                     scoreText.StringBuilder.Append("/");
                     scoreText.StringBuilder.AppendNumber(totalNotes);
+
+                    if (totalNotes > 0)
+                    {
+                        scoreText.StringBuilder.Append(" (");
+
+                        float percent = (float)detectedNotes / (float)totalNotes;
+
+                        int evenPercent = (int)(percent * 100);
+
+                        scoreText.StringBuilder.AppendNumber(evenPercent);
+                        scoreText.StringBuilder.Append('.');
+
+                        percent -= evenPercent / 100;
+
+                        scoreText.StringBuilder.AppendNumber((int)(percent * 10));
+                        scoreText.StringBuilder.Append("%)");
+                    }
 
                     scoreTextWrapper.UpdateContentLayout();
                 }
