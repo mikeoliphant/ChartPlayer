@@ -547,20 +547,23 @@ namespace ChartPlayer
                 Text = "New Tag",
                 AfterCloseAction = delegate
                 {
-                    Layout.Current.GetKeyboardInput("New Tag", null, delegate (string text, object data)
+                    Layout.Current.ShowTextInputPopup("New Tag:", delegate (string text)
                     {
-                        text = Regex.Replace(text, "[^A-Za-z0-9 -_]", "");
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            text = Regex.Replace(text, "[^A-Za-z0-9 -_]", "");
 
-                        songIndex.AddTag(text);
+                            songIndex.AddTag(text);
 
-                        SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
+                            SongStatsEntry stats = songIndex.GetSongStats(selectedSong, CurrentInstrument);
 
-                        stats.AddTag(text);
+                            stats.AddTag(text);
 
-                        songIndex.SaveStats();
+                            songIndex.SaveStats();
 
-                        UpdateSelectedSongDisplay();
-                    }, null);
+                            UpdateSelectedSongDisplay();
+                        }
+                    }, UIColor.Black, new UIColor(200, 200, 200));
                 }
             });
 
