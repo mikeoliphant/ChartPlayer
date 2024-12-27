@@ -27,7 +27,7 @@ namespace ChartPlayer
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
 
-        VorbisReader vorbisReader;
+        VorbisMixer vorbisReader;
         WdlResampler resampler;
         float seekTime = -1;
         long totalSamples;
@@ -103,7 +103,12 @@ namespace ChartPlayer
                 }
             }
 
-            using (Stream structStream = File.OpenRead(Path.Combine(songPath, "arrangement.json")))
+            string arrangement = "arrangement";
+
+            if (!string.IsNullOrEmpty(part.ArrangementName))
+                arrangement = part.ArrangementName;
+
+            using (Stream structStream = File.OpenRead(Path.Combine(songPath, arrangement + ".json")))
             {
                 SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SerializationUtil.CondensedSerializerOptions);
             }
@@ -143,7 +148,14 @@ namespace ChartPlayer
                 SongVocals = new List<SongVocal>();
             }
 
-            vorbisReader = new VorbisReader(Path.Combine(songPath, "song.ogg"));
+            if (!string.IsNullOrEmpty(part.SongAudio))
+            {
+                vorbisReader = new VorbisMixer(part.SongAudio);
+            }
+            else
+            {
+                vorbisReader = new VorbisMixer(Path.Combine(songPath, "song.ogg"));
+            }
 
             if (vorbisReader == null)
             {
