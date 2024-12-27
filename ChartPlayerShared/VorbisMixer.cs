@@ -21,8 +21,6 @@ namespace ChartPlayer
             if (oggPath.EndsWith(".ogg", StringComparison.InvariantCultureIgnoreCase))
             {
                 readers.Add(new VorbisReader(oggPath));
-
-                TotalTime = readers[0].TotalTime;
             }
             else
             {
@@ -45,18 +43,36 @@ namespace ChartPlayer
 
             int read = 0;
 
-            if (mixBuf.Length != count)
+            if (mixBuf.Length < count)
                 Array.Resize(ref mixBuf, count);
 
             Array.Clear(buffer, offset, count);
 
             foreach (var reader in readers)
             {
-                int toMix = reader.ReadSamples(mixBuf, 0, count);
+                int toRead = count;
 
-                for (int i = 0; i < toMix; i++)
+                if (reader.Channels == 1)
+                    toRead /= 2;
+
+                int toMix = reader.ReadSamples(mixBuf, 0, toRead);
+
+                if (reader.Channels == 1)
                 {
-                    buffer[i + offset] += mixBuf[i] * 0.6f;
+                    int pos = offset;
+
+                    for (int i = 0; i < toMix; i++)
+                    {
+                        buffer[pos++] += mixBuf[i] * 0.6f;
+                        buffer[pos++] += mixBuf[i] * 0.6f;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < toMix; i++)
+                    {
+                        buffer[i + offset] += mixBuf[i] * 0.6f;
+                    }
                 }
 
                 read = Math.Max(read, toMix);

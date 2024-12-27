@@ -18,7 +18,7 @@
 		<PackageReference Include="AudioPlugSharp" Version="0.6.10" />
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.2.1105" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
-		<PackageReference Include="NVorbis" Version="0.10.5" />
+		<PackageReference Include="NVorbis" Version="0.9.1" />
 		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">

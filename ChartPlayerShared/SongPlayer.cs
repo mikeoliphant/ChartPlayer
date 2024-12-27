@@ -134,7 +134,7 @@ namespace ChartPlayer
                 TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
             }
 
-            SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).FirstOrDefault();
+            SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).Where(p => p.ArrangementName == part.ArrangementName).FirstOrDefault();
 
             if (vocalPart != null)
             {
