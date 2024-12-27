@@ -23,7 +23,6 @@ namespace ChartPlayer
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
-        public string KeysTuning { get; set; }
         [XmlIgnore]
         [JsonIgnore]
         public SongStatsEntry[] Stats { get; set; } = new SongStatsEntry[Enum.GetValues(typeof(ESongInstrumentType)).Length];
@@ -41,16 +40,7 @@ namespace ChartPlayer
     }
 
     public class SongIndex
-    {
-        public static JsonSerializerOptions SerializerOptions { get; } =
-            new JsonSerializerOptions()
-            {
-                Converters = {
-                   new JsonStringEnumConverter()
-                },
-            };
-
-        public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
+    {   public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
         public SongStats[] Stats = new SongStats[Enum.GetValues(typeof(ESongInstrumentType)).Length];
         public string BasePath { get; private set; }
 
@@ -170,7 +160,7 @@ namespace ChartPlayer
         {
             using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
             {
-                SongData song = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
+                SongData song = JsonSerializer.Deserialize<SongData>(songStream, SerializationUtil.CondensedSerializerOptions);
 
                 if (song != null)
                 {
@@ -202,11 +192,13 @@ namespace ChartPlayer
 
                             indexEntry.BassGuitarTuning = GetTuning(song,part);
                         }
+                        else if (part.InstrumentType == ESongInstrumentType.Drums)
+                        {
+                            indexEntry.Arrangements += "D";
+                        }
                         else if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
                             indexEntry.Arrangements += "K";
-
-                            indexEntry.KeysTuning = "Standard";
                         }
                     }
 
@@ -257,7 +249,7 @@ namespace ChartPlayer
             {
                 using (Stream songStream = File.OpenRead(Path.Combine(GetSongPath(indexEntry), "song.json")))
                 {
-                    return JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
+                    return JsonSerializer.Deserialize<SongData>(songStream, SerializationUtil.CondensedSerializerOptions);
                 }
             }
             catch

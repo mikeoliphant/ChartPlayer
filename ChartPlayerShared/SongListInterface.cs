@@ -167,6 +167,7 @@ namespace ChartPlayer
             buttonInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Drums", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Drums); } });
             //buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
             buttonInputStack.AddInput(new DialogInput { Text = "ReScan", Action = delegate { SongPlayerInterface.Instance.RescanSongIndex(); } });
             buttonInputStack.AddInput(new DialogInput
@@ -272,17 +273,22 @@ namespace ChartPlayer
             switch (CurrentInstrument)
             {
                 case ESongInstrumentType.LeadGuitar:
-                    songs = songs.Where(s => (s.LeadGuitarTuning != null));
+                    songs = songs.Where(s => s.Arrangements.Contains('L'));
                     break;
                 case ESongInstrumentType.RhythmGuitar:
-                    songs = songs.Where(s => (s.RhythmGuitarTuning != null));
+                    songs = songs.Where(s => s.Arrangements.Contains('R'));
                     break;
                 case ESongInstrumentType.BassGuitar:
-                    songs = songs.Where(s => (s.BassGuitarTuning != null));
+                    songs = songs.Where(s => s.Arrangements.Contains('B'));
+                    break;
+                case ESongInstrumentType.Drums:
+                    songs = songs.Where(s => s.Arrangements.Contains('D'));
                     break;
                 case ESongInstrumentType.Keys:
+                    songs = songs.Where(s => s.Arrangements.Contains('K'));
                     break;
                 case ESongInstrumentType.Vocals:
+                    songs = songs.Where(s => s.Arrangements.Contains('V'));
                     break;
                 default:
                     break;
@@ -334,6 +340,11 @@ namespace ChartPlayer
                 CurrentInstrument = type;
 
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
+
+                if (typeof(SongIndex).GetProperty(tuningColumn.PropertyName) == null)
+                {
+                    tuningColumn.PropertyName = "LeadGuitarTuning";
+                }
 
                 SetCurrentSongs();
             }
@@ -547,7 +558,7 @@ namespace ChartPlayer
                 Text = "New Tag",
                 AfterCloseAction = delegate
                 {
-                    Layout.Current.ShowTextInputPopup("New Tag:", delegate (string text)
+                    Layout.Current.ShowTextInputPopup("New Tag:", "", delegate (string text)
                     {
                         if (!string.IsNullOrEmpty(text))
                         {

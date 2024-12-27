@@ -90,7 +90,7 @@ namespace ChartPlayer
             {
                 using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
                 {
-                    SongKeyboardNotes = JsonSerializer.Deserialize<SongKeyboardNotes>(noteStream, SongIndex.SerializerOptions);
+                    SongKeyboardNotes = JsonSerializer.Deserialize<SongKeyboardNotes>(noteStream, SerializationUtil.CondensedSerializerOptions);
                 }
 
                 SongInstrumentNotes = new SongInstrumentNotes();
@@ -99,13 +99,13 @@ namespace ChartPlayer
             {
                 using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
                 {
-                    SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream, SongIndex.SerializerOptions);
+                    SongInstrumentNotes = JsonSerializer.Deserialize<SongInstrumentNotes>(noteStream, SerializationUtil.CondensedSerializerOptions);
                 }
             }
 
             using (Stream structStream = File.OpenRead(Path.Combine(songPath, "arrangement.json")))
             {
-                SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SongIndex.SerializerOptions);
+                SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SerializationUtil.CondensedSerializerOptions);
             }
 
             if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
@@ -135,7 +135,7 @@ namespace ChartPlayer
             {
                 using (Stream vocalStream = File.OpenRead(Path.Combine(songPath, vocalPart.InstrumentName + ".json")))
                 {
-                    SongVocals = JsonSerializer.Deserialize<List<SongVocal>>(vocalStream, SongIndex.SerializerOptions);
+                    SongVocals = JsonSerializer.Deserialize<List<SongVocal>>(vocalStream, SerializationUtil.CondensedSerializerOptions);
                 }
             }
             else

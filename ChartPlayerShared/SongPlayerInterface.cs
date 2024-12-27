@@ -430,7 +430,7 @@ namespace ChartPlayer
 
                 using (Stream songStream = File.OpenRead(Path.Combine(songPath, "song.json")))
                 {
-                    songData = JsonSerializer.Deserialize<SongData>(songStream, SongIndex.SerializerOptions);
+                    songData = JsonSerializer.Deserialize<SongData>(songStream, SerializationUtil.CondensedSerializerOptions);
                 }
 
                 SongInstrumentPart part = null;
