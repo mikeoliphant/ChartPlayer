@@ -23,6 +23,8 @@ namespace ChartPlayer
         public Vector3 Up { get; set; }
         public Vector3 Forward { get; set; }
 
+        public bool MirrorLeftRight { get; set; } = false;
+
         public Camera3D()
         {
             OrthographicScale = 1;
@@ -50,7 +52,11 @@ namespace ChartPlayer
 
         public virtual Matrix GetViewMatrix()
         {
-            return Matrix.CreateLookAt(Position, Position + Forward, Up);;
+            if (MirrorLeftRight)
+                return Matrix.CreateLookAt(Position, Position + Forward, Up) * Matrix.CreateScale(-1, 1, 1);
+            else
+                return Matrix.CreateLookAt(Position, Position + Forward, Up);
+
         }
 
         public float GetDistanceForWidth(float width)

@@ -105,13 +105,13 @@ namespace ChartPlayer
             {
                 HorizontalAlignment = EHorizontalAlignment.Center,
                 VerticalAlignment = EVerticalAlignment.Top,
-                Padding = new LayoutPadding(0, 20)
+                Padding = new LayoutPadding(0, 5)
             };
             topStack.Children.Add(sectionInterface);
 
             vocalText = new VocalDisplay()
             {
-                Margin = new LayoutPadding(20)
+                Margin = new LayoutPadding(20, 5)
             };
             topStack.Children.Add(vocalText);
 
@@ -461,11 +461,11 @@ namespace ChartPlayer
                 vocalText.SongPlayer = songPlayer;
                 if (part.InstrumentType == ESongInstrumentType.Drums)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer, 3);
+                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer);
                 }
                 else if (part.InstrumentType == ESongInstrumentType.Keys)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
+                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer);
                 }
                 else
                 {
@@ -602,10 +602,10 @@ namespace ChartPlayer
                 songPlayer.SongTuningMode = settings.SongTuningMode;
             }
 
-            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
+            if ((ChartPlayerGame.Instance.Scene3D as ChartScene3D) != null)
             {
-                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
-                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).NoteDisplaySeconds = settings.NoteDisplaySeconds;
+                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
+                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = settings.NoteDisplaySeconds;
             }
 
             // Check if song path changed

@@ -12,7 +12,6 @@ namespace ChartPlayer
     {
         public float CameraDistance { get; private set; } = 70;
         public float FocusDist { get; set; } = 600;
-        public bool MirrorLeftRight { get; set; } = false;
 
         float targetCameraDistance = 64;
         float positionFret = 3;
@@ -24,14 +23,6 @@ namespace ChartPlayer
             Forward = new Vector3(0, 0, -1);
 
             FieldOfView = (float)Math.PI / 4.0f;
-        }
-
-        public override Matrix GetViewMatrix()
-        {
-            if (MirrorLeftRight)
-                return base.GetViewMatrix() * Matrix.CreateScale(-1, 1, 1);
-
-            return base.GetViewMatrix();
         }
 
         public void Update(float minFret, float maxFret, float targetFocusFret, float focusY)
@@ -71,33 +62,13 @@ namespace ChartPlayer
         }
     }
 
-    public class FretPlayerScene3D : Scene3D
+    public class FretPlayerScene3D : ChartScene3D
     {
         static UIColor[] stringColors = new UIColor[] { UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
         static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         public bool DisplayNotes { get; set; } = true;
-        public bool LeftyMode
-        {
-            get => lefyMode;
-            set
-            {
-                lefyMode = value;
-                fretCamera.MirrorLeftRight = lefyMode;
-            }
-        }
-        public float NoteDisplaySeconds { get; set; } = 3;
-        public int NumNotesDetected { get; private set; } = 0;
-        public int NumNotesTotal { get; private set; } = 0;
-        public float CurrentBPM { get; private set; } = 0;
 
-        SongPlayer player;
-        UIColor whiteHalfAlpha;
-        UIColor whiteThreeQuartersAlpha;
-        float currentTime;
-        float startTime;
-        float endTime;
-        float timeScale = 200f;
         float targetFocusFret = 2;
         int numFrets = 24;
         float minFret = 0;
@@ -105,7 +76,6 @@ namespace ChartPlayer
         SongNote? firstNote;
         int numStrings;
         bool isDetected = false;
-        bool lefyMode = false;
 
         FretCamera fretCamera;
 
@@ -131,9 +101,8 @@ namespace ChartPlayer
         int startNotePosition = 0;
 
         public FretPlayerScene3D(SongPlayer player)
+            : base(player)
         {
-            this.player = player;
-
             Camera = fretCamera = new FretCamera();
 
             numberStrings = new string[numFrets + 1];
@@ -141,6 +110,9 @@ namespace ChartPlayer
             {
                 numberStrings[i] = i.ToString();
             }
+
+            highwayStartX = GetFretPosition(0);
+            highwayEndX = GetFretPosition(numFrets);
 
             stringNoteImages = new UIImage[6];
             stringNoteTrailImages = new UIImage[6];
@@ -150,12 +122,6 @@ namespace ChartPlayer
                 stringNoteImages[strng] = Layout.Current.GetImage("Guitar" + stringColorNames[strng]);
                 stringNoteTrailImages[strng] = Layout.Current.GetImage("NoteTrail" + stringColorNames[strng]);
             }
-
-            whiteHalfAlpha = UIColor.White;
-            whiteHalfAlpha.A = 128;
-
-            whiteThreeQuartersAlpha = UIColor.White;
-            whiteThreeQuartersAlpha.A = 192;
 
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
 
@@ -273,24 +239,21 @@ namespace ChartPlayer
             noteDetectThread.Join();
         }
 
-        public void ResetScore()
+        public override void ResetScore()
         {
             Array.Clear(notesDetected);
 
-            NumNotesDetected = 0;
-            NumNotesTotal = 0;
+            base.ResetScore();
         }
 
         public override void Draw()
         {
+            base.Draw();
+
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
-                currentTime = (float)player.CurrentSecond;
-
                 fretCamera.Update(minFret, maxFret, targetFocusFret, -(float)(currentTime * timeScale));
             }
-
-            base.Draw();
         }
 
         public override void DrawQuads()
@@ -308,9 +271,6 @@ namespace ChartPlayer
                 {
                     firstNote = null;
 
-                    startTime = currentTime;
-                    endTime = currentTime + NoteDisplaySeconds;
-
                     timeScale = 600 / NoteDisplaySeconds;
 
                     for (int fret = 0; fret < numFrets; fret++)
@@ -321,28 +281,7 @@ namespace ChartPlayer
                     minFret = numFrets;
                     maxFret = 0;
 
-                    UIColor lineColor = UIColor.White;
-
-                    CurrentBPM = 0;
-                    float lastBeatTime = 0;
-
-                    foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
-                    {
-                        lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
-
-                        DrawFretHorizontalLine(0, 23, beat.TimeOffset, 0, lineColor, beat.IsMeasure ? .12f : .08f);
-
-                        if (lastBeatTime == 0)
-                        {
-                            lastBeatTime = beat.TimeOffset;
-                        }
-                        else if (CurrentBPM == 0)
-                        {
-                            float delta = beat.TimeOffset - lastBeatTime;
-
-                            CurrentBPM = (float)((1.0 / delta) * 60);
-                        }
-                    }
+                    DrawBeats();
 
                     float secsBehind = 1f;
 

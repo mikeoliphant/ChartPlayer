@@ -4,48 +4,38 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
+using AudioPlugSharp;
 
 namespace ChartPlayer
 {
-    public class DrumPlayerScene3D : Scene3D
+    public class DrumPlayerScene3D : ChartScene3D
     {
         static int[] ScaleWhiteBlack = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
 
-        UIColor whiteHalfAlpha;
-        UIColor whiteThreeQuartersAlpha;
-        SongPlayer player;
-        float secondsLong;
         int numLanes = 5;
-        float timeScale = 200f;
-        float currentTime;
         float targetCameraDistance = 64;
         float cameraDistance = 70;
         float positionLane;
-        float startTime;
-        float endTime;
 
-        public DrumPlayerScene3D(SongPlayer player, float secondsLong)
+        public DrumPlayerScene3D(SongPlayer player)
+            : base(player)
         {
-            this.player = player;
-            this.secondsLong = secondsLong;
-
-            whiteHalfAlpha = UIColor.White;
-            whiteHalfAlpha.A = 128;
-
-            whiteThreeQuartersAlpha = UIColor.White;
-            whiteThreeQuartersAlpha.A = 192;
-
             positionLane = (float)numLanes / 2;
+
+            highwayStartX = 0;
+            highwayEndX = GetLanePosition(numLanes);
         }
 
         public override void Draw()
         {
+            base.Draw();
+
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 currentTime = (float)player.CurrentSecond;
 
-                targetCameraDistance = 80;
+                targetCameraDistance = 85;
 
                 float targetPositionKey = (float)numLanes / 2;
 
@@ -53,11 +43,9 @@ namespace ChartPlayer
 
                 cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
-                Camera.Position = new Vector3(GetLanePosition(positionLane), 50, -(float)(currentTime * timeScale) + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (secondsLong * timeScale) * .3f));
+                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, -(float)(currentTime * timeScale) + cameraDistance);
+                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplaySeconds * timeScale) * .3f));
             }
-
-            base.Draw();
         }
 
         public override void DrawQuads()
@@ -66,134 +54,127 @@ namespace ChartPlayer
 
             FogEnabled = true;
             FogStart = 400;
-            FogEnd = cameraDistance + (secondsLong * timeScale);
+            FogEnd = cameraDistance + (NoteDisplaySeconds * timeScale);
             FogColor = UIColor.Black;
 
             try
             {
                 if (player != null)
                 {
-                    startTime = currentTime;
-                    endTime = currentTime + secondsLong;
-
                     for (int lane = 0; lane <= numLanes; lane++)
                     {
                         DrawLaneTimeLine(lane, 0, startTime, endTime, whiteHalfAlpha);
                     }
 
-                    UIColor lineColor = UIColor.White;
-
-                    foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
-                    {
-                        lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
-
-                        DrawLaneHorizontalLine(0, numLanes, beat.TimeOffset, 0, lineColor, .08f);
-                    }
-
-                    float startWithMinSustain = startTime - 0.15f;
-
-                    var notes = player.SongDrumNotes.Notes.Where(n => n.TimeOffset >= startWithMinSustain).OrderByDescending(n => n.TimeOffset);
+                    var notes = player.SongDrumNotes.Notes.Where(n => n.TimeOffset >= startTime).OrderByDescending(n => n.TimeOffset);
 
                     // Draw the notes
                     foreach (SongDrumNote note in notes)
                     {
-                        string imageName = null;
-                        int drawLane = 0;
-                        float drawLaneOffset;
-                        bool haveCrash2 = true;
-
-                        EDrumArticulation articulation = note.Articulation;
-
-                        if (articulation == EDrumArticulation.None)
-                            articulation = SongDrumNote.GetDefaultArticulation(note.KitPiece);
-
-                        switch (note.KitPiece)
+                        if (note.KitPiece == EDrumKitPiece.Kick)
                         {
-                            case EDrumKitPiece.Snare:
-                                switch (articulation)
-                                {
-                                    case EDrumArticulation.DrumHead:
-                                        imageName = "DrumRed";
-                                        drawLane = 0;
-                                        break;
-                                    case EDrumArticulation.DrumRim:
-                                        imageName = "DrumRedStick";
-                                        drawLane = 0;
-                                        break;
-                                    case EDrumArticulation.SideStick:
-                                        imageName = "DrumRedStick";
-                                        drawLane = 0;
-                                        break;
-                                }
-                                break;
-                            case EDrumKitPiece.HiHat:
-                                switch (articulation)
-                                {
-                                    case EDrumArticulation.HiHatClosed:
-                                        imageName = "CymbalYellow";
-                                        drawLane = 1;
-                                        break;
-                                    case EDrumArticulation.HiHatOpen:
-                                        imageName = "CymbalYellowOpen";
-                                        drawLane = 1;
-                                        break;
-                                    case EDrumArticulation.HiHatChick:
-                                        imageName = "CymbalYellowFoot";
-                                        drawLane = 1;
-                                        break;
-                                }
-                                break;
-                            case EDrumKitPiece.Crash:
-                                imageName = "CymbalGreen";
-                                drawLane = 2;
-                                break;
+                            DrawLaneHorizontalLine(0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .1f);
+                        }
+                        else
+                        {
+                            string imageName = null;
+                            int drawLane = 0;
+                            float drawLaneOffset;
+                            bool haveCrash2 = true;
 
-                            case EDrumKitPiece.Crash2:
-                                imageName = "CymbalGreen";
+                            EDrumArticulation articulation = note.Articulation;
 
-                                if (haveCrash2)
-                                {
-                                    drawLane = 4;
-                                }
-                                else
-                                {
+                            if (articulation == EDrumArticulation.None)
+                                articulation = SongDrumNote.GetDefaultArticulation(note.KitPiece);
+
+                            switch (note.KitPiece)
+                            {
+                                case EDrumKitPiece.Snare:
+                                    switch (articulation)
+                                    {
+                                        case EDrumArticulation.DrumHead:
+                                            imageName = "DrumRed";
+                                            drawLane = 0;
+                                            break;
+                                        case EDrumArticulation.DrumRim:
+                                            imageName = "DrumRedStick";
+                                            drawLane = 0;
+                                            break;
+                                        case EDrumArticulation.SideStick:
+                                            imageName = "DrumRedStick";
+                                            drawLane = 0;
+                                            break;
+                                    }
+                                    break;
+                                case EDrumKitPiece.HiHat:
+                                    switch (articulation)
+                                    {
+                                        case EDrumArticulation.HiHatClosed:
+                                            imageName = "CymbalYellow";
+                                            drawLane = 1;
+                                            break;
+                                        case EDrumArticulation.HiHatOpen:
+                                            imageName = "CymbalYellowOpen";
+                                            drawLane = 1;
+                                            break;
+                                        case EDrumArticulation.HiHatChick:
+                                            imageName = "CymbalYellowFoot";
+                                            drawLane = 1;
+                                            break;
+                                    }
+                                    break;
+                                case EDrumKitPiece.Crash:
+                                    imageName = "CymbalGreen";
                                     drawLane = 2;
-                                    drawLaneOffset = 5;
-                                }
-                                break;
+                                    break;
 
-                            case EDrumKitPiece.Ride:
-                                if (articulation == EDrumArticulation.CymbalBell)
-                                {
-                                    imageName = "CymbalBlueBell";
-                                }
-                                else if (articulation == EDrumArticulation.CymbalBow)
-                                {
-                                    imageName = "CymbalBlue";
-                                }
-                                drawLane = 3;
-                                break;
-                            case EDrumKitPiece.Tom1:
-                                imageName = "DrumYellow";
-                                drawLane = 1;
-                                break;
-                            case EDrumKitPiece.Tom2:
-                                imageName = "DrumGreen";
-                                drawLane = 2;
-                                break;
-                            case EDrumKitPiece.Tom3:
-                                imageName = "DrumBlue";
-                                drawLane = 3;
-                                break;
+                                case EDrumKitPiece.Crash2:
+                                    imageName = "CymbalGreen";
+
+                                    if (haveCrash2)
+                                    {
+                                        drawLane = 4;
+                                    }
+                                    else
+                                    {
+                                        drawLane = 2;
+                                        drawLaneOffset = 5;
+                                    }
+                                    break;
+
+                                case EDrumKitPiece.Ride:
+                                    if (articulation == EDrumArticulation.CymbalBell)
+                                    {
+                                        imageName = "CymbalBlueBell";
+                                    }
+                                    else if (articulation == EDrumArticulation.CymbalBow)
+                                    {
+                                        imageName = "CymbalBlue";
+                                    }
+                                    drawLane = 3;
+                                    break;
+                                case EDrumKitPiece.Tom1:
+                                    imageName = "DrumYellow";
+                                    drawLane = 1;
+                                    break;
+                                case EDrumKitPiece.Tom2:
+                                    imageName = "DrumGreen";
+                                    drawLane = 2;
+                                    break;
+                                case EDrumKitPiece.Tom3:
+                                    imageName = "DrumBlue";
+                                    drawLane = 3;
+                                    break;
+                            }
+
+                            if (articulation == EDrumArticulation.CymbalChoke)
+                            {
+                                imageName = "CymbalChoke";
+                            }
+
+                            if (imageName != null)
+                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f);
                         }
-
-                        if (articulation == EDrumArticulation.CymbalChoke)
-                        {
-                            imageName = "CymbalChoke";
-                        }
-
-                        if (imageName != null)
-                            DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f);
                     }
 
                     DrawLaneHorizontalLine(0, numLanes, startTime, 0, UIColor.White, .04f);
@@ -254,16 +235,31 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(minX, minY, timeCenter), color, new Vector3(minX, maxY, timeCenter), color, new Vector3(maxX, maxY, timeCenter), color, new Vector3(maxX, minY, timeCenter), color);
         }
 
-        void DrawFlatImage(UIImage image, float laneCenter, float startTime, float endTime, float heightOffset, UIColor color, float imageScale)
+        void DrawVerticalImage(UIImage image, float startLane, float endLane, float time, float heightOffset, in UIColor color, float imageScale)
+        {
+            startLane = GetLanePosition(startLane);
+            endLane = GetLanePosition(endLane);
+            time *= -timeScale;
+
+            float minY = heightOffset - ((float)image.Height * imageScale);
+            float maxY = heightOffset + ((float)image.Height * imageScale);
+
+            DrawQuad(image, new Vector3(startLane, minY, time), color, new Vector3(startLane, maxY, time), color, new Vector3(endLane, maxY, time), color, new Vector3(endLane, minY, time), color);
+        }
+
+
+        void DrawFlatImage(UIImage image, float laneCenter, float timeOffset, float heightOffset, UIColor color, float imageScale)
         {
             laneCenter = GetLanePosition(laneCenter);
-            startTime *= -timeScale;
-            endTime *= -timeScale;
+            timeOffset *= -timeScale;
 
             float minX = laneCenter - ((float)image.Width * imageScale);
             float maxX = laneCenter + ((float)image.Width * imageScale);
 
-            DrawQuad(image, new Vector3(minX, heightOffset, startTime), color, new Vector3(minX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, endTime), color, new Vector3(maxX, heightOffset, startTime), color);
+            float minZ = timeOffset - ((float)image.Height * imageScale);
+            float maxZ = timeOffset + ((float)image.Height * imageScale);
+
+            DrawQuad(image, new Vector3(minX, heightOffset, minZ), color, new Vector3(minX, heightOffset, maxZ), color, new Vector3(maxX, heightOffset, maxZ), color, new Vector3(maxX, heightOffset, minZ), color);
         }
     }
 }

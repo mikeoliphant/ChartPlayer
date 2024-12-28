@@ -7,45 +7,29 @@ using SongFormat;
 
 namespace ChartPlayer
 {
-    public class KeysPlayerScene3D : Scene3D
+    public class KeysPlayerScene3D : ChartScene3D
     {
         static int[] ScaleWhiteBlack = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
 
-        UIColor whiteHalfAlpha;
-        UIColor whiteThreeQuartersAlpha;
-        SongPlayer player;
-        float secondsLong;
         int minKey = 48;
         int maxKey = 72;
-        float timeScale = 200f;
-        float currentTime;
         float targetCameraDistance = 64;
         float cameraDistance = 70;
         float positionKey;
-        float startTime;
-        float endTime;
 
-        public KeysPlayerScene3D(SongPlayer player, float secondsLong)
+        public KeysPlayerScene3D(SongPlayer player)
+            : base(player)
         {
-            this.player = player;
-            this.secondsLong = secondsLong;
-
-            whiteHalfAlpha = UIColor.White;
-            whiteHalfAlpha.A = 128;
-
-            whiteThreeQuartersAlpha = UIColor.White;
-            whiteThreeQuartersAlpha.A = 192;
-
             positionKey = ((float)maxKey + (float)minKey) / 2;
         }
 
         public override void Draw()
         {
+            base.Draw();
+
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
-                currentTime = (float)player.CurrentSecond;
-
                 int keyDist = maxKey - minKey;
 
                 keyDist -= 12;
@@ -62,10 +46,8 @@ namespace ChartPlayer
                 cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
                 Camera.Position = new Vector3(GetKeyPosition(positionKey), 50, -(float)(currentTime * timeScale) + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetKeyPosition(positionKey), 0, Camera.Position.Z - (secondsLong * timeScale) * .3f));
+                Camera.SetLookAt(new Vector3(GetKeyPosition(positionKey), 0, Camera.Position.Z - (NoteDisplaySeconds * timeScale) * .3f));
             }
-
-            base.Draw();
         }
 
         public override void DrawQuads()
@@ -74,31 +56,19 @@ namespace ChartPlayer
 
             FogEnabled = true;
             FogStart = 400;
-            FogEnd = cameraDistance + (secondsLong * timeScale);
+            FogEnd = cameraDistance + (NoteDisplaySeconds * timeScale);
             FogColor = UIColor.Black;
 
             try
             {
                 if (player != null)
                 {
-                    startTime = currentTime;
-                    endTime = currentTime + secondsLong;
-
                     for (int key = minKey; key <= (maxKey + 2); key++)
                     {
                         if (ScaleWhiteBlack[(key - minKey) % 12] == 0)
                         {
                             DrawKeyTimeLine(key, 0, startTime, endTime, whiteHalfAlpha);
                         }
-                    }
-
-                    UIColor lineColor = UIColor.White;
-
-                    foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
-                    {
-                        lineColor.A = beat.IsMeasure ? (byte)128 : (byte)64;
-
-                        DrawKeyHorizontalLine(minKey, maxKey + 2, beat.TimeOffset, 0, lineColor, .08f);
                     }
 
                     float startWithMinSustain = startTime - 0.15f;

@@ -13,10 +13,12 @@ namespace ChartPlayer
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<float> SampleHistory { get; private set; } = new SampleHistory<float>();
         public MonoGameHost GameHost { get; private set; } = null;
+        public DrumMidiDeviceConfiguration DrumMidiDeviceConfiguration { get; set; } = DrumMidiDeviceConfiguration.GenericMap;
 
         FloatAudioIOPort stereoInput;
         FloatAudioIOPort stereoOutput;
         Thread gameThread = null;
+        AudioPluginParameter pedalParameter;
 
         public ChartPlayerPlugin()
         {
@@ -94,6 +96,21 @@ namespace ChartPlayer
             }
 
             SampleHistory.SetSize((int)Host.SampleRate);
+
+            pedalParameter = new AudioPluginParameter
+            {
+                ID = "hihat-pedal",
+                Name = "HiHat Pedal",
+                Type = EAudioPluginParameterType.Float,
+                MinValue = 0,
+                MaxValue = 1,
+                DefaultValue = 0,
+                ValueFormat = "{0:0.0}"
+            };
+
+            AddParameter(pedalParameter);
+
+            //AddMidiControllerMapping(pedalParameter, (uint)DrumAudioHost.Instance.DrumMidiConfig.HiHatPedalChannel);
         }
 
         unsafe void RunGame()
@@ -171,6 +188,16 @@ namespace ChartPlayer
             this.SongPlayer = songPlayer;
         }
 
+        public override void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.HandleNoteOn(channel, noteNumber, velocity, sampleOffset, isLive: true);
+        }
+
+        public override void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset, isLive: true);
+        }
+
         public override void Process()
         {
             base.Process();
@@ -179,32 +206,43 @@ namespace ChartPlayer
             try
             {
 #endif
-                Host.ProcessAllEvents();
 
-                var input = stereoInput.GetAudioBuffer(0);
+            var input = stereoInput.GetAudioBuffer(0);
 
-                SampleHistory.CopyFrom(input);
+            var left = stereoOutput.GetAudioBuffer(0);
+            var right = stereoOutput.GetAudioBuffer(1);
 
-                var left = stereoOutput.GetAudioBuffer(0);
-                var right = stereoOutput.GetAudioBuffer(1);
+            int currentSample = 0;
+            int nextSample = 0;
+
+            SampleHistory.CopyFrom(input);
+
+            do
+            {
+                nextSample = Host.ProcessEvents();
+
+                DrumMidiDeviceConfiguration.SetHiHatPedalValue((float)pedalParameter.GetInterpolatedProcessValue(currentSample));
 
                 if (SongPlayer != null)
                 {
-                    SongPlayer.ReadSamples(left, right);
+                    SongPlayer.ReadSamples(left.Slice(currentSample, nextSample - currentSample), right.Slice(currentSample, nextSample - currentSample));
 
                     float gain = 0.25f;
 
-                    for (int i = 0; i < Host.CurrentAudioBufferSize; i++)
+                    for (; currentSample < nextSample; currentSample++)
                     {
-                        left[i] *= gain;// + input[i];
-                        right[i] *= gain;// + input[i];
+                        left[currentSample] *= gain;// + input[i];
+                        right[currentSample] *= gain;// + input[i];
                     }
                 }
-                else
-                {
-                    left.Clear();
-                    right.Clear();
-                }
+            }
+            while (nextSample < Host.CurrentAudioBufferSize);
+
+            if (SongPlayer == null)
+            {
+                left.Clear();
+                right.Clear();
+            }
 #if RELEASE
             }
             catch (Exception ex)
