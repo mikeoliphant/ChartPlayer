@@ -48,21 +48,15 @@ namespace ChartPlayerImageProcessor
 
             Add("FingerOutline");
 
-            AddWithShadow("GuitarRed");
-            AddWithShadow("GuitarYellow");
-            AddWithShadow("GuitarCyan");
-            AddWithShadow("GuitarOrange");
-            AddWithShadow("GuitarGreen");
-            AddWithShadow("GuitarPurple");
+            var guitarColors = new string[] { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
+
+            foreach (string color in guitarColors)
+                AddWithShadow("Guitar" + color);
 
             AddWithShadow("GuitarDetected");
 
-            AddWithShadow("NoteTrailRed");
-            AddWithShadow("NoteTrailYellow");
-            AddWithShadow("NoteTrailCyan");
-            AddWithShadow("NoteTrailOrange");
-            AddWithShadow("NoteTrailGreen");
-            AddWithShadow("NoteTrailPurple");
+            foreach (string color in guitarColors)
+                AddWithShadow("NoteTrail" + color);
 
             AddWithShadow("NoteTrailWhite");
             AddWithShadow("NoteTrailBlack");
@@ -73,6 +67,24 @@ namespace ChartPlayerImageProcessor
             AddWithShadow("NotePalmMute");
             AddWithShadow("NoteHarmonic");
             AddWithShadow("NotePinchHarmonic");
+
+            AddWithShadow("DrumRed");
+            AddWithShadow("DrumYellow");
+            AddWithShadow("DrumBlue");
+            AddWithShadow("DrumGreen");
+
+            AddWithShadow("DrumRedStick");
+
+            AddWithShadow("CymbalYellow");
+            AddWithShadow("CymbalYellowFoot");
+            AddWithShadow("CymbalYellowOpen");
+
+            AddWithShadow("CymbalGreen");
+
+            AddWithShadow("CymbalBlue");
+            AddWithShadow("CymbalBlueBell");
+
+            AddWithShadow("CymbalChoke");
 
             PopDirectory();
 

@@ -459,8 +459,11 @@ namespace ChartPlayer
                 sectionInterface.SetSongPlayer(songPlayer);
 
                 vocalText.SongPlayer = songPlayer;
-
-                if (part.InstrumentType == ESongInstrumentType.Keys)
+                if (part.InstrumentType == ESongInstrumentType.Drums)
+                {
+                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer, 3);
+                }
+                else if (part.InstrumentType == ESongInstrumentType.Keys)
                 {
                     ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer, 3);
                 }

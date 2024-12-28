@@ -19,8 +19,9 @@ namespace ChartPlayer
         public float SongLengthSeconds { get; private set; } = 0;
         public SongData Song { get; private set; }
         public SongInstrumentPart SongInstrumentPart { get; private set; }
-        public SongKeyboardNotes SongKeyboardNotes { get; private set; }
         public SongInstrumentNotes SongInstrumentNotes { get; private set; }
+        public SongDrumNotes SongDrumNotes { get; private set; }
+        public SongKeyboardNotes SongKeyboardNotes { get; private set; }
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
         public bool Paused { get; set; } = false;
@@ -86,7 +87,16 @@ namespace ChartPlayer
             stretchBuf[0] = new float[1024];
             stretchBuf[1] = new float[1024];
 
-            if (part.InstrumentType == ESongInstrumentType.Keys)
+            if (part.InstrumentType == ESongInstrumentType.Drums)
+            {
+                using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
+                {
+                    SongDrumNotes = JsonSerializer.Deserialize<SongDrumNotes>(noteStream, SerializationUtil.CondensedSerializerOptions);
+                }
+
+                SongInstrumentNotes = new SongInstrumentNotes();
+            }
+            else if (part.InstrumentType == ESongInstrumentType.Keys)
             {
                 using (Stream noteStream = File.OpenRead(Path.Combine(songPath, part.InstrumentName + ".json")))
                 {
