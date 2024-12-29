@@ -8,6 +8,13 @@ namespace ChartPlayer
     {
         public static ChartPlayerGame Instance { get; private set; }
 
+        public static UIColor PanelBackgroundColor = new UIColor(50, 55, 65);
+        public static UIColor PanelBackgroundColorDark = PanelBackgroundColor * 0.8f;
+        public static UIColor PanelBackgroundColorDarkest = PanelBackgroundColor * 0.5f;
+        public static UIColor PanelBackgroundColorLight = PanelBackgroundColor * 1.5f;
+        public static UIColor PanelBackgroundColorLightest = PanelBackgroundColor * 3.0f;
+        public static UIColor PanelForegroundColor = UIColor.Lerp(PanelBackgroundColor, UIColor.White, 0.75f);
+
         public ChartPlayerPlugin Plugin { get; set; }
         public Scene3D Scene3D { get; set; }
 

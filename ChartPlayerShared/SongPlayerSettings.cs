@@ -28,6 +28,8 @@ namespace ChartPlayer
         public bool LeftyMode { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public float NoteDisplaySeconds { get; set; } = 3;
+        public float DrumsNoteDisplaySeconds { get; set; } = 3;
+        public float KeysNoteDisplaySeconds { get; set; } = 3;
         public ESongInstrumentType CurrentInstrument { get; set; } = ESongInstrumentType.LeadGuitar;
         public string SongListSortColumn { get; set; } = null;
         public bool SongListSortReversed { get; set; } = false;
@@ -60,8 +62,18 @@ namespace ChartPlayer
 
         void UpdateDisplay()
         {
-            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch};
-            SetContents(vStack);
+            TabPanel tabPanel = new TabPanel(ChartPlayerGame.PanelBackgroundColorDark, UIColor.White, Layout.Current.GetImage("TabPanelBackground"), Layout.Current.GetImage("TabForeground"), Layout.Current.GetImage("TabBackground"), 5, 5);
+            SetContents(tabPanel);
+
+
+            tabPanel.AddTab("General", GeneralTab());
+            tabPanel.AddTab("Guitar", GuitarTab());
+            tabPanel.AddTab("Drums", DrumsTab());
+        }
+
+        UIElement GeneralTab()
+        {
+            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch };
 
             HorizontalStack songPathStack = new HorizontalStack()
             {
@@ -82,11 +94,30 @@ namespace ChartPlayer
                 ClickAction = SelectSongPath
             });
 
-            vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
             vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
+            vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
+
+            return vStack;
+        }
+
+        UIElement GuitarTab()
+        {
+            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch };
+
+            vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
             vStack.Children.Add(CreateEnumOption("SongTuningMode", newSettings, "Song Re-Tuning"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
-            vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
+
+            return vStack;
+        }
+
+        UIElement DrumsTab()
+        {
+            VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch };
+
+             vStack.Children.Add(CreateFloatOption("DrumsNoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+
+            return vStack;
         }
 
         UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)

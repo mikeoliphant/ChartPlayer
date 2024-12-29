@@ -483,11 +483,19 @@ namespace ChartPlayer
                 vocalText.SongPlayer = songPlayer;
                 if (part.InstrumentType == ESongInstrumentType.Drums)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer);
+                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer)
+                    {
+                        LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumsNoteDisplaySeconds
+                    };
                 }
                 else if (part.InstrumentType == ESongInstrumentType.Keys)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer);
+                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer)
+                    {
+                        LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.KeysNoteDisplaySeconds
+                    };
                 }
                 else
                 {
