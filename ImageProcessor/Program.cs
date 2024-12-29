@@ -41,6 +41,9 @@ namespace ChartPlayerImageProcessor
 
             Add("HorizontalSlider");
 
+            Add("VerticalPointer");
+            Add("VerticalPointerLeft");
+
             Add("VerticalFretLine");
             Add("HorizontalFretLine");
 

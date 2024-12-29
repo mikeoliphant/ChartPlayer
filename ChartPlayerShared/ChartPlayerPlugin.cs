@@ -13,7 +13,7 @@ namespace ChartPlayer
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<float> SampleHistory { get; private set; } = new SampleHistory<float>();
         public MonoGameHost GameHost { get; private set; } = null;
-        public DrumMidiDeviceConfiguration DrumMidiDeviceConfiguration { get; set; } = DrumMidiDeviceConfiguration.GenericMap;
+        public IMidiHandler MidiHandler { get; set; } = null;
 
         FloatAudioIOPort stereoInput;
         FloatAudioIOPort stereoOutput;
@@ -190,12 +190,14 @@ namespace ChartPlayer
 
         public override void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
         {
-            DrumHit? hit = DrumMidiDeviceConfiguration.HandleNoteOn(channel, noteNumber, velocity, sampleOffset, isLive: true);
+            if (MidiHandler != null)
+                MidiHandler.HandleNoteOn(channel, noteNumber, velocity, sampleOffset);
         }
 
         public override void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
         {
-            DrumHit? hit = DrumMidiDeviceConfiguration.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset, isLive: true);
+            if (MidiHandler != null)
+                MidiHandler.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset);
         }
 
         public override void Process()
@@ -221,7 +223,7 @@ namespace ChartPlayer
             {
                 nextSample = Host.ProcessEvents();
 
-                DrumMidiDeviceConfiguration.SetHiHatPedalValue((float)pedalParameter.GetInterpolatedProcessValue(currentSample));
+                DrumMidiDeviceConfiguration.CurrentMap.SetHiHatPedalValue((float)pedalParameter.GetInterpolatedProcessValue(currentSample));
 
                 if (SongPlayer != null)
                 {

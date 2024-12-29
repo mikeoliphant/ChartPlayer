@@ -12,6 +12,7 @@ namespace ChartPlayer
 {
     public class SongPlayer
     {
+        public string BasePath { get; set; } = null;
         public double PlaybackSampleRate { get; private set; } = 48000;
         public double SongSampleRate { get; private set; }
         public float CurrentSecond { get; private set; } = 0;
@@ -160,7 +161,9 @@ namespace ChartPlayer
 
             if (!string.IsNullOrEmpty(part.SongAudio))
             {
-                vorbisReader = new VorbisMixer(part.SongAudio);
+                string absolutePath = Path.Combine(BasePath, part.SongAudio);
+
+                vorbisReader = new VorbisMixer(absolutePath);
             }
             else
             {

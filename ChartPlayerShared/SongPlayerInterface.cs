@@ -138,6 +138,13 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(songsButton);
 
+            TextButton drumMidiButton = new TextButton("DrumKit")
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                ClickAction = ShowDrumMidiConfig
+            };
+            bottomButtonStack.Children.Add(drumMidiButton);
+
             TextButton optionsButton = new TextButton("Options")
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
@@ -326,6 +333,20 @@ namespace ChartPlayer
             }
         }
 
+        void ShowDrumMidiConfig()
+        {
+            if (songPlayer != null)
+            {
+                if (!songPlayer.Paused)
+                   TogglePaused();
+            }
+
+
+            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+            Layout.Current.ShowPopup(new MidiEditor());
+        }
+
         void ToggleNotes()
         {
             if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
@@ -446,6 +467,7 @@ namespace ChartPlayer
 
                 songPlayer = new SongPlayer();
 
+                songPlayer.BasePath = songIndex.BasePath;
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
                 SpeedChanged(speedSlider.Level);
                 songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;

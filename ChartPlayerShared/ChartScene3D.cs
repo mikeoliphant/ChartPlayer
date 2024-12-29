@@ -9,6 +9,12 @@ using UILayout;
 
 namespace ChartPlayer
 {
+    public interface IMidiHandler
+    {
+        void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset);
+        void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset);
+    }
+
     public class ChartScene3D : Scene3D
     {
         public float NoteDisplaySeconds { get; set; } = 3;

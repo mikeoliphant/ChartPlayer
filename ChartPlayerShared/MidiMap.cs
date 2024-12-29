@@ -239,9 +239,12 @@ namespace ChartPlayer
     public class DrumMidiDeviceConfiguration
     {
         public static DrumMidiDeviceConfiguration GenericMap { get; private set; }
+        public static DrumMidiDeviceConfiguration CurrentMap { get; set; }
 
         Dictionary<int, DrumVoice> midiMap = new Dictionary<int, DrumVoice>();
 
+        [XmlIgnore]
+        public string Name { get; set; }
         public int HiHatPedalChannel { get; set; }
         public float HiHatPedalClosed { get; set; }
         public float HiHatPedalSemiOpen { get; set; }
@@ -255,72 +258,14 @@ namespace ChartPlayer
 
         static DrumMidiDeviceConfiguration()
         {
-            GenericMap = Generic();
-        }
-
-        // Midi name is "TD-11"
-        public static DrumMidiDeviceConfiguration RolandTDK11()
-        {
-            DrumMidiDeviceConfiguration map = new DrumMidiDeviceConfiguration();
-
-            map.midiMap[36] = new DrumVoice(EDrumKitPiece.Kick, EDrumArticulation.DrumHead);
-            map.midiMap[38] = new DrumVoice(EDrumKitPiece.Snare, EDrumArticulation.DrumHead);
-            map.midiMap[40] = new DrumVoice(EDrumKitPiece.Snare, EDrumArticulation.DrumRim);
-            map.midiMap[48] = new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead);
-            map.midiMap[50] = new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumRim);
-            map.midiMap[45] = new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead);
-            map.midiMap[47] = new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumRim);
-            map.midiMap[43] = new DrumVoice(EDrumKitPiece.Tom3, EDrumArticulation.DrumHead);
-            map.midiMap[58] = new DrumVoice(EDrumKitPiece.Tom3, EDrumArticulation.DrumRim);
-            map.midiMap[41] = new DrumVoice(EDrumKitPiece.Tom4, EDrumArticulation.DrumHead);
-            map.midiMap[39] = new DrumVoice(EDrumKitPiece.Tom4, EDrumArticulation.DrumRim);
-            map.midiMap[46] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatOpen);
-            map.midiMap[26] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatOpen);
-            map.midiMap[22] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatOpen);
-            map.midiMap[42] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatClosed);
-            map.midiMap[44] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatChick);
-            map.midiMap[51] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalBow);
-            map.midiMap[53] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalBell);
-            map.midiMap[59] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalEdge);
-            map.midiMap[49] = new DrumVoice(EDrumKitPiece.Crash, EDrumArticulation.CymbalEdge);
-            map.midiMap[57] = new DrumVoice(EDrumKitPiece.Crash2, EDrumArticulation.CymbalEdge);
-            map.midiMap[55] = new DrumVoice(EDrumKitPiece.Crash3, EDrumArticulation.CymbalEdge);
-
-            return map;
-        }
-
-        public static DrumMidiDeviceConfiguration AlesisForge()
-        {
-            DrumMidiDeviceConfiguration map = new DrumMidiDeviceConfiguration();
-
-            map.midiMap[36] = new DrumVoice(EDrumKitPiece.Kick, EDrumArticulation.DrumHead);
-            map.midiMap[38] = new DrumVoice(EDrumKitPiece.Snare, EDrumArticulation.DrumHead);
-            map.midiMap[40] = new DrumVoice(EDrumKitPiece.Snare, EDrumArticulation.DrumRim);
-            map.midiMap[48] = new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead);
-            map.midiMap[50] = new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumRim);
-            map.midiMap[45] = new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead);
-            map.midiMap[47] = new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumRim);
-            map.midiMap[43] = new DrumVoice(EDrumKitPiece.Tom3, EDrumArticulation.DrumHead);
-            map.midiMap[58] = new DrumVoice(EDrumKitPiece.Tom3, EDrumArticulation.DrumRim);
-            map.midiMap[41] = new DrumVoice(EDrumKitPiece.Tom4, EDrumArticulation.DrumHead);
-            map.midiMap[39] = new DrumVoice(EDrumKitPiece.Tom4, EDrumArticulation.DrumRim);
-            map.midiMap[46] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatOpen);
-            map.midiMap[42] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatClosed);
-            map.midiMap[44] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatChick);
-            map.midiMap[21] = new DrumVoice(EDrumKitPiece.HiHat, EDrumArticulation.HiHatSplash);
-            map.midiMap[51] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalBow);
-            map.midiMap[53] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalBell);
-            map.midiMap[59] = new DrumVoice(EDrumKitPiece.Ride, EDrumArticulation.CymbalEdge);
-            map.midiMap[49] = new DrumVoice(EDrumKitPiece.Crash, EDrumArticulation.CymbalEdge);
-            map.midiMap[57] = new DrumVoice(EDrumKitPiece.Crash2, EDrumArticulation.CymbalEdge);
-            map.midiMap[55] = new DrumVoice(EDrumKitPiece.Crash3, EDrumArticulation.CymbalEdge);
-
-            return map;
+            CurrentMap = GenericMap = Generic();
         }
 
         static DrumMidiDeviceConfiguration Generic()
         {
             DrumMidiDeviceConfiguration map = new DrumMidiDeviceConfiguration();
+
+            map.Name = "Generic";
 
             map.midiMap[35] = new DrumVoice(EDrumKitPiece.Kick, EDrumArticulation.DrumHead);
             map.midiMap[36] = new DrumVoice(EDrumKitPiece.Kick, EDrumArticulation.DrumHead);
@@ -503,6 +448,8 @@ namespace ChartPlayer
                 {
                     drumMidiConfiguration.midiMap[entry.MidiNote] = entry.DrumVoice;
                 }
+
+                drumMidiConfiguration.Name = Path.GetFileNameWithoutExtension(path);
             }
             catch
             {

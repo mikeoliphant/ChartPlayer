@@ -8,7 +8,7 @@ using AudioPlugSharp;
 
 namespace ChartPlayer
 {
-    public class DrumPlayerScene3D : ChartScene3D
+    public class DrumPlayerScene3D : ChartScene3D, IMidiHandler
     {
         static int[] ScaleWhiteBlack = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 };
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
@@ -21,10 +21,37 @@ namespace ChartPlayer
         public DrumPlayerScene3D(SongPlayer player)
             : base(player)
         {
+            ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+
             positionLane = (float)numLanes / 2;
 
             highwayStartX = 0;
             highwayEndX = GetLanePosition(numLanes);
+        }
+
+        public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandleNoteOn(channel, noteNumber, velocity, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                HandleHit(hit.Value);
+            }
+        }
+
+        public void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                HandleHit(hit.Value);
+            }
+        }
+
+        void HandleHit(DrumHit hit)
+        {
+
         }
 
         public override void Draw()

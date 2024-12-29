@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)HelpDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeysPlayerScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MidiMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MidiMapInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NoteDetector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene3D.cs" />
