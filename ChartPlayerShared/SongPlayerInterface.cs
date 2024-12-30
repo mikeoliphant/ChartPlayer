@@ -20,6 +20,7 @@ namespace ChartPlayer
 
         SongPlayer songPlayer;
         SongSectionInterface sectionInterface;
+        SongPlayerSettingsInterface settingsInterface;
 
         SongData songData;
         VocalDisplay vocalText;
@@ -88,6 +89,8 @@ namespace ChartPlayer
 
             ChartPlayerGame.Instance.Scale = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.UIScale;
 
+            settingsInterface = new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings };
+
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
             songIndex = new SongIndex(songBasePath, forceRescan: false);
@@ -138,13 +141,6 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(songsButton);
 
-            TextButton drumMidiButton = new TextButton("DrumKit")
-            {
-                VerticalAlignment = EVerticalAlignment.Stretch,
-                ClickAction = ShowDrumMidiConfig
-            };
-            bottomButtonStack.Children.Add(drumMidiButton);
-
             TextButton optionsButton = new TextButton("Options")
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
@@ -152,7 +148,13 @@ namespace ChartPlayer
                 {
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
-                    Layout.Current.ShowPopup(new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+                    if (songPlayer != null)
+                    {
+                        if (!songPlayer.Paused)
+                            TogglePaused();
+                    }
+
+                    Layout.Current.ShowPopup(settingsInterface);
                 }
             };
             bottomButtonStack.Children.Add(optionsButton);
@@ -331,20 +333,6 @@ namespace ChartPlayer
 
                 Layout.Current.ShowPopup(songList);
             }
-        }
-
-        void ShowDrumMidiConfig()
-        {
-            if (songPlayer != null)
-            {
-                if (!songPlayer.Paused)
-                   TogglePaused();
-            }
-
-
-            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
-
-            Layout.Current.ShowPopup(new MidiEditor());
         }
 
         void ToggleNotes()
@@ -635,7 +623,8 @@ namespace ChartPlayer
             if ((ChartPlayerGame.Instance.Scene3D as ChartScene3D) != null)
             {
                 (ChartPlayerGame.Instance.Scene3D as ChartScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
-                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = settings.NoteDisplaySeconds;
+
+                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = (ChartPlayerGame.Instance.Scene3D is FretPlayerScene3D) ? settings.NoteDisplaySeconds : settings.DrumsNoteDisplaySeconds;
             }
 
             // Check if song path changed

@@ -295,33 +295,7 @@ namespace ChartPlayer
 
                     List<SongNote> allNotes = player.SongInstrumentNotes.Notes;
 
-                    startNotePosition = MathUtil.Clamp(startNotePosition, 0, allNotes.Count - 1);
-
-                    // Move backward until we find a note that is not visible (or we hit the start)
-                    while (startNotePosition > 0)
-                    {
-                        SongNote note = allNotes[startNotePosition];
-
-                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, secsBehind);
-
-                        if (endTime < currentTime)
-                            break;
-
-                        startNotePosition--;
-                    }
-
-                    // Now move forward until we find a note that is visible (or we hit the end)
-                    while (startNotePosition < allNotes.Count)
-                    {
-                        SongNote note = allNotes[startNotePosition];
-
-                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, secsBehind);
-
-                        if (endTime > currentTime)
-                            break;
-
-                        startNotePosition++;
-                    }
+                    startNotePosition = GetStartNote<SongNote>(currentTime, secsBehind, startNotePosition, allNotes);
 
                     int pos = 0;
 

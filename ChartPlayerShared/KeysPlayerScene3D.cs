@@ -17,6 +17,7 @@ namespace ChartPlayer
         float targetCameraDistance = 64;
         float cameraDistance = 70;
         float positionKey;
+        int startNotePosition = 0;
 
         public KeysPlayerScene3D(SongPlayer player)
             : base(player)
@@ -71,13 +72,19 @@ namespace ChartPlayer
                         }
                     }
 
-                    float startWithMinSustain = startTime - 0.15f;
+                    var allNotes = player.SongKeyboardNotes.Notes;
 
-                    var notes = player.SongKeyboardNotes.Notes.Where(n => (n.TimeOffset + n.TimeLength) >= startWithMinSustain).OrderByDescending(n => n.TimeOffset);
+                    startNotePosition = GetStartNote<SongKeyboardNote>(currentTime, .15f, startNotePosition, allNotes);
 
-                    // Draw the notes
-                    foreach (SongKeyboardNote note in notes)
+                    int pos = 0;
+
+                    // Draw hand position areas on timeline
+                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
+                        SongKeyboardNote note = allNotes[pos];
+                        if (note.TimeOffset > endTime)
+                            break;
+
                         if ((note.Note < minKey) || (note.Note > maxKey))
                         {
 

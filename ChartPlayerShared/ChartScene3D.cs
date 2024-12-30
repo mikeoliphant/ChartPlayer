@@ -41,7 +41,7 @@ namespace ChartPlayer
         protected UIColor whiteHalfAlpha;
         protected UIColor whiteThreeQuartersAlpha;
         protected bool lefyMode = false;
-
+        int startBeatPosition = 0;
 
         public ChartScene3D(SongPlayer player)
         {
@@ -58,6 +58,39 @@ namespace ChartPlayer
         {
             NumNotesDetected = 0;
             NumNotesTotal = 0;
+        }
+
+        public int GetStartNote<T>(float timeOffset, float minLength, int startNotePosition, IList<T> notes) where T : ISongEvent
+        {
+            startNotePosition = MathUtil.Clamp(startNotePosition, 0, notes.Count - 1);
+
+            // Move backward until we find a note that is not visible (or we hit the start)
+            while (startNotePosition > 0)
+            {
+                ISongEvent note = notes[startNotePosition];
+
+                float endTime = Math.Max(note.EndTime, note.TimeOffset + minLength);
+
+                if (endTime < timeOffset)
+                    break;
+
+                startNotePosition--;
+            }
+
+            // Now move forward until we find a note that is visible (or we hit the end)
+            while (startNotePosition < notes.Count)
+            {
+                ISongEvent note = notes[startNotePosition];
+
+                float endTime = Math.Max(note.EndTime, note.TimeOffset + minLength);
+
+                if (endTime > currentTime)
+                    break;
+
+                startNotePosition++;
+            }
+
+            return startNotePosition;
         }
 
         public override void Draw()
@@ -83,8 +116,20 @@ namespace ChartPlayer
 
             float lastBeatTime = 0;
 
-            foreach (SongBeat beat in player.SongStructure.Beats.Where(b => (b.TimeOffset >= startTime && b.TimeOffset <= endTime)))
+            var allBeats = player.SongStructure.Beats;
+
+            startBeatPosition = GetStartNote<SongBeat>(currentTime, 0, startBeatPosition, allBeats);
+
+            int pos = 0;
+
+            // Draw hand position areas on timeline
+            for (pos = startBeatPosition; pos < allBeats.Count; pos++)
             {
+                SongBeat beat = allBeats[pos];
+
+                if (beat.TimeOffset > endTime)
+                    break;
+
                 DrawBeat(beat.TimeOffset, beat.IsMeasure);
 
                 if (lastBeatTime == 0)

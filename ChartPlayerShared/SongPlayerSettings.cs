@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using SongFormat;
 using UILayout;
@@ -44,6 +45,7 @@ namespace ChartPlayer
         SongPlayerSettings newSettings = new SongPlayerSettings();
 
         TextBlock songPathText;
+        MidiEditor midiEditor = new MidiEditor();
 
         public SongPlayerSettingsInterface(SongPlayerSettings settings)
             : base(Layout.Current.DefaultOutlineNinePatch)
@@ -115,9 +117,24 @@ namespace ChartPlayer
         {
             VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch };
 
-             vStack.Children.Add(CreateFloatOption("DrumsNoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+            vStack.Children.Add(CreateFloatOption("DrumsNoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+            vStack.Children.Add(new TextButton("Configure Kit Midi")
+            {
+                HorizontalAlignment = EHorizontalAlignment.Right,
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                ClickAction = ShowDrumMidiConfig
+            });
 
             return vStack;
+        }
+
+        void ShowDrumMidiConfig()
+        {
+            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+            Layout.Current.ShowPopup(midiEditor);
+
+            midiEditor.Opened();            
         }
 
         UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)

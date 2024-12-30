@@ -97,7 +97,7 @@ namespace ChartPlayer
         }
     }
 
-    public class MidiEditor : Dock
+    public class MidiEditor : Dock, IMidiHandler
     {
         public static string ConfigPath { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChartPlayer");
         public static MidiEditor Instance { get; private set; }
@@ -144,25 +144,11 @@ namespace ChartPlayer
 
             VerticalStack leftStack = new VerticalStack
             {
+                VerticalAlignment = EVerticalAlignment.Stretch,
                 DesiredWidth = 250,
                 ChildSpacing = 5
             };
             mainStack.Children.Add(leftStack);
-
-            NinePatchWrapper configPanel = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
-            {
-                HorizontalAlignment = EHorizontalAlignment.Stretch
-            };
-            leftStack.Children.Add(configPanel);
-
-            VerticalStack configStack = new VerticalStack { ChildSpacing = 5, HorizontalAlignment = EHorizontalAlignment.Stretch };
-
-            configPanel.Child = configStack;
-
-            configWrapper = new UIElementWrapper() { HorizontalAlignment = EHorizontalAlignment.Stretch };
-            configStack.Children.Add(configWrapper);
-
-            configStack.Children.Add(new TextButton("Save Midi Config") { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
             UIElementWrapper noteWrapper = new UIElementWrapper { HorizontalAlignment = EHorizontalAlignment.Stretch };
             mainStack.Children.Add(noteWrapper);
@@ -181,7 +167,41 @@ namespace ChartPlayer
             //snarePositionDisplay = new PositionalSensingDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             //leftStack.Children.Add(snarePositionDisplay);
 
+            NinePatchWrapper configPanel = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Bottom
+            };
+            leftStack.Children.Add(configPanel);
+
+            VerticalStack configStack = new VerticalStack { ChildSpacing = 5, HorizontalAlignment = EHorizontalAlignment.Stretch };
+
+            configPanel.Child = configStack;
+
+            configWrapper = new UIElementWrapper() { HorizontalAlignment = EHorizontalAlignment.Stretch };
+            configStack.Children.Add(configWrapper);
+
+            configStack.Children.Add(new TextButton("Save Midi Config") { HorizontalAlignment = EHorizontalAlignment.Stretch });
+
+            configStack.Children.Add(new TextButton("Close") { PressAction = Close, HorizontalAlignment = EHorizontalAlignment.Stretch });
+
             UpdateMapDisplay();
+        }
+
+        IMidiHandler midiHandlerBak = null;
+
+        public void Opened()
+        {
+            midiHandlerBak = ChartPlayerGame.Instance.Plugin.MidiHandler;
+
+            ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+        }
+
+        public void Close()
+        {
+            ChartPlayerGame.Instance.Plugin.MidiHandler = midiHandlerBak;
+
+            Layout.Current.ClosePopup(this);
         }
 
         public void UpdateMidiConfig(string path)
@@ -247,12 +267,13 @@ namespace ChartPlayer
 
                 Layout.Current.DefaultFont.MeasureString("000", out width, out height);
 
-                noteDisplay.Children.Add(new TextBlock(String.Format("{0}", midiNoteNumber.ToString("D3")))
+                noteDisplay.Children.Add(new TextButton(String.Format("{0}", midiNoteNumber.ToString("D3")))
                 {
-                    //PressAction = delegate (UIElement element)
-                    //{
-                    //    NotePressed(nn);
-                    //},
+                    PressAction = delegate
+                    {
+                        NotePressed(nn);
+                    },
+                    
                     HorizontalAlignment = EHorizontalAlignment.Right,
                     DesiredWidth = width + 5
                 });
@@ -292,14 +313,32 @@ namespace ChartPlayer
         {
             float velocity = 0.7f + (random.Next() * 0.3f);
 
-            //MainInterface.Instance.MixerInterface.SupressWakeActivity = true;
-            //MainInterface.Instance.HandleMidiMessage(new MidiMessage(EMidiChannelCommand.NoteOn, 9, midiNoteNumber, (int)(velocity * 127)), isLive: true);
-            //MainInterface.Instance.MixerInterface.SupressWakeActivity = false;
+            HandleNoteOn(9, midiNoteNumber, velocity, 0);
         }
 
         void EditButtonClicked(int midiNoteNumber, TextButton button)
         {
             Layout.Current.ShowPopup(new MidiNoteEditor(midiNoteNumber), button.ContentBounds.Center);
+        }
+
+        public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
+        {
+            //                DrumGame.Instance.AddUIWorkAction(delegate
+            //                {
+            //                    midiEventText.StringBuilder.Clear();
+            //                    midiEventText.StringBuilder.AppendFormat("Last Note: {0} Vel: {1}", midiNoteNumber, midiNoteVelocity);
+            //                });
+
+            MidiNoteDisplay display = null;
+
+            if (midiNoteDisplays.TryGetValue(noteNumber, out display))
+            {
+                display.Flash();
+            }
+        }
+
+        public void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
+        {
         }
 
         //public void HandleMidiMessage(AudioCore.MidiMessage message, bool isLive)
