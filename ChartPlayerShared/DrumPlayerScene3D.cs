@@ -81,6 +81,7 @@ namespace ChartPlayer
                     notesDetected[pos] = currentTime - note.TimeOffset;
 
                     NumNotesDetected++;
+                    NumNotesTotal++;
                 }
             }
         }
