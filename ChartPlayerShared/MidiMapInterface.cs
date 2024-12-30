@@ -108,10 +108,12 @@ namespace ChartPlayer
         Dictionary<int, MidiNoteDisplay> midiNoteDisplays = new Dictionary<int, MidiNoteDisplay>();
         int hiHatPedalValue;
         int snarePositionValue;
-        int midiNoteNumber = 0;
-        int midiNoteVelocity;
-        TextBlock midiEventText;
-        HiHatPedalDisplay hiHatPedalDisplay;
+        int lastNoteNumber = 0;
+        float lastNoteVelocity = 0;
+        int currentNoteNumber = 0;
+        float currentNoteVelocity = 0;
+        StringBuilderTextBlock midiEventText;
+        //HiHatPedalDisplay hiHatPedalDisplay;
 
         public MidiEditor()
         {
@@ -158,11 +160,11 @@ namespace ChartPlayer
 
             NinePatchWrapper noteDisplay = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch) { HorizontalAlignment = EHorizontalAlignment.Stretch };
             leftStack.Children.Add(noteDisplay);
-            midiEventText = new TextBlock("Last Note: None");
+            midiEventText = new StringBuilderTextBlock("Last Note: None");
             noteDisplay.Child = midiEventText;
 
-            hiHatPedalDisplay = new HiHatPedalDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
-            leftStack.Children.Add(hiHatPedalDisplay);
+            //hiHatPedalDisplay = new HiHatPedalDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
+            //leftStack.Children.Add(hiHatPedalDisplay);
 
             //snarePositionDisplay = new PositionalSensingDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             //leftStack.Children.Add(snarePositionDisplay);
@@ -232,7 +234,7 @@ namespace ChartPlayer
 
         public void UpdateMapDisplay()
         {
-            hiHatPedalDisplay.UpdateHiHatLevels();
+            //hiHatPedalDisplay.UpdateHiHatLevels();
 
             configWrapper.Child = new OptionButtonStack("Config:", DrumMidiDeviceConfiguration.CurrentMap.Name, delegate { Layout.Current.ShowPopup(new MidiConfigSelectionDialog()); });
 
@@ -323,11 +325,8 @@ namespace ChartPlayer
 
         public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
         {
-            //                DrumGame.Instance.AddUIWorkAction(delegate
-            //                {
-            //                    midiEventText.StringBuilder.Clear();
-            //                    midiEventText.StringBuilder.AppendFormat("Last Note: {0} Vel: {1}", midiNoteNumber, midiNoteVelocity);
-            //                });
+            currentNoteNumber = noteNumber;
+            currentNoteVelocity = velocity;
 
             MidiNoteDisplay display = null;
 
@@ -410,6 +409,22 @@ namespace ChartPlayer
 
                 //PixGame.Instance.PushGameState("MidiConfigSelector", false);
             }
+        }
+
+        protected override void DrawContents()
+        {
+            //hiHatPedalDisplay.SetPedalLevel(DrumMidiDeviceConfiguration.CurrentMap.CurrentPedalValue);
+
+            if ((currentNoteNumber != lastNoteNumber) || (currentNoteVelocity != lastNoteVelocity))
+            {
+                midiEventText.StringBuilder.Clear();
+                midiEventText.StringBuilder.AppendFormat("Last Note: {0} Vel: {1:0.00}", currentNoteNumber, currentNoteVelocity);
+
+                lastNoteNumber = currentNoteNumber;
+                lastNoteVelocity = currentNoteVelocity;
+            }
+
+            base.DrawContents();
         }
     }
 

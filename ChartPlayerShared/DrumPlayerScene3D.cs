@@ -25,6 +25,7 @@ namespace ChartPlayer
             : base(player)
         {
             ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+            ChartPlayerGame.Instance.Plugin.SetHiHatPedalController((uint)DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalChannel);
 
             positionLane = (float)numLanes / 2;
 
@@ -91,32 +92,34 @@ namespace ChartPlayer
             var eventType = SongDrumNote.GetKitPieceType(eventVoice.KitPiece);
             var hitType = SongDrumNote.GetKitPieceType(hit.Voice.KitPiece);
 
-            Logger.Log("Try match: " + eventType + " with " + hitType);
+            var eventArticulation = eventVoice.Articulation;
+            if (eventArticulation == EDrumArticulation.None)
+                eventArticulation = SongDrumNote.GetDefaultArticulation(eventVoice.KitPiece);
 
             //if (triggerVoice.KitPiece == EDrumKitPiece.Crash3)
             //{
-                //// Let Crash3 substitute for hihit
-                //if (eventVoice.KitPiece == EDrumKitPiece.HiHat)
-                //    return true;
+            //// Let Crash3 substitute for hihit
+            //if (eventVoice.KitPiece == EDrumKitPiece.HiHat)
+            //    return true;
 
-            //    triggerVoice.KitPiece = EDrumKitPiece.Crash;
-            //}
+                //    triggerVoice.KitPiece = EDrumKitPiece.Crash;
+                //}
 
             if (eventType == hitType)
             {
                 if (eventType == EDrumKitPieceType.HiHat)
                 {
-                    if (eventVoice.Articulation == EDrumArticulation.HiHatOpen)
+                    if (eventArticulation == EDrumArticulation.HiHatOpen)
                     {
-                        return hit.DimensionValue < 1.0f;
+                        return (hit.DimensionValue < 1.0f);
                     }
-                    else if (eventVoice.Articulation == EDrumArticulation.HiHatClosed)
+                    else if (eventArticulation == EDrumArticulation.HiHatClosed)
                     {
-                        return hit.DimensionValue > 0;
+                        return (hit.DimensionValue > 0);
                     }
                     else
                     {
-                        return eventVoice.Articulation == hit.Voice.Articulation;
+                        return eventArticulation == hit.Voice.Articulation;
                     }
                 }
 

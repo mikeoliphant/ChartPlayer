@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using AudioPlugSharp;
 using SongFormat;
 
 namespace ChartPlayer
@@ -249,6 +250,7 @@ namespace ChartPlayer
         public float HiHatPedalClosed { get; set; }
         public float HiHatPedalSemiOpen { get; set; }
         public float HiHatPedalOpen { get; set; }
+        public float CurrentPedalValue { get; private set; }
         public int SnarePositionChannel { get; set; }
         public float SnarePositionCenter { get; set; }
         public float SnarePositionEdge { get; set; }
@@ -361,12 +363,11 @@ namespace ChartPlayer
             midiMap[midiNoteNumber] = voice;
         }
 
-        float pedalValue;
         float snarePositionValue;
 
         public void SetHiHatPedalValue(float pedalValue)
         {
-            this.pedalValue = pedalValue;
+            this.CurrentPedalValue = pedalValue;
         }
 
         public DrumHit? HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset, bool isLive)
@@ -386,7 +387,7 @@ namespace ChartPlayer
                 {
                     if (hit.Voice.KitPiece == EDrumKitPiece.HiHat)
                     {
-                        hit.DimensionValue = HiHatPedalOpen + (pedalValue * (HiHatPedalClosed - HiHatPedalOpen));
+                        hit.DimensionValue = HiHatPedalOpen + (CurrentPedalValue * (HiHatPedalClosed - HiHatPedalOpen));
                     }
                     else if (hit.Voice.KitPiece == EDrumKitPiece.Snare)
                     {

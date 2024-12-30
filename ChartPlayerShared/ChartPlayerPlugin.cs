@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Design;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -56,6 +57,20 @@ namespace ChartPlayer
             {
                 stereoOutput = new FloatAudioIOPort("Stereo Output", EAudioChannelConfiguration.Stereo)
             };
+
+            pedalParameter = new AudioPluginParameter
+            {
+                ID = "hihat-pedal",
+                Name = "HiHat Pedal",
+                Type = EAudioPluginParameterType.Float,
+                MinValue = 0,
+                MaxValue = 1,
+                DefaultValue = 0,
+                ValueFormat = "{0:0.0}"
+            };
+
+            AddParameter(pedalParameter);
+            SetHiHatPedalController(4);
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -96,21 +111,11 @@ namespace ChartPlayer
             }
 
             SampleHistory.SetSize((int)Host.SampleRate);
+        }
 
-            pedalParameter = new AudioPluginParameter
-            {
-                ID = "hihat-pedal",
-                Name = "HiHat Pedal",
-                Type = EAudioPluginParameterType.Float,
-                MinValue = 0,
-                MaxValue = 1,
-                DefaultValue = 0,
-                ValueFormat = "{0:0.0}"
-            };
-
-            AddParameter(pedalParameter);
-
-            //AddMidiControllerMapping(pedalParameter, (uint)DrumAudioHost.Instance.DrumMidiConfig.HiHatPedalChannel);
+        public void SetHiHatPedalController(uint controller)
+        {
+            AddMidiControllerMapping(pedalParameter, (uint)controller);
         }
 
         unsafe void RunGame()
