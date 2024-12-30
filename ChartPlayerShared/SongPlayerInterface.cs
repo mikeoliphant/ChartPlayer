@@ -676,12 +676,12 @@ namespace ChartPlayer
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
             }
 
-            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+            ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
 
-            if (fretScene != null)
+            if (chartScene != null)
             {
-                int totalNotes = fretScene.NumNotesTotal;
-                int detectedNotes = fretScene.NumNotesDetected;
+                int totalNotes = chartScene.NumNotesTotal;
+                int detectedNotes = chartScene.NumNotesDetected;
 
                 if ((totalNotes != lastTotalNotes) || (detectedNotes != lastDetectedNotes))
                 {
@@ -713,7 +713,7 @@ namespace ChartPlayer
                     scoreTextWrapper.UpdateContentLayout();
                 }
 
-                float bpm = fretScene.CurrentBPM * songPlayer.PlaybackSpeed;
+                float bpm = chartScene.CurrentBPM * songPlayer.PlaybackSpeed;
 
                 bpm = ((int)(bpm * 10)) / 10.0f;
 

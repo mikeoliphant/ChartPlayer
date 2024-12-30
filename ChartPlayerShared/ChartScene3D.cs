@@ -84,7 +84,7 @@ namespace ChartPlayer
 
                 float endTime = Math.Max(note.EndTime, note.TimeOffset + minLength);
 
-                if (endTime > currentTime)
+                if (endTime > timeOffset)
                     break;
 
                 startNotePosition++;

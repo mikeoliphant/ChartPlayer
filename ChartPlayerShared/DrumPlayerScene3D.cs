@@ -19,6 +19,7 @@ namespace ChartPlayer
         float positionLane;
         float?[] notesDetected;
         int startNotePosition = 0;
+        float detectionToleranceSecs = 0.1f;
 
         public DrumPlayerScene3D(SongPlayer player)
             : base(player)
@@ -55,79 +56,81 @@ namespace ChartPlayer
 
         void HandleHit(DrumHit hit)
         {
-            //    //if (waitingForSnare && (hit.Voice.KitPiece == EDrumKitPiece.Snare))
-            //    //{
-            //    //    Play();
-            //    //}
+            //if (waitingForSnare && (hit.Voice.KitPiece == EDrumKitPiece.Snare))
+            //{
+            //    Play();
+            //}
 
-            //    float secsTolerance = 0.1f;
+            var allNotes = player.SongDrumNotes.Notes;
 
-            //    var notes = player.SongDrumNotes.Notes.Where(n => (Math.Abs(currentTime - n.TimeOffset) < secsTolerance)).OrderBy(n => (Math.Abs(currentTime - n.TimeOffset) < secsTolerance));
+            startNotePosition = GetStartNote<SongDrumNote>(currentTime, detectionToleranceSecs, startNotePosition, allNotes);
 
-            //    foreach (var note in notes)
-            //    {
-            //        if (notes)
-            //    }
+            int pos = 0;
 
-            //    MidiTriggerEvent matchedEvent = null;
+            // TODO - should find closest, not just first match
 
-            //    MidiTriggerEvent nextEvent = MidiInstrumentPlayer.TimelinePlayer.NextEvent;
+            for (pos = startNotePosition; pos < allNotes.Count; pos++)
+            {
+                SongDrumNote note = allNotes[pos];
 
-            //    if (nextEvent == null)
-            //        return true;
+                if (note.TimeOffset > (currentTime + detectionToleranceSecs))
+                    break;
 
-            //    int currentIndex = MidiInstrumentPlayer.TimelinePlayer.CurrentEventIndex;
+                if ((notesDetected[pos] == null) && VoicesMatch(new DrumVoice(note.KitPiece, note.Articulation), hit))
+                {
+                    notesDetected[pos] = currentTime - note.TimeOffset;
 
-            //    int currentTick = MidiInstrumentPlayer.TimelinePlayer.CurrentTick;
-
-            //    while ((currentIndex > 0) && (Math.Abs(MidiInstrumentPlayer.TimelinePlayer.Timeline.TriggerEvents[currentIndex - 1].AbsoluteOffset - currentTick) <= tickTolerance))
-            //    {
-            //        currentIndex--;
-            //        nextEvent = MidiInstrumentPlayer.TimelinePlayer.Timeline.TriggerEvents[currentIndex];
-            //    }
-
-            //    float errorSecs = 0;
-
-            //    while ((currentIndex < MidiInstrumentPlayer.TimelinePlayer.Timeline.TriggerEvents.Count) && (Math.Abs(nextEvent.AbsoluteOffset - currentTick) <= tickTolerance))
-            //    {
-            //        if ((nextEvent.Message.MidiChannel == 9) && (nextEvent.Message.Command == EMidiChannelCommand.NoteOn) && (nextEvent.Message.Data2 > 0))
-            //        {
-            //            DrumVoice eventVoice = DrumMidiDeviceConfiguration.GenericMap.GetVoiceFromMidiNote(nextEvent.Message.Data1);
-
-            //            if (VoicesMatch(eventVoice, hit) && !matchedEvents.ContainsKey(nextEvent))
-            //            {
-            //                errorSecs = ((float)(nextEvent.AbsoluteOffset - currentTick) * AudioHost.Instance.AudioSettings.SamplesPerTick) / (float)(AudioHost.Instance.AudioSettings.SamplesPerSecond);
-
-            //                if (Math.Abs(errorSecs) < secsTolerance)
-            //                {
-            //                    matchedEvent = nextEvent;
-
-            //                    break;
-            //                }
-            //            }
-            //        }
-
-            //        currentIndex++;
-
-            //        if (currentIndex >= MidiInstrumentPlayer.TimelinePlayer.Timeline.TriggerEvents.Count - 1)
-            //            break;
-
-            //        nextEvent = MidiInstrumentPlayer.TimelinePlayer.Timeline.TriggerEvents[currentIndex];
-            //    }
-
-            //    if (matchedEvent != null)
-            //    {
-            //        matchedEvents[matchedEvent] = true;
-
-            //        if (barEventData.ContainsKey(MidiInstrumentPlayer.CurrentBarOffset))
-            //        {
-            //            barMatchedEventsInARow[barEventData[MidiInstrumentPlayer.CurrentBarOffset]] *= 0.95f;
-            //        }
-
-            //        UpdateScore(1, 0, errorSecs);
-            //    }
+                    NumNotesDetected++;
+                }
+            }
         }
 
+        bool VoicesMatch(in DrumVoice eventVoice, in DrumHit hit)
+        {
+            var eventType = SongDrumNote.GetKitPieceType(eventVoice.KitPiece);
+            var hitType = SongDrumNote.GetKitPieceType(hit.Voice.KitPiece);
+
+            Logger.Log("Try match: " + eventType + " with " + hitType);
+
+            //if (triggerVoice.KitPiece == EDrumKitPiece.Crash3)
+            //{
+                //// Let Crash3 substitute for hihit
+                //if (eventVoice.KitPiece == EDrumKitPiece.HiHat)
+                //    return true;
+
+            //    triggerVoice.KitPiece = EDrumKitPiece.Crash;
+            //}
+
+            if (eventType == hitType)
+            {
+                if (eventType == EDrumKitPieceType.HiHat)
+                {
+                    if (eventVoice.Articulation == EDrumArticulation.HiHatOpen)
+                    {
+                        return hit.DimensionValue < 1.0f;
+                    }
+                    else if (eventVoice.Articulation == EDrumArticulation.HiHatClosed)
+                    {
+                        return hit.DimensionValue > 0;
+                    }
+                    else
+                    {
+                        return eventVoice.Articulation == hit.Voice.Articulation;
+                    }
+                }
+
+                return true;
+            }
+
+            return (eventType == hitType);
+        }
+
+        public override void ResetScore()
+        {
+            Array.Clear(notesDetected);
+
+            base.ResetScore();
+        }
 
         public override void Draw()
         {
@@ -170,14 +173,31 @@ namespace ChartPlayer
 
                     var allNotes = player.SongDrumNotes.Notes;
 
-                    startNotePosition = GetStartNote<SongDrumNote>(currentTime, 0, startNotePosition, allNotes);
-
                     int pos = 0;
 
-                    // Draw hand position areas on timeline
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - 0.5f, 0, startNotePosition, allNotes);
+
                     for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
                         SongDrumNote note = allNotes[pos];
+
+                        if ((currentTime - note.TimeOffset) < detectionToleranceSecs)
+                            break;
+
+                        if (notesDetected[pos] != null)
+                            continue;
+
+                        notesDetected[pos] = float.MaxValue;
+
+                        NumNotesTotal++;
+                    }
+
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime, 0, startNotePosition, allNotes);
+
+                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
+                    {
+                        SongDrumNote note = allNotes[pos];
+
                         if (note.TimeOffset > endTime)
                             break;
 

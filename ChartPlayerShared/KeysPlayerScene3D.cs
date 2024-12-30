@@ -78,7 +78,6 @@ namespace ChartPlayer
 
                     int pos = 0;
 
-                    // Draw hand position areas on timeline
                     for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
                         SongKeyboardNote note = allNotes[pos];
