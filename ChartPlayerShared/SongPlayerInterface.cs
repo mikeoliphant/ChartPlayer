@@ -8,6 +8,7 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 
 namespace ChartPlayer
 {
@@ -88,6 +89,16 @@ namespace ChartPlayer
             }
 
             ChartPlayerGame.Instance.Scale = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.UIScale;
+
+            if (!string.IsNullOrEmpty(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumMidiMapName))
+            {
+                try
+                {
+                    DrumMidiDeviceConfiguration.CurrentMap = DrumMidiDeviceConfiguration.LoadFromXml(
+                        Path.Combine(MidiEditor.ConfigPath, "MidiMaps", ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumMidiMapName + ".xml"));
+                }
+                catch { }
+            }
 
             settingsInterface = new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings };
 

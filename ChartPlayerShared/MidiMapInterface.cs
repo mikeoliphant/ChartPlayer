@@ -75,9 +75,15 @@ namespace ChartPlayer
 
     public class MidiConfigSelectionDialog : InputDialog
     {
-        public MidiConfigSelectionDialog()
+        bool isSave = false;
+
+        public MidiConfigSelectionDialog(bool isSave)
             : base(Layout.Current.DefaultOutlineNinePatch)
         {
+            this.isSave = isSave;
+
+            DesiredWidth = 400;
+
             FileSelectionSwipeList fileSelect = new FileSelectionSwipeList(Path.Combine(MidiEditor.ConfigPath, "MidiMaps"), "*.xml");
             fileSelect.HorizontalAlignment = EHorizontalAlignment.Stretch;
             fileSelect.DesiredHeight = 200;
@@ -85,25 +91,50 @@ namespace ChartPlayer
             fileSelect.PathSelectAction = MidiConfigSelected;
             SetContents(fileSelect);
 
-            AddInput(new DialogInput { Text = "Load Custom", Action = MidiEditor.Instance.LoadCustomMidiMap, CloseOnInput = true });
+            if (isSave)
+            {
+                AddInput(new DialogInput
+                {
+                    Text = "Save As",
+                    Action = delegate
+                    {
+                        Layout.Current.ShowTextInputPopup("New Config Name:", SaveAs);
+                    },
+                    CloseOnInput = true
+                });
+            }
+            //AddInput(new DialogInput { Text = "Load Custom", Action = MidiEditor.Instance.LoadCustomMidiMap, CloseOnInput = true });
             AddInput(new DialogInput { Text = "Cancel", CloseOnInput = true });
+        }
+
+        void SaveAs(string name)
+        {
+            DrumMidiDeviceConfiguration.CurrentMap.Name = name;
+            MidiEditor.Instance.SaveMidiConfig(Path.Combine(MidiEditor.ConfigPath, "MidiMaps", name + ".xml"));
         }
 
         void MidiConfigSelected(string path)
         {
-            MidiEditor.Instance.UpdateMidiConfig(path);
+            if (isSave)
+            {
+                MidiEditor.Instance.SaveMidiConfig(path);
+            }
+            else
+            {
+                MidiEditor.Instance.UpdateMidiConfig(path);
+            }
 
             CloseAction();
         }
     }
 
-    public class MidiEditor : Dock, IMidiHandler
+    public class MidiEditor : Dock, IMidiHandler, IPopup
     {
         public static string ConfigPath { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChartPlayer");
         public static MidiEditor Instance { get; private set; }
+        public Action CloseAction { get; set; }
 
         HorizontalStack midiNoteStack;
-        FileSelector midiConfigSelector;
         UIElementWrapper configWrapper;
         Dictionary<int, MidiNoteDisplay> midiNoteDisplays = new Dictionary<int, MidiNoteDisplay>();
         int hiHatPedalValue;
@@ -133,13 +164,6 @@ namespace ChartPlayer
 
             if (!Directory.Exists(midiUserPath))
                 Directory.CreateDirectory(midiUserPath);
-
-            //midiConfigSelector = new FileSelector("Midi Configuration", canCreateFolders: true);
-            //midiConfigSelector.AllowedExtensions = new string[] { ".xml" };
-            //midiConfigSelector.SetRootPath(midiUserPath);
-            //midiConfigSelector.FileAction = UpdateMidiConfig;
-
-            //PixGame.Instance.AddGameState("MidiConfigSelector", midiConfigSelector);
 
             HorizontalStack mainStack = new HorizontalStack { HorizontalAlignment = EHorizontalAlignment.Stretch, VerticalAlignment = EVerticalAlignment.Stretch, ChildSpacing = 10 };
             mainVStack.Children.Add(mainStack);
@@ -183,7 +207,14 @@ namespace ChartPlayer
             configWrapper = new UIElementWrapper() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             configStack.Children.Add(configWrapper);
 
-            configStack.Children.Add(new TextButton("Save Midi Config") { HorizontalAlignment = EHorizontalAlignment.Stretch });
+            configStack.Children.Add(new TextButton("Save Midi Config")
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                PressAction = delegate
+                {
+                    Layout.Current.ShowPopup(new MidiConfigSelectionDialog(isSave: true));
+                }
+            });
 
             configStack.Children.Add(new TextButton("Close") { PressAction = Close, HorizontalAlignment = EHorizontalAlignment.Stretch });
 
@@ -203,7 +234,7 @@ namespace ChartPlayer
         {
             ChartPlayerGame.Instance.Plugin.MidiHandler = midiHandlerBak;
 
-            Layout.Current.ClosePopup(this);
+            if (CloseAction != null) CloseAction();
         }
 
         public void UpdateMidiConfig(string path)
@@ -211,17 +242,11 @@ namespace ChartPlayer
             SetMidiConfig(path);
         }
 
-        void SaveMidiConfig(string path)
-        {            
-            //MixerSettings.Instance.MidiConfig = path;
+        public void SaveMidiConfig(string path)
+        {         
+            DrumMidiDeviceConfiguration.CurrentMap.SaveXml(path);
 
-            //configWrapper.Child = new OptionButtonStack("Config:", Path.GetFileNameWithoutExtension(MixerSettings.Instance.MidiConfig), "SelectMidiConfig");
-
-            //DrumAudioHost.Instance.DrumMidiConfig.SaveXml(MixerSettings.Instance.MidiConfig);
-
-            //MixerSettings.SaveXml(Path.Combine(DrumAudioHost.UserDataFolder, "MixerSettings.xml"));
-
-            //PixGame.Instance.UserInterface.NeedLayoutUpdate = true;
+            UpdateMapDisplay();
         }
 
         public void SetMidiConfig(string path)
@@ -236,7 +261,7 @@ namespace ChartPlayer
         {
             //hiHatPedalDisplay.UpdateHiHatLevels();
 
-            configWrapper.Child = new OptionButtonStack("Config:", DrumMidiDeviceConfiguration.CurrentMap.Name, delegate { Layout.Current.ShowPopup(new MidiConfigSelectionDialog()); });
+            configWrapper.Child = new OptionButtonStack("Config:", DrumMidiDeviceConfiguration.CurrentMap.Name, delegate { Layout.Current.ShowPopup(new MidiConfigSelectionDialog(isSave: false)); });
 
             midiNoteStack.Children.Clear();
             midiNoteDisplays.Clear();
@@ -338,77 +363,6 @@ namespace ChartPlayer
 
         public void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
         {
-        }
-
-        //public void HandleMidiMessage(AudioCore.MidiMessage message, bool isLive)
-        //{
-        //    DrumMidiDeviceConfiguration map = isLive ? DrumAudioHost.Instance.DrumMidiConfig : DrumMidiDeviceConfiguration.GenericMap;
-
-        //    if (true) //isLive)
-        //    {
-        //        if (message.Command == EMidiChannelCommand.NoteOn)
-        //        {
-        //            if (message.Data2 > 0)
-        //            {
-        //                midiNoteNumber = message.Data1;
-        //                midiNoteVelocity = message.Data2;
-
-        //                DrumGame.Instance.AddUIWorkAction(delegate
-        //                {
-        //                    midiEventText.StringBuilder.Clear();
-        //                    midiEventText.StringBuilder.AppendFormat("Last Note: {0} Vel: {1}", midiNoteNumber, midiNoteVelocity);
-        //                });
-
-        //                MidiNoteDisplay display = null;
-
-        //                if (midiNoteDisplays.TryGetValue(midiNoteNumber, out display))
-        //                {
-        //                    display.Flash();
-        //                }
-        //            }
-        //        }
-        //        else if (message.Command == EMidiChannelCommand.Controller)
-        //        {
-        //            if (message.Data1 == map.HiHatPedalChannel)
-        //            {
-        //                hiHatPedalValue = message.Data2;
-
-        //                hiHatPedalDisplay.SetPedalLevel((float)hiHatPedalValue / 127.0f);
-        //            }
-        //            else if (message.Data1 == map.SnarePositionChannel)
-        //            {
-        //                snarePositionValue = message.Data2;
-
-        //                snarePositionDisplay.SetPosition((float)snarePositionValue / 127.0f);
-        //            }
-        //        }
-        //    }
-        //}
-
-        public void LoadCustomMidiMap()
-        {
-            midiConfigSelector.FileAction = UpdateMidiConfig;
-            midiConfigSelector.IsSaveMode = false;
-
-            //PixGame.Instance.PushGameState("MidiConfigSelector", false);
-        }
-
-        public override void HandleInput(InputManager inputManager)
-        {
-            base.HandleInput(inputManager);
-
-            if (inputManager.WasClicked("SelectMidiConfig", this))
-            {
-                ;
-            }
-
-            if (inputManager.WasClicked("SaveMidiConfig", this))
-            {
-                midiConfigSelector.FileAction = SaveMidiConfig;
-                midiConfigSelector.IsSaveMode = true;
-
-                //PixGame.Instance.PushGameState("MidiConfigSelector", false);
-            }
         }
 
         protected override void DrawContents()

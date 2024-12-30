@@ -250,6 +250,7 @@ namespace ChartPlayer
         public float HiHatPedalClosed { get; set; }
         public float HiHatPedalSemiOpen { get; set; }
         public float HiHatPedalOpen { get; set; }
+        [XmlIgnore]
         public float CurrentPedalValue { get; private set; }
         public int SnarePositionChannel { get; set; }
         public float SnarePositionCenter { get; set; }
@@ -452,7 +453,7 @@ namespace ChartPlayer
 
                 drumMidiConfiguration.Name = Path.GetFileNameWithoutExtension(path);
             }
-            catch
+            catch (Exception ex)
             {
             }
 

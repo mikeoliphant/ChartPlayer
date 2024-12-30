@@ -35,6 +35,7 @@ namespace ChartPlayer
         public string SongListSortColumn { get; set; } = null;
         public bool SongListSortReversed { get; set; } = false;
         public float UIScale { get; set; } = 1.0f;
+        public string DrumMidiMapName { get; set; } = null;
     }
 
     public class SongPlayerSettingsInterface : InputDialog
@@ -132,9 +133,14 @@ namespace ChartPlayer
         {
             ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
-            Layout.Current.ShowPopup(midiEditor);
+            midiEditor.CloseAction = Test;
 
-            midiEditor.Opened();            
+            Layout.Current.ShowPopup(midiEditor);
+        }
+
+        void Test()
+        {
+
         }
 
         UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)
@@ -261,6 +267,8 @@ namespace ChartPlayer
 
         void Apply()
         {
+            newSettings.DrumMidiMapName = DrumMidiDeviceConfiguration.CurrentMap.Name;
+
             CopySettings(newSettings, oldSettings);
 
             if (ApplyAction != null)
