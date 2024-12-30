@@ -13,3 +13,7 @@ For your host to see the plugin, the "ChartPlayer" folder must be copied to your
 **Important Note**: You must have .NET 8.0 or later installed:
 
 https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
+If you are still having trouble getting the plugin to work, please check out troubleshooting instructions here:
+
+https://github.com/mikeoliphant/ChartPlayer/blob/master/Troubleshooting.md
