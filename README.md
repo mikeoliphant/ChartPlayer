@@ -8,10 +8,10 @@ It runs as a VST plugin inside your DAW so that you can use any other plugin you
 
 # Features
 
+* Support for guitar, bass, drums, keys and vocals
 * Song browser
 * Very fast startup and song loading
 * 3D, "note highway" display
-* Support for guitar and bass guitar
 * Note detection
 * Pitch shifting of songs that are slightly off of standard tuning
 * Adjustable song playback speed
