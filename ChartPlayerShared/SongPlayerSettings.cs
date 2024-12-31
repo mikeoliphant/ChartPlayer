@@ -295,7 +295,7 @@ namespace ChartPlayer
 
         void SelectSongPath()
         {
-            string newPath = Layout.Current.GetFolder("Song Path", newSettings.SongPath);
+            string newPath = Layout.Current.GetFolder(newSettings.SongPath);
 
             if (!string.IsNullOrEmpty(newPath))
             {

@@ -19,7 +19,7 @@ namespace ChartPlayer
         public string ArtistName { get; set; }
         public string AlbumName { get; set; }
         public string FolderPath { get; set; }
-        public string Arrangements { get; set; }
+        public string Arrangements { get; set; } = "";
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
