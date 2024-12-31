@@ -9,6 +9,7 @@ using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using System.Xml.Linq;
+using System.Data.SqlTypes;
 
 namespace ChartPlayer
 {
@@ -755,6 +756,7 @@ namespace ChartPlayer
         List<float> sectionDensity = new List<float>();
         float maxDensity;
         float endTime;
+        List<SongSection> sections;
 
         public SongSectionInterface()
         {
@@ -766,31 +768,35 @@ namespace ChartPlayer
 
             sectionDensity.Clear();
 
-            if (songPlayer.SongInstrumentNotes.Sections.Count == 0)
+            sections = songPlayer.SongInstrumentNotes.Sections;
+
+            if (sections.Count == 0)
+            {
+                sections = songPlayer.SongStructure.Sections;
+            }
+
+            if (sections.Count == 0)
                 return;
 
-            foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+            foreach (SongSection section in sections)
             {
-                SongNote? lastNote = null;
                 int density = 0;
 
-                foreach (SongNote note in songPlayer.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))))
+                switch (songPlayer.SongInstrumentPart.InstrumentType)
                 {
-                    if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
-                    {
-                        if (lastNote.HasValue && lastNote.Value.Techniques.HasFlag(ESongNoteTechnique.Chord) && (note.ChordID != lastNote.Value.ChordID))
-                            density += 5;
-                        else
-                            density += 1;
-                    }
-                    else
-                    {
-                        if (lastNote.HasValue && (lastNote.Value.Fret != note.Fret))
-                            density += 5;
-                        else
-                            density += 1;
-
-                    }
+                    case ESongInstrumentType.LeadGuitar:
+                    case ESongInstrumentType.RhythmGuitar:
+                    case ESongInstrumentType.BassGuitar:
+                        density = GetDensity(section, songPlayer.SongInstrumentNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Keys:
+                        density = GetDensity(section, songPlayer.SongKeyboardNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Drums:
+                        density = GetDensity(section, songPlayer.SongDrumNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Vocals:
+                        break;
                 }
 
                 sectionDensity.Add((float)density / (section.EndTime - section.StartTime));
@@ -798,7 +804,43 @@ namespace ChartPlayer
 
             maxDensity = sectionDensity.Max();
 
-            endTime = songPlayer.SongInstrumentNotes.Sections.Last().EndTime;
+            endTime = sections.Last().EndTime;
+        }
+
+        int GetDensity<T>(SongSection section, IEnumerable<T> notes) where T : struct, ISongEvent
+        {
+            T? lastNote = null;
+
+            int density = 0;
+
+            var blah = notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))).ToList();
+
+            foreach (var note in notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))))
+            {
+                if ((note is SongNote songNote) && (lastNote is SongNote lastSongNote))
+                {
+                    if (songNote.Techniques.HasFlag(ESongNoteTechnique.Chord))
+                    {
+                        density += (songNote.ChordID != lastSongNote.ChordID) ? 5 : 1;
+                    }
+                    else
+                    {
+                        density += (songNote.Fret != lastSongNote.Fret) ? 5 : 1;
+                    }
+                }
+                else if ((note is SongDrumNote drumNote) && (lastNote is SongDrumNote lastDrumNote))
+                {
+                    density += ((drumNote.KitPiece == lastDrumNote.KitPiece) && (drumNote.Articulation == lastDrumNote.Articulation)) ? 5 : 1;
+                }
+                else if ((note is SongKeyboardNote keyNote) && (lastNote is SongKeyboardNote lastKeyNote))
+                {
+                    density += (keyNote.Note == lastKeyNote.Note) ? 5 : 1;
+                }
+
+                lastNote = note;
+            }
+
+            return density;
         }
 
         protected override void GetContentSize(out float width, out float height)
@@ -822,7 +864,7 @@ namespace ChartPlayer
                 }
                 else if (touch.TouchState == ETouchState.Pressed)
                 {
-                    foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+                    foreach (SongSection section in sections)
                     {
                         if ((time >= section.StartTime) && (time < section.EndTime))
                         {
@@ -865,9 +907,9 @@ namespace ChartPlayer
 
             float currentTime = songPlayer.CurrentSecond;
 
-            for (int i = 0; i < songPlayer.SongInstrumentNotes.Sections.Count; i++)
+            for (int i = 0; i < sections.Count; i++)
             {
-                SongSection section = songPlayer.SongInstrumentNotes.Sections[i];
+                SongSection section = sections[i];
 
                 bool isCurrent = (currentTime >= section.StartTime) && (currentTime < section.EndTime);
 
