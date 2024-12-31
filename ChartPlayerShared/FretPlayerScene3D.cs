@@ -13,7 +13,7 @@ namespace ChartPlayer
         public float CameraDistance { get; private set; } = 70;
         public float FocusDist { get; set; } = 600;
 
-        float targetCameraDistance = 64;
+        float targetCameraDistance = 70;
         float positionFret = 3;
 
         public FretCamera()
