@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
 using AudioPlugSharp;
+using SharpDX.Direct2D1.Effects;
 
 namespace ChartPlayer
 {
@@ -196,7 +197,7 @@ namespace ChartPlayer
                         NumNotesTotal++;
                     }
 
-                    startNotePosition = GetStartNote<SongDrumNote>(currentTime, 0, startNotePosition, allNotes);
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - 0.1f, 0, startNotePosition, allNotes);
 
                     for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
@@ -207,7 +208,7 @@ namespace ChartPlayer
 
                         if (note.KitPiece == EDrumKitPiece.Kick)
                         {
-                            DrawLaneHorizontalLine(0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .1f);
+                            DrawVerticalImage(Layout.Current.GetImage("HorizontalFretLine"), 0.25f, numLanes - 0.25f, Math.Max(currentTime, note.TimeOffset), 0, UIColor.Yellow, .06f);
                         }
                         else
                         {
@@ -306,8 +307,22 @@ namespace ChartPlayer
                                 imageName = "CymbalChoke";
                             }
 
+                            float scale = .08f;
+
+                            if (note.TimeOffset <= currentTime)
+                            {
+                                float range = 0.1f;
+
+                                float delta = currentTime - note.TimeOffset;
+
+                                if (delta < range)
+                                {
+                                    scale *= 1 + ((1.0f - (delta / range)) * .75f);
+                                }
+                            }
+
                             if (imageName != null)
-                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f);
+                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, Math.Max(note.TimeOffset, currentTime), 0, UIColor.White, scale);
                         }
                     }
 
