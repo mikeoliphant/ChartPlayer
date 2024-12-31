@@ -24,7 +24,7 @@ You will probably want two tracks in your DAW - one for ChartPlayer, and one for
 
 ChartPlayer needs to be sent input from your instrument audio channel (or midi channel for drums/keys) if you want it to do detection.
 
-**NOTE** Make sure that the ChartPlayer track is armed for input even if you aren't doing note detection, as some DAWs will not run it properly in real-time sync if you do not.
+**NOTE:** Make sure that the ChartPlayer track is armed for input even if you aren't doing note detection, as some DAWs will not run it properly in real-time sync if you do not.
 
 ## Reporting Problems
 
