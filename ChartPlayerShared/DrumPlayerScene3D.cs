@@ -4,8 +4,6 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
-using AudioPlugSharp;
-using SharpDX.Direct2D1.Effects;
 
 namespace ChartPlayer
 {
