@@ -139,6 +139,7 @@ namespace ChartPlayer
 
             HorizontalStack bottomButtonStack = new HorizontalStack()
             {
+                BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
                 Padding = new LayoutPadding(5),
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,

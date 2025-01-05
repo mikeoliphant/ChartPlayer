@@ -30,6 +30,7 @@ namespace ChartPlayer
                 Camera.MirrorLeftRight = lefyMode;
             }
         }
+        public float CurrentTimeOffset { get; set; } = 0;
 
         protected SongPlayer player;
         protected float timeScale = 200f;
@@ -93,6 +94,24 @@ namespace ChartPlayer
             return startNotePosition;
         }
 
+        public int GetEndNote<T>(int startPosition, float endTime, IList<T> notes) where T : ISongEvent
+        {
+            while (startPosition < notes.Count)
+            {
+                ISongEvent note = notes[startPosition];
+
+                if (note.TimeOffset > endTime)
+                    break;
+
+                startPosition++;
+            }
+
+            if (startPosition == notes.Count)
+                startPosition--;
+
+            return startPosition;
+        }
+
         public override void Draw()
         {
             base.Draw();
@@ -118,7 +137,7 @@ namespace ChartPlayer
 
             var allBeats = player.SongStructure.Beats;
 
-            startBeatPosition = GetStartNote<SongBeat>(currentTime, 0, startBeatPosition, allBeats);
+            startBeatPosition = GetStartNote<SongBeat>(currentTime - CurrentTimeOffset, 0, startBeatPosition, allBeats);
 
             int pos = 0;
 

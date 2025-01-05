@@ -32,6 +32,8 @@ namespace ChartPlayer
             highwayEndX = GetLanePosition(numLanes);
 
             notesDetected = new float?[player.SongDrumNotes.Notes.Count];
+
+            CurrentTimeOffset = 0.15f;
         }
 
         public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
@@ -143,7 +145,7 @@ namespace ChartPlayer
             {
                 currentTime = (float)player.CurrentSecond;
 
-                targetCameraDistance = 85;
+                targetCameraDistance = 75;
 
                 float targetPositionKey = (float)numLanes / 2;
 
@@ -151,7 +153,9 @@ namespace ChartPlayer
 
                 cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
-                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, -(float)(currentTime * timeScale) + cameraDistance);
+                float frontPosition = -(float)((currentTime - CurrentTimeOffset) * timeScale);
+
+                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, frontPosition + cameraDistance);
                 Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplaySeconds * timeScale) * .3f));
             }
         }
@@ -171,7 +175,7 @@ namespace ChartPlayer
                 {
                     for (int lane = 0; lane <= numLanes; lane++)
                     {
-                        DrawLaneTimeLine(lane, 0, startTime, endTime, whiteHalfAlpha);
+                        DrawLaneTimeLine(lane, 0, currentTime - CurrentTimeOffset, endTime, whiteHalfAlpha);
                     }
 
                     var allNotes = player.SongDrumNotes.Notes;
@@ -195,18 +199,31 @@ namespace ChartPlayer
                         NumNotesTotal++;
                     }
 
-                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - 0.1f, 0, startNotePosition, allNotes);
+                    int lastNote = GetEndNote<SongDrumNote>(startNotePosition, endTime, allNotes);
 
-                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - CurrentTimeOffset, 0, startNotePosition, allNotes);
+
+                    for (pos = lastNote; pos >= startNotePosition; pos--)
                     {
                         SongDrumNote note = allNotes[pos];
 
-                        if (note.TimeOffset > endTime)
-                            break;
+                        float scale = 1;
+
+                        if (note.TimeOffset <= currentTime)
+                        {
+                            float range = 0.1f;
+
+                            float delta = currentTime - note.TimeOffset;
+
+                            if (delta < range)
+                            {
+                                scale = 1 + ((1.0f - (delta / range)) * .75f);
+                            }
+                        }
 
                         if (note.KitPiece == EDrumKitPiece.Kick)
                         {
-                            DrawVerticalImage(Layout.Current.GetImage("HorizontalFretLine"), 0.25f, numLanes - 0.25f, Math.Max(currentTime, note.TimeOffset), 0, UIColor.Yellow, .06f);
+                            DrawVerticalImage(Layout.Current.GetImage("HorizontalFretLine"), 0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .04f * scale);
                         }
                         else
                         {
@@ -305,22 +322,8 @@ namespace ChartPlayer
                                 imageName = "CymbalChoke";
                             }
 
-                            float scale = .08f;
-
-                            if (note.TimeOffset <= currentTime)
-                            {
-                                float range = 0.1f;
-
-                                float delta = currentTime - note.TimeOffset;
-
-                                if (delta < range)
-                                {
-                                    scale *= 1 + ((1.0f - (delta / range)) * .75f);
-                                }
-                            }
-
                             if (imageName != null)
-                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, Math.Max(note.TimeOffset, currentTime), 0, UIColor.White, scale);
+                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f * scale);
                         }
                     }
 

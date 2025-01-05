@@ -344,7 +344,6 @@ namespace ChartPlayer
                     currentFingerNote = null;
                     currentChordDetected = false;
 
-                    // Find current active notes
                     for (pos = lastNote; pos >= startNotePosition; pos--)
                     {
                         SongNote note = allNotes[pos];
