@@ -224,13 +224,18 @@ namespace ChartPlayer
             return Path.Combine(BasePath, folder);
         }
 
+        public string GetAlbumPath(SongIndexEntry indexEntry)
+        {
+            return Path.Combine(GetSongPath(indexEntry), "albumart.png");
+        }
+
         public UIImage GetAlbumImage(SongIndexEntry indexEntry)
         {
             UIImage image = null;
 
             try
             {
-                using (Stream inputStream = File.OpenRead(Path.Combine(GetSongPath(indexEntry), "albumart.png")))
+                using (Stream inputStream = File.OpenRead(GetAlbumPath(indexEntry)))
                 {
                     image = new UIImage(inputStream);
                 }

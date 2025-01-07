@@ -18,6 +18,7 @@ namespace ChartPlayer
     public class ChartScene3D : Scene3D
     {
         public float NoteDisplaySeconds { get; set; } = 3;
+        public float NoteDisplayDistance { get; set; } = 600;
         public int NumNotesDetected { get; protected set; } = 0;
         public int NumNotesTotal { get; protected set; } = 0;
         public float CurrentBPM { get; protected set; } = 0;
@@ -33,7 +34,7 @@ namespace ChartPlayer
         public float CurrentTimeOffset { get; set; } = 0;
 
         protected SongPlayer player;
-        protected float timeScale = 200f;
+        protected float timeScale;
         protected float currentTime;
         protected float startTime;
         protected float endTime;
@@ -115,6 +116,8 @@ namespace ChartPlayer
         public override void Draw()
         {
             base.Draw();
+
+            timeScale = NoteDisplayDistance / NoteDisplaySeconds;
 
             currentTime = (float)player.CurrentSecond;
 

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UILayout;
 using SongFormat;
 using System.Text.RegularExpressions;
+using System.IO;
+using System.Collections.Concurrent;
 
 namespace ChartPlayer
 {
@@ -21,7 +24,7 @@ namespace ChartPlayer
         List<SongIndexEntry> currentSongs;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
         HorizontalStack songDisplayStack;
-        ImageElement albumImage;
+        BackgroundImage albumImage;
         TextBlock songTitleText;
         TextBlock songArtistText;
         TextBlock songAlbumText;
@@ -38,8 +41,6 @@ namespace ChartPlayer
         {
             HorizontalAlignment = EHorizontalAlignment.Stretch;
             VerticalAlignment = EVerticalAlignment.Stretch;
-
-            Padding = new LayoutPadding(5);
 
             SongList = new MultiColumnItemDisplay<SongIndexEntry>(UIColor.Black);
 
@@ -109,7 +110,7 @@ namespace ChartPlayer
             };
             bottomStack.Children.Add(songDisplayStack);
 
-            albumImage = new ImageElement("SingleWhitePixel")
+            albumImage = new BackgroundImage
             {
                 DesiredWidth = 192,
                 DesiredHeight = 192
@@ -426,26 +427,9 @@ namespace ChartPlayer
             };
         }
 
-        UIImage albumArtToDelete = null;
-
         void UpdateSelectedSongDisplay()
         {
-            if (albumArtToDelete != null)
-            {
-                if (albumArtToDelete.Texture != null)
-                {
-                    albumArtToDelete.Texture.Dispose();
-                }
-
-                albumArtToDelete = null;
-            }
-
-            if (albumImage.Image.Width > 1) // Don't dispose our single white pixel image
-            {
-                albumArtToDelete = albumImage.Image;
-            }
-
-            albumImage.Image = songIndex.GetAlbumImage(selectedSong);
+            albumImage.LoadImage(songIndex.GetAlbumPath(selectedSong));
 
             songTitleText.Text = selectedSong.SongName;
             songArtistText.Text = selectedSong.ArtistName;
@@ -1092,6 +1076,107 @@ namespace ChartPlayer
             if (inputManager.WasPressed("LastItem"))
             {
                 ListDisplay.GoToLastItem();
+            }
+        }
+    }
+
+    public class BackgroundImage : ImageElement
+    {
+        ConcurrentQueue<string> loadQueue = new ConcurrentQueue<string>();
+
+        Thread loadThread = null;
+        UIImage toDelete = null;
+
+        public BackgroundImage()
+            : base("SingleWhitePixel")
+        {
+
+        }
+
+        public void LoadImage(string imagePath)
+        {
+            loadQueue.Enqueue(imagePath);
+
+            if (loadThread != null)
+            {
+                if (!loadThread.IsAlive)
+                {
+                    loadThread.Join();
+
+                    loadThread = null;
+                }
+            }
+
+            if (loadThread == null)
+            {
+                loadThread = new Thread(new ThreadStart(BackgroundLoad));
+                loadThread.Start();
+            }
+        }
+
+        public void ClearImage()
+        {
+            LoadImage(null);
+        }
+
+        void Delete()
+        {
+            if ((toDelete != null) && (toDelete.Width > 1))
+            {
+                if (toDelete.Texture != null)
+                {
+                    toDelete.Texture.Dispose();
+                }
+            }
+
+            toDelete = null;
+        }
+
+        void BackgroundLoad()
+        {
+            string toLoad = null;
+
+            if (loadQueue.Count > 0)
+            {
+                string tryLoad;
+
+                while (loadQueue.TryDequeue(out tryLoad))
+                {
+                    toLoad = tryLoad;
+                }
+
+                Delete();
+
+                if (toLoad == null)
+                {
+                    toDelete = Image;
+
+                    Image = Layout.Current.GetImage("SingleWhitePixel");
+                }
+                else
+                {
+                    UIImage loadImage = null;
+
+                    try
+                    {
+                        Delete();
+
+                        using (Stream inputStream = File.OpenRead(toLoad))
+                        {
+                            loadImage = new UIImage(inputStream);
+
+                            toDelete = Image;
+
+                            Image = loadImage;
+                        }
+                    }
+                    catch
+                    {
+                        toDelete = Image;
+
+                        Image = Layout.Current.GetImage("SingleWhitePixel");
+                    }
+                }
             }
         }
     }

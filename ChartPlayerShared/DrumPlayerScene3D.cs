@@ -13,7 +13,7 @@ namespace ChartPlayer
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
 
         int numLanes = 5;
-        float targetCameraDistance = 64;
+        float targetCameraDistance = 75;
         float cameraDistance = 70;
         float positionLane;
         float?[] notesDetected;
@@ -34,6 +34,8 @@ namespace ChartPlayer
             notesDetected = new float?[player.SongDrumNotes.Notes.Count];
 
             CurrentTimeOffset = 0.15f;
+
+            NoteDisplayDistance = 400;
         }
 
         public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
@@ -145,8 +147,6 @@ namespace ChartPlayer
             {
                 currentTime = (float)player.CurrentSecond;
 
-                targetCameraDistance = 75;
-
                 float targetPositionKey = (float)numLanes / 2;
 
                 positionLane = MathUtil.Lerp(positionLane, targetPositionKey, 0.01f);
@@ -156,7 +156,7 @@ namespace ChartPlayer
                 float frontPosition = -(float)((currentTime - CurrentTimeOffset) * timeScale);
 
                 Camera.Position = new Vector3(GetLanePosition(positionLane), 70, frontPosition + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplaySeconds * timeScale) * .3f));
+                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplayDistance * .4f)));
             }
         }
 
@@ -165,8 +165,8 @@ namespace ChartPlayer
             base.DrawQuads();
 
             FogEnabled = true;
-            FogStart = 400;
-            FogEnd = cameraDistance + (NoteDisplaySeconds * timeScale);
+            FogStart = cameraDistance + (NoteDisplayDistance * .6f);
+            FogEnd = cameraDistance + NoteDisplayDistance;
             FogColor = UIColor.Black;
 
             try
