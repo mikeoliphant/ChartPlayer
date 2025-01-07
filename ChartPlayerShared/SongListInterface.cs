@@ -10,7 +10,7 @@ using System.Collections.Concurrent;
 
 namespace ChartPlayer
 {
-    public class SongListDisplay : HorizontalStack, IPopup
+    public class SongListDisplay : HorizontalStack, IPopup, IMidiHandler
     {
         public Action CloseAction { get; set; }
         public ESongInstrumentType CurrentInstrument { get; private set; } = ESongInstrumentType.LeadGuitar;
@@ -208,8 +208,40 @@ namespace ChartPlayer
             CloseAction = Close;
         }
 
+        IMidiHandler midiHandlerBak = null;
+
         public virtual void Opened()
         {
+            midiHandlerBak = ChartPlayerGame.Instance.Plugin.MidiHandler;
+
+            ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+        }
+
+        public void Close()
+        {
+            ChartPlayerGame.Instance.Plugin.MidiHandler = midiHandlerBak;
+
+            Layout.Current.ClosePopup(this);
+        }
+
+        public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandleNoteOn(channel, noteNumber, velocity, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                DrumUIMapping.AddHit(hit.Value.Voice);
+            }
+        }
+
+        public void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                DrumUIMapping.AddHit(hit.Value.Voice);
+            }
         }
 
         public override bool HandleTouch(in Touch touch)
@@ -570,10 +602,6 @@ namespace ChartPlayer
             Layout.Current.ShowPopup(new Menu(items), tagStack.ContentBounds.Center);
         }
 
-        public void Close()
-        {
-            Layout.Current.ClosePopup(this);
-        }
 
         DateTime currentDate = DateTime.Now;
 
@@ -595,6 +623,13 @@ namespace ChartPlayer
             }
 
             return days + "d";
+        }
+
+        protected override void DrawContents()
+        {
+            base.DrawContents();
+
+            DrumUIMapping.ClearHits();
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 using UILayout;
+using SongFormat;
 
 namespace ChartPlayer
 {
@@ -57,6 +57,9 @@ namespace ChartPlayer
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.LeftShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.RightShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.Multiply));
+
+            InputManager.AddMapping("PreviousPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead)));
+            InputManager.AddMapping("NextPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead)));
 
 
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
