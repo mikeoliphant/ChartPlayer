@@ -95,8 +95,11 @@ namespace ChartPlayer
             {
                 try
                 {
-                    DrumMidiDeviceConfiguration.CurrentMap = DrumMidiDeviceConfiguration.LoadFromXml(
+                    var map = DrumMidiDeviceConfiguration.LoadFromXml(
                         Path.Combine(MidiEditor.ConfigPath, "MidiMaps", ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumMidiMapName + ".xml"));
+
+                    if (map != null)
+                        DrumMidiDeviceConfiguration.CurrentMap = map;
                 }
                 catch { }
             }

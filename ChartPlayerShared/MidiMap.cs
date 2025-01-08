@@ -437,25 +437,19 @@ namespace ChartPlayer
         {
             DrumMidiDeviceConfiguration drumMidiConfiguration = null;
 
-            try
+            XmlSerializer serializer = new XmlSerializer(typeof(DrumMidiDeviceConfiguration));
+
+            using (Stream inputStream = File.OpenRead(path))
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(DrumMidiDeviceConfiguration));
-
-                using (Stream inputStream = File.OpenRead(path))
-                {
-                    drumMidiConfiguration = serializer.Deserialize(inputStream) as DrumMidiDeviceConfiguration;
-                }
-
-                foreach (DrumMidiMapEntry entry in drumMidiConfiguration.MidiMapEntrys)
-                {
-                    drumMidiConfiguration.midiMap[entry.MidiNote] = entry.DrumVoice;
-                }
-
-                drumMidiConfiguration.Name = Path.GetFileNameWithoutExtension(path);
+                drumMidiConfiguration = serializer.Deserialize(inputStream) as DrumMidiDeviceConfiguration;
             }
-            catch (Exception ex)
+
+            foreach (DrumMidiMapEntry entry in drumMidiConfiguration.MidiMapEntrys)
             {
+                drumMidiConfiguration.midiMap[entry.MidiNote] = entry.DrumVoice;
             }
+
+            drumMidiConfiguration.Name = Path.GetFileNameWithoutExtension(path);
 
             return drumMidiConfiguration;
         }
