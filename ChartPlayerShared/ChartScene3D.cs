@@ -66,6 +66,9 @@ namespace ChartPlayer
         {
             startNotePosition = MathUtil.Clamp(startNotePosition, 0, notes.Count - 1);
 
+            if (startNotePosition < 0)
+                startNotePosition = 0;
+
             // Move backward until we find a note that is not visible (or we hit the start)
             while (startNotePosition > 0)
             {
