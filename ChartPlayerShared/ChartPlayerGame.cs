@@ -61,6 +61,8 @@ namespace ChartPlayer
             InputManager.AddMapping("PreviousPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead)));
             InputManager.AddMapping("NextPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead)));
 
+            InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.LeftAlt });
+            InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.RightAlt });
 
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
@@ -78,6 +80,16 @@ namespace ChartPlayer
             }
 
             base.Draw();
+        }
+
+        public override void Update(float secondsElapsed)
+        {
+            base.Update(secondsElapsed);
+
+            if (InputManager.WasClicked("ToggleFullscreen", this))
+            {
+                Plugin.ToggleFullScreen();
+            }
         }
 
         public override void Exiting()
