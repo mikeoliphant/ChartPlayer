@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text.Json;
 using System.Threading;
 using NVorbis;
@@ -28,6 +29,9 @@ namespace ChartPlayer
         public bool Paused { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
+        public float LoopStartSecond { get; set; } = 0;
+        public float LoopEndSecond { get; set; } = 0;
+
 
         VorbisMixer vorbisReader;
         WdlResampler resampler;
@@ -200,6 +204,17 @@ namespace ChartPlayer
         {
             seekTime = secs;
             CurrentSecond = seekTime;
+        }
+
+        public void ToggleLoop()
+        {
+            if (LoopEndSecond != 0 && LoopStartSecond != 0)
+            {
+                if (CurrentSecond > LoopEndSecond)
+                {
+                    SeekTime(LoopStartSecond);
+                }
+            }
         }
 
         public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)

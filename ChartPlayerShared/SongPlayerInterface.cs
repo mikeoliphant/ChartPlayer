@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using System.Xml.Linq;
 using System.Data.SqlTypes;
+using System.Media;
 
 namespace ChartPlayer
 {
@@ -617,6 +618,37 @@ namespace ChartPlayer
 #endif
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+
+            if (inputManager.WasPressed("LoopStart"))
+            {
+                if (songPlayer.LoopStartSecond == 0)
+                {  
+                   if (songPlayer.LoopEndSecond > 0 && songPlayer.CurrentSecond >= songPlayer.LoopEndSecond)
+                    {
+                        songPlayer.LoopStartSecond = 0;
+                    } 
+                   else
+                    {
+                        songPlayer.LoopStartSecond = songPlayer.CurrentSecond;
+                    }                                                   
+                }                
+                else
+                {
+                    songPlayer.LoopStartSecond = 0;
+                }
+
+            }
+            if (inputManager.WasPressed("LoopEnd"))
+            {
+                if (songPlayer.LoopEndSecond == 0)
+                {
+                    songPlayer.LoopEndSecond = songPlayer.CurrentSecond;
+                }
+                else
+                {
+                    songPlayer.LoopEndSecond = 0;
+                }
+            }
         }
 
         public void TogglePaused()
@@ -667,7 +699,7 @@ namespace ChartPlayer
             {
                 fretScene.ResetScore();
             }
-        }
+        }     
 
         protected override void DrawContents()
         {
@@ -690,6 +722,8 @@ namespace ChartPlayer
                 }
 
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
+
+                songPlayer.ToggleLoop();
             }
 
             ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
@@ -749,6 +783,8 @@ namespace ChartPlayer
                     bpmInterface.UpdateContentLayout();
                 }
             }
+
+            
 
             base.DrawContents();
         }
@@ -895,6 +931,7 @@ namespace ChartPlayer
             {
                 SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond - 0.2f);
             }
+            
         }
 
         protected override void DrawContents()
@@ -908,6 +945,12 @@ namespace ChartPlayer
 
             UIColor lineColor = UIColor.White;
             lineColor.A = 128;
+
+            UIColor loopStartColor = UIColor.Green;
+            loopStartColor.A = 128;
+            UIColor loopEndColor = UIColor.Red;
+            loopStartColor.A = 128;
+
 
             float currentTime = songPlayer.CurrentSecond;
 
@@ -935,8 +978,20 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
+            int loopStartPixel = (int)(((float)songPlayer.LoopStartSecond / endTime) * ContentBounds.Width);
+            int loopEndPixel = (int)(((float)songPlayer.LoopEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
+
+            if (songPlayer.LoopStartSecond > 0)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopStartColor);
+            }
+            if (songPlayer.LoopEndSecond > 0)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopEndColor);
+            }
+          
         }
     }
 }
