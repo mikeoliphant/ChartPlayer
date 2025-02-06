@@ -57,8 +57,8 @@ namespace ChartPlayer
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.LeftShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.RightShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.Multiply));
-            InputManager.AddMapping("LoopStart", new KeyMapping(InputKey.OemOpenBrackets));
-            InputManager.AddMapping("LoopEnd", new KeyMapping(InputKey.OemCloseBrackets));
+            InputManager.AddMapping("LoopMarkerStart", new KeyMapping(InputKey.OemOpenBrackets));
+            InputManager.AddMapping("LoopMarkerEnd", new KeyMapping(InputKey.OemCloseBrackets));
 
             InputManager.AddMapping("PreviousPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead)));
             InputManager.AddMapping("NextPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead)));

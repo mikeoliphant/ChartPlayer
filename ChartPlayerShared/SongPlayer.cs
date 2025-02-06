@@ -29,8 +29,8 @@ namespace ChartPlayer
         public bool Paused { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
-        public float LoopStartSecond { get; set; } = 0;
-        public float LoopEndSecond { get; set; } = 0;
+        public float LoopMarkerStartSecond { get; set; } = 0;
+        public float LoopMarkerEndSecond { get; set; } = 0;
 
 
         VorbisMixer vorbisReader;
@@ -206,15 +206,16 @@ namespace ChartPlayer
             CurrentSecond = seekTime;
         }
 
-        public void ToggleLoop()
+        public float GetLoopMarkerStartSecond()
         {
-            if (LoopEndSecond != 0 && LoopStartSecond != 0)
+            if (LoopMarkerEndSecond != 0 && LoopMarkerStartSecond != 0)
             {
-                if (CurrentSecond > LoopEndSecond)
+                if (CurrentSecond > LoopMarkerEndSecond)
                 {
-                    SeekTime(LoopStartSecond);
+                    return LoopMarkerStartSecond;
                 }
             }
+            return 0;
         }
 
         public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)

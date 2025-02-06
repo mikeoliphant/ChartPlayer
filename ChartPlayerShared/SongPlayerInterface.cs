@@ -619,34 +619,34 @@ namespace ChartPlayer
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
 
-            if (inputManager.WasPressed("LoopStart"))
+            if (inputManager.WasPressed("LoopMarkerStart"))
             {
-                if (songPlayer.LoopStartSecond == 0)
+                if (songPlayer.LoopMarkerStartSecond == 0)
                 {  
-                   if (songPlayer.LoopEndSecond > 0 && songPlayer.CurrentSecond >= songPlayer.LoopEndSecond)
+                   if (songPlayer.LoopMarkerEndSecond > 0 && songPlayer.CurrentSecond >= songPlayer.LoopMarkerEndSecond)
                     {
-                        songPlayer.LoopStartSecond = 0;
+                        songPlayer.LoopMarkerStartSecond = 0;
                     } 
                    else
                     {
-                        songPlayer.LoopStartSecond = songPlayer.CurrentSecond;
+                        songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;
                     }                                                   
                 }                
                 else
                 {
-                    songPlayer.LoopStartSecond = 0;
+                    songPlayer.LoopMarkerStartSecond = 0;
                 }
 
             }
-            if (inputManager.WasPressed("LoopEnd"))
+            if (inputManager.WasPressed("LoopMarkerEnd"))
             {
-                if (songPlayer.LoopEndSecond == 0)
+                if (songPlayer.LoopMarkerEndSecond == 0)
                 {
-                    songPlayer.LoopEndSecond = songPlayer.CurrentSecond;
+                    songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
                 }
                 else
                 {
-                    songPlayer.LoopEndSecond = 0;
+                    songPlayer.LoopMarkerEndSecond = 0;
                 }
             }
         }
@@ -699,7 +699,17 @@ namespace ChartPlayer
             {
                 fretScene.ResetScore();
             }
-        }     
+        }
+
+        public void CheckLoopMarkers()
+        {
+            float loopMarkerStartSecond = songPlayer.GetLoopMarkerStartSecond();
+            if (loopMarkerStartSecond > 0)
+            {
+                SeekTime(loopMarkerStartSecond);
+            }
+        }
+
 
         protected override void DrawContents()
         {
@@ -723,7 +733,7 @@ namespace ChartPlayer
 
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
 
-                songPlayer.ToggleLoop();
+                CheckLoopMarkers();
             }
 
             ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
@@ -978,16 +988,16 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
-            int loopStartPixel = (int)(((float)songPlayer.LoopStartSecond / endTime) * ContentBounds.Width);
-            int loopEndPixel = (int)(((float)songPlayer.LoopEndSecond / endTime) * ContentBounds.Width);
+            int loopStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
+            int loopEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
 
-            if (songPlayer.LoopStartSecond > 0)
+            if (songPlayer.LoopMarkerStartSecond > 0)
             {
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopStartColor);
             }
-            if (songPlayer.LoopEndSecond > 0)
+            if (songPlayer.LoopMarkerEndSecond > 0)
             {
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopEndColor);
             }
