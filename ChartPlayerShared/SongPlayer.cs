@@ -29,10 +29,7 @@ namespace ChartPlayer
         public bool Paused { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
-        public float LoopMarkerStartSecond { get; set; } = 0;
-        public float LoopMarkerEndSecond { get; set; } = 0;
-
-
+      
         VorbisMixer vorbisReader;
         WdlResampler resampler;
         float seekTime = -1;
@@ -43,6 +40,8 @@ namespace ChartPlayer
         RubberBandStretcherStereo stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
+        float loopMarkerStartSecond = -1;
+        float loopMarkerEndSecond = -1;
 
         public SongPlayer()
         {
@@ -206,16 +205,49 @@ namespace ChartPlayer
             CurrentSecond = seekTime;
         }
 
-        public float GetLoopMarkerStartSecond()
+        public float LoopMarkerStartSecond
         {
-            if (LoopMarkerEndSecond != 0 && LoopMarkerStartSecond != 0)
+            get
             {
-                if (CurrentSecond > LoopMarkerEndSecond)
+                return loopMarkerStartSecond;                             
+            }
+            set
+            {
+                if (loopMarkerStartSecond == -1)
                 {
-                    return LoopMarkerStartSecond;
+                    if (loopMarkerEndSecond != -1 && value >= loopMarkerEndSecond)
+                    {
+                        loopMarkerStartSecond = -1;
+                    }
+                    else
+                    {
+                        loopMarkerStartSecond = value;
+                    }
+                }
+                else
+                {
+                    loopMarkerStartSecond = -1;
+                }               
+            }
+        }
+
+        public float LoopMarkerEndSecond
+        {
+            get
+            {
+                return loopMarkerEndSecond;
+            }
+            set
+            {
+                if (loopMarkerEndSecond == -1)
+                {
+                    loopMarkerEndSecond = value;
+                }
+                else
+                {
+                    loopMarkerEndSecond = -1;
                 }
             }
-            return 0;
         }
 
         public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)

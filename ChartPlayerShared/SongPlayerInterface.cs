@@ -184,7 +184,7 @@ namespace ChartPlayer
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
-                        "Left/Right arrows to move forward/back.")));
+                        "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
                 }
             };
             bottomButtonStack.Children.Add(helpButton);
@@ -621,33 +621,12 @@ namespace ChartPlayer
 
             if (inputManager.WasPressed("LoopMarkerStart"))
             {
-                if (songPlayer.LoopMarkerStartSecond == 0)
-                {  
-                   if (songPlayer.LoopMarkerEndSecond > 0 && songPlayer.CurrentSecond >= songPlayer.LoopMarkerEndSecond)
-                    {
-                        songPlayer.LoopMarkerStartSecond = 0;
-                    } 
-                   else
-                    {
-                        songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;
-                    }                                                   
-                }                
-                else
-                {
-                    songPlayer.LoopMarkerStartSecond = 0;
-                }
+                songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;               
 
             }
             if (inputManager.WasPressed("LoopMarkerEnd"))
             {
-                if (songPlayer.LoopMarkerEndSecond == 0)
-                {
-                    songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
-                }
-                else
-                {
-                    songPlayer.LoopMarkerEndSecond = 0;
-                }
+                songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
             }
         }
 
@@ -701,15 +680,16 @@ namespace ChartPlayer
             }
         }
 
-        public void CheckLoopMarkers()
+        public void CheckLoopMarkers()       
         {
-            float loopMarkerStartSecond = songPlayer.GetLoopMarkerStartSecond();
-            if (loopMarkerStartSecond > 0)
+            if (songPlayer.LoopMarkerStartSecond != -1 && songPlayer.LoopMarkerEndSecond != -1)
             {
-                SeekTime(loopMarkerStartSecond);
-            }
+                if (songPlayer.CurrentSecond > songPlayer.LoopMarkerEndSecond)
+                {
+                    SeekTime(songPlayer.LoopMarkerStartSecond);
+                }
+            }           
         }
-
 
         protected override void DrawContents()
         {
@@ -956,11 +936,10 @@ namespace ChartPlayer
             UIColor lineColor = UIColor.White;
             lineColor.A = 128;
 
-            UIColor loopStartColor = UIColor.Green;
-            loopStartColor.A = 128;
-            UIColor loopEndColor = UIColor.Red;
-            loopStartColor.A = 128;
-
+            UIColor loopMarkerStartColor = UIColor.Green;
+            loopMarkerStartColor.A = 128;
+            UIColor loopMarkerEndColor = UIColor.Red;
+            loopMarkerStartColor.A = 128;
 
             float currentTime = songPlayer.CurrentSecond;
 
@@ -988,18 +967,18 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
-            int loopStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
-            int loopEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
+            int loopMarkerStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
+            int loopMarkerEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
 
-            if (songPlayer.LoopMarkerStartSecond > 0)
+            if (songPlayer.LoopMarkerStartSecond != -1)
             {
-                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopStartColor);
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerStartColor);
             }
-            if (songPlayer.LoopMarkerEndSecond > 0)
+            if (songPlayer.LoopMarkerEndSecond != -1)
             {
-                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopEndColor);
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerEndColor);
             }
           
         }
