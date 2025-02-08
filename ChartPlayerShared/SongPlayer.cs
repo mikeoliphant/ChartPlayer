@@ -127,25 +127,28 @@ namespace ChartPlayer
                 SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SerializationUtil.CondensedSerializerOptions);
             }
 
-            if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
-                TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
-
-            TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
-
-            TuningOffsetSemitones %= 12;
-
-            if (TuningOffsetSemitones > 6)
+            if (part.InstrumentType != ESongInstrumentType.Drums)
             {
-                TuningOffsetSemitones = 12 - TuningOffsetSemitones;
-            }
-            else if (TuningOffsetSemitones < -6)
-            {
-                TuningOffsetSemitones += 12;
-            }
+                if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
+                    TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
 
-            if (SongTuningMode > ESongTuningMode.EStandard)
-            {
-                TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
+                TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
+
+                TuningOffsetSemitones %= 12;
+
+                if (TuningOffsetSemitones > 6)
+                {
+                    TuningOffsetSemitones = 12 - TuningOffsetSemitones;
+                }
+                else if (TuningOffsetSemitones < -6)
+                {
+                    TuningOffsetSemitones += 12;
+                }
+
+                if (SongTuningMode > ESongTuningMode.EStandard)
+                {
+                    TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
+                }
             }
 
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).Where(p => p.ArrangementName == part.ArrangementName).FirstOrDefault();
