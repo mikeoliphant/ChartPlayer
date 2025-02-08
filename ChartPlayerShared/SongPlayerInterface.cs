@@ -618,7 +618,6 @@ namespace ChartPlayer
 #endif
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
-
             if (inputManager.WasPressed("LoopMarkerStart"))
             {
                 songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;               
@@ -772,9 +771,7 @@ namespace ChartPlayer
 
                     bpmInterface.UpdateContentLayout();
                 }
-            }
-
-            
+            }                      
 
             base.DrawContents();
         }
@@ -940,7 +937,6 @@ namespace ChartPlayer
             loopMarkerStartColor.A = 128;
             UIColor loopMarkerEndColor = UIColor.Red;
             loopMarkerStartColor.A = 128;
-
             float currentTime = songPlayer.CurrentSecond;
 
             for (int i = 0; i < sections.Count; i++)
