@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 using System.Xml.Linq;
 using System.Data.SqlTypes;
+using System.Media;
 
 namespace ChartPlayer
 {
@@ -183,7 +184,7 @@ namespace ChartPlayer
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
-                        "Left/Right arrows to move forward/back.")));
+                        "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
                 }
             };
             bottomButtonStack.Children.Add(helpButton);
@@ -617,6 +618,15 @@ namespace ChartPlayer
 #endif
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+            if (inputManager.WasPressed("LoopMarkerStart"))
+            {
+                songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;               
+
+            }
+            if (inputManager.WasPressed("LoopMarkerEnd"))
+            {
+                songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
+            }
         }
 
         public void TogglePaused()
@@ -669,6 +679,17 @@ namespace ChartPlayer
             }
         }
 
+        public void CheckLoopMarkers()       
+        {
+            if (songPlayer.LoopMarkerStartSecond != -1 && songPlayer.LoopMarkerEndSecond != -1)
+            {
+                if (songPlayer.CurrentSecond > songPlayer.LoopMarkerEndSecond)
+                {
+                    SeekTime(songPlayer.LoopMarkerStartSecond);
+                }
+            }           
+        }
+
         protected override void DrawContents()
         {
             if (songPlayer != null)
@@ -690,6 +711,8 @@ namespace ChartPlayer
                 }
 
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
+
+                CheckLoopMarkers();
             }
 
             ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
@@ -748,7 +771,7 @@ namespace ChartPlayer
 
                     bpmInterface.UpdateContentLayout();
                 }
-            }
+            }                      
 
             base.DrawContents();
         }
@@ -895,6 +918,7 @@ namespace ChartPlayer
             {
                 SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond - 0.2f);
             }
+            
         }
 
         protected override void DrawContents()
@@ -909,6 +933,10 @@ namespace ChartPlayer
             UIColor lineColor = UIColor.White;
             lineColor.A = 128;
 
+            UIColor loopMarkerStartColor = UIColor.Green;
+            loopMarkerStartColor.A = 128;
+            UIColor loopMarkerEndColor = UIColor.Red;
+            loopMarkerStartColor.A = 128;
             float currentTime = songPlayer.CurrentSecond;
 
             for (int i = 0; i < sections.Count; i++)
@@ -935,8 +963,20 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
+            int loopMarkerStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
+            int loopMarkerEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
+
+            if (songPlayer.LoopMarkerStartSecond != -1)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerStartColor);
+            }
+            if (songPlayer.LoopMarkerEndSecond != -1)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerEndColor);
+            }
+          
         }
     }
 }
