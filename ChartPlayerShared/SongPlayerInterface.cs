@@ -671,7 +671,7 @@ namespace ChartPlayer
         {
             songPlayer.SeekTime(secs);
 
-            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+            ChartScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
 
             if (fretScene != null)
             {
