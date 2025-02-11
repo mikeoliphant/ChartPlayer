@@ -42,6 +42,9 @@ namespace ChartPlayer
         int lastTotalNotes = -1;
         int lastDetectedNotes = -1;
 
+        bool needSeek = false;
+        float seekSecs = 0;
+
         StringBuilderTextBlock playTimeText;
 
         int currentMinute = 0;
@@ -669,6 +672,12 @@ namespace ChartPlayer
 
         public void SeekTime(float secs)
         {
+            seekSecs = secs;
+            needSeek = true;
+        }
+
+        void DoSeekTime(float secs)
+        {
             songPlayer.SeekTime(secs);
 
             ChartScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
@@ -694,6 +703,13 @@ namespace ChartPlayer
         {
             if (songPlayer != null)
             {
+                if (needSeek)
+                {
+                    DoSeekTime(seekSecs);
+
+                    needSeek = false;
+                }
+
                 float newSecondFloat = songPlayer.CurrentSecond;
 
                 int newMinute = (int)(newSecondFloat / 60);
