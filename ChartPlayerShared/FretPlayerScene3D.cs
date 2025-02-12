@@ -239,17 +239,20 @@ namespace ChartPlayer
             noteDetectThread.Join();
         }
 
-        public override void ResetScore()
+        public override void ResetScore(float scoreStartSecs)
         {
             Array.Clear(notesDetected);
 
-            base.ResetScore();
+            base.ResetScore(scoreStartSecs);
         }
 
         public override void Draw()
         {
             base.Draw();
+        }
 
+        public override void UpdateCamera()
+        {
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 fretCamera.Update(minFret, maxFret, targetFocusFret, -(float)(currentTime * timeScale));
@@ -400,7 +403,7 @@ namespace ChartPlayer
 
                             isDetected = false;
 
-                            if (note.TimeOffset <= currentTime)
+                            if ((note.TimeOffset <= currentTime) && (note.TimeOffset > scoreStartSecs))
                             {
                                 isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : currentStringDetected[note.String];
 

@@ -132,21 +132,17 @@ namespace ChartPlayer
             return (eventType == hitType);
         }
 
-        public override void ResetScore()
+        public override void ResetScore(float scoreStartSecs)
         {
             Array.Clear(notesDetected);
 
-            base.ResetScore();
+            base.ResetScore(scoreStartSecs);
         }
 
-        public override void Draw()
+        public override void UpdateCamera()
         {
-            base.Draw();
-
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
-                currentTime = (float)player.CurrentSecond;
-
                 float targetPositionKey = (float)numLanes / 2;
 
                 positionLane = MathUtil.Lerp(positionLane, targetPositionKey, 0.01f);
@@ -194,9 +190,12 @@ namespace ChartPlayer
                         if (notesDetected[pos] != null)
                             continue;
 
-                        notesDetected[pos] = float.MaxValue;
+                        if (note.TimeOffset > scoreStartSecs)
+                        {
+                            notesDetected[pos] = float.MaxValue;
 
-                        NumNotesTotal++;
+                            NumNotesTotal++;
+                        }
                     }
 
                     int lastNote = GetEndNote<SongDrumNote>(startNotePosition, endTime, allNotes);

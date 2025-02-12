@@ -25,10 +25,8 @@ namespace ChartPlayer
             positionKey = ((float)maxKey + (float)minKey) / 2;
         }
 
-        public override void Draw()
+        public override void UpdateCamera()
         {
-            base.Draw();
-
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 int keyDist = maxKey - minKey;

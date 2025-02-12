@@ -684,7 +684,7 @@ namespace ChartPlayer
 
             if (fretScene != null)
             {
-                fretScene.ResetScore();
+                fretScene.ResetScore(secs);
             }
         }
 

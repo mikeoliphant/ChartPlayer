@@ -43,6 +43,7 @@ namespace ChartPlayer
         protected UIColor whiteHalfAlpha;
         protected UIColor whiteThreeQuartersAlpha;
         protected bool lefyMode = false;
+        protected float scoreStartSecs = 0;
         int startBeatPosition = 0;
 
         public ChartScene3D(SongPlayer player)
@@ -54,10 +55,14 @@ namespace ChartPlayer
 
             whiteThreeQuartersAlpha = UIColor.White;
             whiteThreeQuartersAlpha.A = 192;
+
+            scoreStartSecs = 0;
         }
 
-        public virtual void ResetScore()
+        public virtual void ResetScore(float scoreStartSecs)
         {
+            this.scoreStartSecs = scoreStartSecs;
+
             NumNotesDetected = 0;
             NumNotesTotal = 0;
         }
@@ -118,14 +123,20 @@ namespace ChartPlayer
 
         public override void Draw()
         {
-            base.Draw();
-
             timeScale = NoteDisplayDistance / NoteDisplaySeconds;
 
             currentTime = (float)player.CurrentSecond;
 
             startTime = currentTime;
             endTime = currentTime + NoteDisplaySeconds;
+
+            UpdateCamera();
+
+            base.Draw();
+        }
+
+        public virtual void UpdateCamera()
+        {
         }
 
         public override void DrawQuads()
