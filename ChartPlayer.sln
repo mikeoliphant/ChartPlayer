@@ -172,18 +172,18 @@ Global
 		SolutionGuid = {AD240CF6-8533-4CAC-BEB9-3C93FFD34FF7}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Dependencies\UILayout\UILayout.CrossPlatform\UILayout.CrossPlatform.projitems*{0a1d37db-eaf4-43b0-a13a-a55dd97397d1}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{0a1d37db-eaf4-43b0-a13a-a55dd97397d1}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{0a1d37db-eaf4-43b0-a13a-a55dd97397d1}*SharedItemsImports = 5
 		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{595d9376-81d5-4163-9045-bd1d72a45b16}*SharedItemsImports = 13
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
+		Dependencies\UILayout\UILayout.WindowsNative\UILayout.WindowsNative.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{5c17386c-1bb3-4f61-860d-1987a1fcf984}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{7da2b397-a39f-4e5b-96ed-f206329982c9}*SharedItemsImports = 13
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout\UILayout.projitems*{cbe11591-e599-4978-86ed-f2423f17bfb7}*SharedItemsImports = 5
 		ChartPlayerShared\ChartPlayerShared.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		Dependencies\OpenSongChart\SongFormat\SongFormat.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
-		Dependencies\UILayout\UILayout\UILayout.projitems*{d2d7b37a-fa58-4292-b4de-2f24eff36b60}*SharedItemsImports = 5
 		Dependencies\UILayout\UILayout.MonoGame\UILayout.MonoGame.projitems*{d7307594-237f-43da-bd6b-d0bc2bd9b276}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{e89d1bac-28e4-434d-857a-3be1d35e279c}*SharedItemsImports = 13
 		ChartPlayerShared\ChartPlayerShared.projitems*{f80b24e8-b74b-476a-9652-40a0e64fbeee}*SharedItemsImports = 5

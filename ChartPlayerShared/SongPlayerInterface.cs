@@ -8,6 +8,9 @@ using UILayout;
 using SongFormat;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using System.Xml.Linq;
+using System.Data.SqlTypes;
+using System.Media;
 
 namespace ChartPlayer
 {
@@ -20,6 +23,7 @@ namespace ChartPlayer
 
         SongPlayer songPlayer;
         SongSectionInterface sectionInterface;
+        SongPlayerSettingsInterface settingsInterface;
 
         SongData songData;
         VocalDisplay vocalText;
@@ -37,6 +41,9 @@ namespace ChartPlayer
         StringBuilderTextBlock scoreText;
         int lastTotalNotes = -1;
         int lastDetectedNotes = -1;
+
+        bool needSeek = false;
+        float seekSecs = 0;
 
         StringBuilderTextBlock playTimeText;
 
@@ -88,6 +95,21 @@ namespace ChartPlayer
 
             ChartPlayerGame.Instance.Scale = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.UIScale;
 
+            if (!string.IsNullOrEmpty(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumMidiMapName))
+            {
+                try
+                {
+                    var map = DrumMidiDeviceConfiguration.LoadFromXml(
+                        Path.Combine(MidiEditor.ConfigPath, "MidiMaps", ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumMidiMapName + ".xml"));
+
+                    if (map != null)
+                        DrumMidiDeviceConfiguration.CurrentMap = map;
+                }
+                catch { }
+            }
+
+            settingsInterface = new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings };
+
             songBasePath = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongPath;
 
             songIndex = new SongIndex(songBasePath, forceRescan: false);
@@ -124,6 +146,7 @@ namespace ChartPlayer
 
             HorizontalStack bottomButtonStack = new HorizontalStack()
             {
+                BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
                 Padding = new LayoutPadding(5),
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
@@ -138,13 +161,6 @@ namespace ChartPlayer
             };
             bottomButtonStack.Children.Add(songsButton);
 
-            TextButton drumMidiButton = new TextButton("DrumKit")
-            {
-                VerticalAlignment = EVerticalAlignment.Stretch,
-                ClickAction = ShowDrumMidiConfig
-            };
-            bottomButtonStack.Children.Add(drumMidiButton);
-
             TextButton optionsButton = new TextButton("Options")
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
@@ -152,7 +168,13 @@ namespace ChartPlayer
                 {
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
-                    Layout.Current.ShowPopup(new SongPlayerSettingsInterface(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings) { ApplyAction = ApplySettings });
+                    if (songPlayer != null)
+                    {
+                        if (!songPlayer.Paused)
+                            TogglePaused();
+                    }
+
+                    Layout.Current.ShowPopup(settingsInterface);
                 }
             };
             bottomButtonStack.Children.Add(optionsButton);
@@ -165,7 +187,7 @@ namespace ChartPlayer
                     ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
-                        "Left/Right arrows to move forward/back.")));
+                        "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
                 }
             };
             bottomButtonStack.Children.Add(helpButton);
@@ -326,20 +348,6 @@ namespace ChartPlayer
             Layout.Current.ShowPopup(songList);
         }
 
-        void ShowDrumMidiConfig()
-        {
-            if (songPlayer != null)
-            {
-                if (!songPlayer.Paused)
-                   TogglePaused();
-            }
-
-
-            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
-
-            Layout.Current.ShowPopup(new MidiEditor());
-        }
-
         void ToggleNotes()
         {
             if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
@@ -476,11 +484,19 @@ namespace ChartPlayer
                 vocalText.SongPlayer = songPlayer;
                 if (part.InstrumentType == ESongInstrumentType.Drums)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer);
+                    ChartPlayerGame.Instance.Scene3D = new DrumPlayerScene3D(songPlayer)
+                    {
+                        LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumsNoteDisplaySeconds
+                    };
                 }
                 else if (part.InstrumentType == ESongInstrumentType.Keys)
                 {
-                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer);
+                    ChartPlayerGame.Instance.Scene3D = new KeysPlayerScene3D(songPlayer)
+                    {
+                        LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.KeysNoteDisplaySeconds
+                    };
                 }
                 else
                 {
@@ -598,6 +614,15 @@ namespace ChartPlayer
 #endif
 
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
+            if (inputManager.WasPressed("LoopMarkerStart"))
+            {
+                songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;               
+
+            }
+            if (inputManager.WasPressed("LoopMarkerEnd"))
+            {
+                songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
+            }
         }
 
         public void TogglePaused()
@@ -620,7 +645,8 @@ namespace ChartPlayer
             if ((ChartPlayerGame.Instance.Scene3D as ChartScene3D) != null)
             {
                 (ChartPlayerGame.Instance.Scene3D as ChartScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
-                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = settings.NoteDisplaySeconds;
+
+                (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = (ChartPlayerGame.Instance.Scene3D is FretPlayerScene3D) ? settings.NoteDisplaySeconds : settings.DrumsNoteDisplaySeconds;
             }
 
             // Check if song path changed
@@ -639,20 +665,44 @@ namespace ChartPlayer
 
         public void SeekTime(float secs)
         {
+            seekSecs = secs;
+            needSeek = true;
+        }
+
+        void DoSeekTime(float secs)
+        {
             songPlayer.SeekTime(secs);
 
-            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+            ChartScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
 
             if (fretScene != null)
             {
-                fretScene.ResetScore();
+                fretScene.ResetScore(secs);
             }
+        }
+
+        public void CheckLoopMarkers()       
+        {
+            if (songPlayer.LoopMarkerStartSecond != -1 && songPlayer.LoopMarkerEndSecond != -1)
+            {
+                if (songPlayer.CurrentSecond > songPlayer.LoopMarkerEndSecond)
+                {
+                    SeekTime(songPlayer.LoopMarkerStartSecond);
+                }
+            }           
         }
 
         protected override void DrawContents()
         {
             if (songPlayer != null)
             {
+                if (needSeek)
+                {
+                    DoSeekTime(seekSecs);
+
+                    needSeek = false;
+                }
+
                 float newSecondFloat = songPlayer.CurrentSecond;
 
                 int newMinute = (int)(newSecondFloat / 60);
@@ -670,14 +720,16 @@ namespace ChartPlayer
                 }
 
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
+
+                CheckLoopMarkers();
             }
 
-            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+            ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);
 
-            if (fretScene != null)
+            if (chartScene != null)
             {
-                int totalNotes = fretScene.NumNotesTotal;
-                int detectedNotes = fretScene.NumNotesDetected;
+                int totalNotes = chartScene.NumNotesTotal;
+                int detectedNotes = chartScene.NumNotesDetected;
 
                 if ((totalNotes != lastTotalNotes) || (detectedNotes != lastDetectedNotes))
                 {
@@ -709,7 +761,7 @@ namespace ChartPlayer
                     scoreTextWrapper.UpdateContentLayout();
                 }
 
-                float bpm = fretScene.CurrentBPM * songPlayer.PlaybackSpeed;
+                float bpm = chartScene.CurrentBPM * songPlayer.PlaybackSpeed;
 
                 bpm = ((int)(bpm * 10)) / 10.0f;
 
@@ -728,7 +780,7 @@ namespace ChartPlayer
 
                     bpmInterface.UpdateContentLayout();
                 }
-            }
+            }                      
 
             base.DrawContents();
         }
@@ -740,6 +792,7 @@ namespace ChartPlayer
         List<float> sectionDensity = new List<float>();
         float maxDensity;
         float endTime;
+        List<SongSection> sections;
 
         public SongSectionInterface()
         {
@@ -751,31 +804,35 @@ namespace ChartPlayer
 
             sectionDensity.Clear();
 
-            if (songPlayer.SongInstrumentNotes.Sections.Count == 0)
+            sections = songPlayer.SongInstrumentNotes.Sections;
+
+            if (sections.Count == 0)
+            {
+                sections = songPlayer.SongStructure.Sections;
+            }
+
+            if (sections.Count == 0)
                 return;
 
-            foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+            foreach (SongSection section in sections)
             {
-                SongNote? lastNote = null;
                 int density = 0;
 
-                foreach (SongNote note in songPlayer.SongInstrumentNotes.Notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))))
+                switch (songPlayer.SongInstrumentPart.InstrumentType)
                 {
-                    if (note.Techniques.HasFlag(ESongNoteTechnique.Chord))
-                    {
-                        if (lastNote.HasValue && lastNote.Value.Techniques.HasFlag(ESongNoteTechnique.Chord) && (note.ChordID != lastNote.Value.ChordID))
-                            density += 5;
-                        else
-                            density += 1;
-                    }
-                    else
-                    {
-                        if (lastNote.HasValue && (lastNote.Value.Fret != note.Fret))
-                            density += 5;
-                        else
-                            density += 1;
-
-                    }
+                    case ESongInstrumentType.LeadGuitar:
+                    case ESongInstrumentType.RhythmGuitar:
+                    case ESongInstrumentType.BassGuitar:
+                        density = GetDensity(section, songPlayer.SongInstrumentNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Keys:
+                        density = GetDensity(section, songPlayer.SongKeyboardNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Drums:
+                        density = GetDensity(section, songPlayer.SongDrumNotes.Notes);
+                        break;
+                    case ESongInstrumentType.Vocals:
+                        break;
                 }
 
                 sectionDensity.Add((float)density / (section.EndTime - section.StartTime));
@@ -783,7 +840,43 @@ namespace ChartPlayer
 
             maxDensity = sectionDensity.Max();
 
-            endTime = songPlayer.SongInstrumentNotes.Sections.Last().EndTime;
+            endTime = sections.Last().EndTime;
+        }
+
+        int GetDensity<T>(SongSection section, IEnumerable<T> notes) where T : struct, ISongEvent
+        {
+            T? lastNote = null;
+
+            int density = 0;
+
+            var blah = notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))).ToList();
+
+            foreach (var note in notes.Where(n => ((n.TimeOffset >= section.StartTime) && (n.TimeOffset < section.EndTime))))
+            {
+                if ((note is SongNote songNote) && (lastNote is SongNote lastSongNote))
+                {
+                    if (songNote.Techniques.HasFlag(ESongNoteTechnique.Chord))
+                    {
+                        density += (songNote.ChordID != lastSongNote.ChordID) ? 5 : 1;
+                    }
+                    else
+                    {
+                        density += (songNote.Fret != lastSongNote.Fret) ? 5 : 1;
+                    }
+                }
+                else if ((note is SongDrumNote drumNote) && (lastNote is SongDrumNote lastDrumNote))
+                {
+                    density += ((drumNote.KitPiece == lastDrumNote.KitPiece) && (drumNote.Articulation == lastDrumNote.Articulation)) ? 5 : 1;
+                }
+                else if ((note is SongKeyboardNote keyNote) && (lastNote is SongKeyboardNote lastKeyNote))
+                {
+                    density += (keyNote.Note == lastKeyNote.Note) ? 5 : 1;
+                }
+
+                lastNote = note;
+            }
+
+            return density;
         }
 
         protected override void GetContentSize(out float width, out float height)
@@ -807,7 +900,7 @@ namespace ChartPlayer
                 }
                 else if (touch.TouchState == ETouchState.Pressed)
                 {
-                    foreach (SongSection section in songPlayer.SongInstrumentNotes.Sections)
+                    foreach (SongSection section in sections)
                     {
                         if ((time >= section.StartTime) && (time < section.EndTime))
                         {
@@ -834,6 +927,7 @@ namespace ChartPlayer
             {
                 SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond - 0.2f);
             }
+            
         }
 
         protected override void DrawContents()
@@ -848,11 +942,15 @@ namespace ChartPlayer
             UIColor lineColor = UIColor.White;
             lineColor.A = 128;
 
+            UIColor loopMarkerStartColor = UIColor.Green;
+            loopMarkerStartColor.A = 128;
+            UIColor loopMarkerEndColor = UIColor.Red;
+            loopMarkerStartColor.A = 128;
             float currentTime = songPlayer.CurrentSecond;
 
-            for (int i = 0; i < songPlayer.SongInstrumentNotes.Sections.Count; i++)
+            for (int i = 0; i < sections.Count; i++)
             {
-                SongSection section = songPlayer.SongInstrumentNotes.Sections[i];
+                SongSection section = sections[i];
 
                 bool isCurrent = (currentTime >= section.StartTime) && (currentTime < section.EndTime);
 
@@ -874,8 +972,20 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
+            int loopMarkerStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
+            int loopMarkerEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
+
+            if (songPlayer.LoopMarkerStartSecond != -1)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerStartColor);
+            }
+            if (songPlayer.LoopMarkerEndSecond != -1)
+            {
+                Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerEndColor);
+            }
+          
         }
     }
 }

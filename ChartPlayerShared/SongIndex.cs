@@ -19,7 +19,7 @@ namespace ChartPlayer
         public string ArtistName { get; set; }
         public string AlbumName { get; set; }
         public string FolderPath { get; set; }
-        public string Arrangements { get; set; }
+        public string Arrangements { get; set; } = "";
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
@@ -224,13 +224,18 @@ namespace ChartPlayer
             return Path.Combine(BasePath, folder);
         }
 
+        public string GetAlbumPath(SongIndexEntry indexEntry)
+        {
+            return Path.Combine(GetSongPath(indexEntry), "albumart.png");
+        }
+
         public UIImage GetAlbumImage(SongIndexEntry indexEntry)
         {
             UIImage image = null;
 
             try
             {
-                using (Stream inputStream = File.OpenRead(Path.Combine(GetSongPath(indexEntry), "albumart.png")))
+                using (Stream inputStream = File.OpenRead(GetAlbumPath(indexEntry)))
                 {
                     image = new UIImage(inputStream);
                 }

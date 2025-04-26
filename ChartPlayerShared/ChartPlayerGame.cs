@@ -1,12 +1,19 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 using UILayout;
+using SongFormat;
 
 namespace ChartPlayer
 {
     public class ChartPlayerGame : MonoGameLayout
     {
         public static ChartPlayerGame Instance { get; private set; }
+
+        public static UIColor PanelBackgroundColor = new UIColor(50, 55, 65);
+        public static UIColor PanelBackgroundColorDark = PanelBackgroundColor * 0.8f;
+        public static UIColor PanelBackgroundColorDarkest = PanelBackgroundColor * 0.5f;
+        public static UIColor PanelBackgroundColorLight = PanelBackgroundColor * 1.5f;
+        public static UIColor PanelBackgroundColorLightest = PanelBackgroundColor * 3.0f;
+        public static UIColor PanelForegroundColor = UIColor.Lerp(PanelBackgroundColor, UIColor.White, 0.75f);
 
         public ChartPlayerPlugin Plugin { get; set; }
         public Scene3D Scene3D { get; set; }
@@ -50,7 +57,14 @@ namespace ChartPlayer
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.LeftShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.D8) { Modifier = InputKey.RightShift });
             InputManager.AddMapping("ToggleFavorite", new KeyMapping(InputKey.Multiply));
+            InputManager.AddMapping("LoopMarkerStart", new KeyMapping(InputKey.OemOpenBrackets));
+            InputManager.AddMapping("LoopMarkerEnd", new KeyMapping(InputKey.OemCloseBrackets));
 
+            InputManager.AddMapping("PreviousPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom1, EDrumArticulation.DrumHead)));
+            InputManager.AddMapping("NextPage", new DrumUIMapping(new DrumVoice(EDrumKitPiece.Tom2, EDrumArticulation.DrumHead)));
+
+            InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.LeftAlt });
+            InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.RightAlt });
 
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
@@ -68,6 +82,17 @@ namespace ChartPlayer
             }
 
             base.Draw();
+        }
+
+        public override void Update(float secondsElapsed)
+        {
+            base.Update(secondsElapsed);
+
+            if (InputManager.WasClicked("ToggleFullscreen", this))
+            {
+                Plugin.ToggleFullScreen();
+            }
+           
         }
 
         public override void Exiting()

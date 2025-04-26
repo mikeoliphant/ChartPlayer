@@ -28,6 +28,10 @@ namespace ChartPlayerImageProcessor
 
             AddWithShadow("PopupBackground");
 
+            Add("TabPanelBackground");
+            Add("TabForeground");
+            Add("TabBackground");
+
             Add("ButtonPressed");
             Add("ButtonUnpressed");
 

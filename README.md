@@ -2,16 +2,16 @@
 
 ChartPlayer is a cross-platform application for playing along to charts in [OpenSongChart](https://github.com/mikeoliphant/OpenSongChart) format.
 
-It runs as a VST plugin inside your DAW so that you can use any other plugin you like (ie: guitar amp simulation) for your instrument sounds.
+It runs as a VST plugin inside your DAW (or as a [Jack Audio](https://github.com/jackaudio) client) so that you can use any other plugin you like (ie: guitar amp simulation) for your instrument sounds.
 
-![ChartPlayerSultans](https://github.com/mikeoliphant/ChartPlayer/assets/6710799/a0aafcdf-4121-425f-945b-07974ec7dbcc)
+![ChartPlayerSultans](https://github.com/user-attachments/assets/17c38536-040f-4a24-b97a-97cbb9548b4d)
 
 # Features
 
+* Support for guitar, bass, drums, keys and vocals
 * Song browser
 * Very fast startup and song loading
 * 3D, "note highway" display
-* Support for guitar and bass guitar
 * Note detection
 * Pitch shifting of songs that are slightly off of standard tuning
 * Adjustable song playback speed

@@ -13,7 +13,7 @@ namespace ChartPlayer
         public float CameraDistance { get; private set; } = 70;
         public float FocusDist { get; set; } = 600;
 
-        float targetCameraDistance = 64;
+        float targetCameraDistance = 75;
         float positionFret = 3;
 
         public FretCamera()
@@ -239,17 +239,20 @@ namespace ChartPlayer
             noteDetectThread.Join();
         }
 
-        public override void ResetScore()
+        public override void ResetScore(float scoreStartSecs)
         {
             Array.Clear(notesDetected);
 
-            base.ResetScore();
+            base.ResetScore(scoreStartSecs);
         }
 
         public override void Draw()
         {
             base.Draw();
+        }
 
+        public override void UpdateCamera()
+        {
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
                 fretCamera.Update(minFret, maxFret, targetFocusFret, -(float)(currentTime * timeScale));
@@ -295,33 +298,7 @@ namespace ChartPlayer
 
                     List<SongNote> allNotes = player.SongInstrumentNotes.Notes;
 
-                    startNotePosition = MathUtil.Clamp(startNotePosition, 0, allNotes.Count - 1);
-
-                    // Move backward until we find a note that is not visible (or we hit the start)
-                    while (startNotePosition > 0)
-                    {
-                        SongNote note = allNotes[startNotePosition];
-
-                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, secsBehind);
-
-                        if (endTime < currentTime)
-                            break;
-
-                        startNotePosition--;
-                    }
-
-                    // Now move forward until we find a note that is visible (or we hit the end)
-                    while (startNotePosition < allNotes.Count)
-                    {
-                        SongNote note = allNotes[startNotePosition];
-
-                        float endTime = note.TimeOffset + Math.Max(note.TimeLength, secsBehind);
-
-                        if (endTime > currentTime)
-                            break;
-
-                        startNotePosition++;
-                    }
+                    startNotePosition = GetStartNote<SongNote>(currentTime, secsBehind, startNotePosition, allNotes);
 
                     int pos = 0;
 
@@ -370,7 +347,6 @@ namespace ChartPlayer
                     currentFingerNote = null;
                     currentChordDetected = false;
 
-                    // Find current active notes
                     for (pos = lastNote; pos >= startNotePosition; pos--)
                     {
                         SongNote note = allNotes[pos];
@@ -427,7 +403,7 @@ namespace ChartPlayer
 
                             isDetected = false;
 
-                            if (note.TimeOffset <= currentTime)
+                            if ((note.TimeOffset <= currentTime) && (note.TimeOffset > scoreStartSecs))
                             {
                                 isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : currentStringDetected[note.String];
 

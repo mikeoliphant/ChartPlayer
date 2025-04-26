@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UILayout;
 using SongFormat;
 using System.Text.RegularExpressions;
+using System.IO;
+using System.Collections.Concurrent;
 
 namespace ChartPlayer
 {
-    public class SongListDisplay : HorizontalStack, IPopup
+    public class SongListDisplay : HorizontalStack, IPopup, IMidiHandler
     {
         public Action CloseAction { get; set; }
         public ESongInstrumentType CurrentInstrument { get; private set; } = ESongInstrumentType.LeadGuitar;
@@ -21,7 +24,7 @@ namespace ChartPlayer
         List<SongIndexEntry> currentSongs;
         ItemDisplayColum<SongIndexEntry> tuningColumn;
         HorizontalStack songDisplayStack;
-        ImageElement albumImage;
+        BackgroundImage albumImage;
         TextBlock songTitleText;
         TextBlock songArtistText;
         TextBlock songAlbumText;
@@ -38,8 +41,6 @@ namespace ChartPlayer
         {
             HorizontalAlignment = EHorizontalAlignment.Stretch;
             VerticalAlignment = EVerticalAlignment.Stretch;
-
-            Padding = new LayoutPadding(5);
 
             SongList = new MultiColumnItemDisplay<SongIndexEntry>(UIColor.Black);
 
@@ -109,7 +110,7 @@ namespace ChartPlayer
             };
             bottomStack.Children.Add(songDisplayStack);
 
-            albumImage = new ImageElement("SingleWhitePixel")
+            albumImage = new BackgroundImage
             {
                 DesiredWidth = 192,
                 DesiredHeight = 192
@@ -207,11 +208,44 @@ namespace ChartPlayer
             CloseAction = Close;
         }
 
+        IMidiHandler midiHandlerBak = null;
+
         public virtual void Opened()
         {
             if (songIndex.Songs.Count == 0)
             {
                 ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".\n\nIf Song Path is correct, try the \"ReScan\" button below.");
+            }
+        }
+            midiHandlerBak = ChartPlayerGame.Instance.Plugin.MidiHandler;
+
+            ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+        }
+
+        public void Close()
+        {
+            ChartPlayerGame.Instance.Plugin.MidiHandler = midiHandlerBak;
+
+            Layout.Current.ClosePopup(this);
+        }
+
+        public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandleNoteOn(channel, noteNumber, velocity, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                DrumUIMapping.AddHit(hit.Value.Voice);
+            }
+        }
+
+        public void HandlePolyPressure(int channel, int noteNumber, float pressure, int sampleOffset)
+        {
+            DrumHit? hit = DrumMidiDeviceConfiguration.CurrentMap.HandlePolyPressure(channel, noteNumber, pressure, sampleOffset, isLive: true);
+
+            if (hit != null)
+            {
+                DrumUIMapping.AddHit(hit.Value.Voice);
             }
         }
 
@@ -434,26 +468,9 @@ namespace ChartPlayer
             };
         }
 
-        UIImage albumArtToDelete = null;
-
         void UpdateSelectedSongDisplay()
         {
-            if (albumArtToDelete != null)
-            {
-                if (albumArtToDelete.Texture != null)
-                {
-                    albumArtToDelete.Texture.Dispose();
-                }
-
-                albumArtToDelete = null;
-            }
-
-            if (albumImage.Image.Width > 1) // Don't dispose our single white pixel image
-            {
-                albumArtToDelete = albumImage.Image;
-            }
-
-            albumImage.Image = songIndex.GetAlbumImage(selectedSong);
+            albumImage.LoadImage(songIndex.GetAlbumPath(selectedSong));
 
             songTitleText.Text = selectedSong.SongName;
             songArtistText.Text = selectedSong.ArtistName;
@@ -594,10 +611,6 @@ namespace ChartPlayer
             Layout.Current.ShowPopup(new Menu(items), tagStack.ContentBounds.Center);
         }
 
-        public void Close()
-        {
-            Layout.Current.ClosePopup(this);
-        }
 
         DateTime currentDate = DateTime.Now;
 
@@ -619,6 +632,13 @@ namespace ChartPlayer
             }
 
             return days + "d";
+        }
+
+        protected override void DrawContents()
+        {
+            base.DrawContents();
+
+            DrumUIMapping.ClearHits();
         }
     }
 
@@ -1100,6 +1120,107 @@ namespace ChartPlayer
             if (inputManager.WasPressed("LastItem"))
             {
                 ListDisplay.GoToLastItem();
+            }
+        }
+    }
+
+    public class BackgroundImage : ImageElement
+    {
+        ConcurrentQueue<string> loadQueue = new ConcurrentQueue<string>();
+
+        Thread loadThread = null;
+        UIImage toDelete = null;
+
+        public BackgroundImage()
+            : base("SingleWhitePixel")
+        {
+
+        }
+
+        public void LoadImage(string imagePath)
+        {
+            loadQueue.Enqueue(imagePath);
+
+            if (loadThread != null)
+            {
+                if (!loadThread.IsAlive)
+                {
+                    loadThread.Join();
+
+                    loadThread = null;
+                }
+            }
+
+            if (loadThread == null)
+            {
+                loadThread = new Thread(new ThreadStart(BackgroundLoad));
+                loadThread.Start();
+            }
+        }
+
+        public void ClearImage()
+        {
+            LoadImage(null);
+        }
+
+        void Delete()
+        {
+            if ((toDelete != null) && (toDelete.Width > 1))
+            {
+                if (toDelete.Texture != null)
+                {
+                    toDelete.Texture.Dispose();
+                }
+            }
+
+            toDelete = null;
+        }
+
+        void BackgroundLoad()
+        {
+            string toLoad = null;
+
+            if (loadQueue.Count > 0)
+            {
+                string tryLoad;
+
+                while (loadQueue.TryDequeue(out tryLoad))
+                {
+                    toLoad = tryLoad;
+                }
+
+                Delete();
+
+                if (toLoad == null)
+                {
+                    toDelete = Image;
+
+                    Image = Layout.Current.GetImage("SingleWhitePixel");
+                }
+                else
+                {
+                    UIImage loadImage = null;
+
+                    try
+                    {
+                        Delete();
+
+                        using (Stream inputStream = File.OpenRead(toLoad))
+                        {
+                            loadImage = new UIImage(inputStream);
+
+                            toDelete = Image;
+
+                            Image = loadImage;
+                        }
+                    }
+                    catch
+                    {
+                        toDelete = Image;
+
+                        Image = Layout.Current.GetImage("SingleWhitePixel");
+                    }
+                }
             }
         }
     }

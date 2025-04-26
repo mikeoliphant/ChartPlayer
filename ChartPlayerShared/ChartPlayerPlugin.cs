@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Design;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using AudioPlugSharp;
+using Microsoft.Xna.Framework.Graphics;
 using UILayout;
 
 namespace ChartPlayer
@@ -56,6 +59,20 @@ namespace ChartPlayer
             {
                 stereoOutput = new FloatAudioIOPort("Stereo Output", EAudioChannelConfiguration.Stereo)
             };
+
+            pedalParameter = new AudioPluginParameter
+            {
+                ID = "hihat-pedal",
+                Name = "HiHat Pedal",
+                Type = EAudioPluginParameterType.Float,
+                MinValue = 0,
+                MaxValue = 1,
+                DefaultValue = 0,
+                ValueFormat = "{0:0.0}"
+            };
+
+            AddParameter(pedalParameter);
+            SetHiHatPedalController(4);
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -96,21 +113,11 @@ namespace ChartPlayer
             }
 
             SampleHistory.SetSize((int)Host.SampleRate);
+        }
 
-            pedalParameter = new AudioPluginParameter
-            {
-                ID = "hihat-pedal",
-                Name = "HiHat Pedal",
-                Type = EAudioPluginParameterType.Float,
-                MinValue = 0,
-                MaxValue = 1,
-                DefaultValue = 0,
-                ValueFormat = "{0:0.0}"
-            };
-
-            AddParameter(pedalParameter);
-
-            //AddMidiControllerMapping(pedalParameter, (uint)DrumAudioHost.Instance.DrumMidiConfig.HiHatPedalChannel);
+        public void SetHiHatPedalController(uint controller)
+        {
+            AddMidiControllerMapping(pedalParameter, (uint)controller);
         }
 
         unsafe void RunGame()
@@ -128,14 +135,20 @@ namespace ChartPlayer
 
                 Logger.Log("Create ChartPlayer Game");
 
-                using (GameHost = new MonoGameHost(screenWidth, screenHeight, fullscreen: false))
+                if (ChartPlayerSaveState.IsFullscreen)
+                {
+                    screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                    screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+                }
+
+                using (GameHost = new MonoGameHost(screenWidth, screenHeight, ChartPlayerSaveState.IsFullscreen))
                 {
                     game = new ChartPlayerGame();
                     game.Plugin = this;
 
                     GameHost.IsMouseVisible = true;
 
-                    if (parentWindow != IntPtr.Zero)
+                    if ((parentWindow != IntPtr.Zero) && !ChartPlayerSaveState.IsFullscreen)
                     {
                         GameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
                         GameHost.Window.IsBorderless = true;
@@ -181,6 +194,40 @@ namespace ChartPlayer
                 if (gameThread != null)
                     gameThread.Join();
             }
+        }
+
+        public void ToggleFullScreen()
+        {
+            if (!GameHost.GraphicsDeviceManager.IsFullScreen)
+            {
+                SetParent(GameHost.Window.Handle, 0);
+
+                GameHost.GraphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+                GameHost.GraphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
+                GameHost.GraphicsDeviceManager.HardwareModeSwitch = false;
+                GameHost.GraphicsDeviceManager.IsFullScreen = true;
+                GameHost.GraphicsDeviceManager.ApplyChanges();
+                GameHost.GraphicsDeviceManager.HardwareModeSwitch = true;
+                GameHost.GraphicsDeviceManager.ApplyChanges();
+            }
+            else
+            {
+                GameHost.GraphicsDeviceManager.PreferredBackBufferWidth = (int)EditorWidth;
+                GameHost.GraphicsDeviceManager.PreferredBackBufferHeight = (int)EditorHeight;
+
+                GameHost.GraphicsDeviceManager.ToggleFullScreen();
+
+                if (parentWindow != IntPtr.Zero)
+                {
+                    GameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
+                    GameHost.Window.IsBorderless = true;
+
+                    SetParent(GameHost.Window.Handle, parentWindow);
+                }
+            }
+
+            ChartPlayerSaveState.IsFullscreen = GameHost.GraphicsDeviceManager.IsFullScreen;
         }
 
         public void SetSongPlayer(SongPlayer songPlayer)
@@ -257,6 +304,7 @@ namespace ChartPlayer
 
     public class ChartPlayerSaveState : AudioPluginSaveState
     {
+        public bool IsFullscreen { get; set; } = false;
         public SongPlayerSettings SongPlayerSettings { get; set; } = null;
 
         public ChartPlayerSaveState()

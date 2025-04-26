@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text.Json;
 using System.Threading;
 using NVorbis;
@@ -28,7 +29,7 @@ namespace ChartPlayer
         public bool Paused { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
-
+      
         VorbisMixer vorbisReader;
         WdlResampler resampler;
         float seekTime = -1;
@@ -39,6 +40,8 @@ namespace ChartPlayer
         RubberBandStretcherStereo stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
+        float loopMarkerStartSecond = -1;
+        float loopMarkerEndSecond = -1;
 
         public SongPlayer()
         {
@@ -124,25 +127,28 @@ namespace ChartPlayer
                 SongStructure = JsonSerializer.Deserialize<SongStructure>(structStream, SerializationUtil.CondensedSerializerOptions);
             }
 
-            if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
-                TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
-
-            TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
-
-            TuningOffsetSemitones %= 12;
-
-            if (TuningOffsetSemitones > 6)
+            if (part.InstrumentType != ESongInstrumentType.Drums)
             {
-                TuningOffsetSemitones = 12 - TuningOffsetSemitones;
-            }
-            else if (TuningOffsetSemitones < -6)
-            {
-                TuningOffsetSemitones += 12;
-            }
+                if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
+                    TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
 
-            if (SongTuningMode > ESongTuningMode.EStandard)
-            {
-                TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
+                TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
+
+                TuningOffsetSemitones %= 12;
+
+                if (TuningOffsetSemitones > 6)
+                {
+                    TuningOffsetSemitones = 12 - TuningOffsetSemitones;
+                }
+                else if (TuningOffsetSemitones < -6)
+                {
+                    TuningOffsetSemitones += 12;
+                }
+
+                if (SongTuningMode > ESongTuningMode.EStandard)
+                {
+                    TuningOffsetSemitones += (SongTuningMode - ESongTuningMode.EStandard);  // For tunings lower than E Standard
+                }
             }
 
             SongInstrumentPart vocalPart = song.InstrumentParts.Where(p => (p.InstrumentType == ESongInstrumentType.Vocals)).Where(p => p.ArrangementName == part.ArrangementName).FirstOrDefault();
@@ -200,6 +206,51 @@ namespace ChartPlayer
         {
             seekTime = secs;
             CurrentSecond = seekTime;
+        }
+
+        public float LoopMarkerStartSecond
+        {
+            get
+            {
+                return loopMarkerStartSecond;                             
+            }
+            set
+            {
+                if (loopMarkerStartSecond == -1)
+                {
+                    if (loopMarkerEndSecond != -1 && value >= loopMarkerEndSecond)
+                    {
+                        loopMarkerStartSecond = -1;
+                    }
+                    else
+                    {
+                        loopMarkerStartSecond = value;
+                    }
+                }
+                else
+                {
+                    loopMarkerStartSecond = -1;
+                }               
+            }
+        }
+
+        public float LoopMarkerEndSecond
+        {
+            get
+            {
+                return loopMarkerEndSecond;
+            }
+            set
+            {
+                if (loopMarkerEndSecond == -1)
+                {
+                    loopMarkerEndSecond = value;
+                }
+                else
+                {
+                    loopMarkerEndSecond = -1;
+                }
+            }
         }
 
         public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)

@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using UILayout;
 using SongFormat;
-using AudioPlugSharp;
 
 namespace ChartPlayer
 {
@@ -14,19 +13,29 @@ namespace ChartPlayer
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
 
         int numLanes = 5;
-        float targetCameraDistance = 64;
+        float targetCameraDistance = 75;
         float cameraDistance = 70;
         float positionLane;
+        float?[] notesDetected;
+        int startNotePosition = 0;
+        float detectionToleranceSecs = 0.1f;
 
         public DrumPlayerScene3D(SongPlayer player)
             : base(player)
         {
             ChartPlayerGame.Instance.Plugin.MidiHandler = this;
+            ChartPlayerGame.Instance.Plugin.SetHiHatPedalController((uint)DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalChannel);
 
             positionLane = (float)numLanes / 2;
 
             highwayStartX = 0;
             highwayEndX = GetLanePosition(numLanes);
+
+            notesDetected = new float?[player.SongDrumNotes.Notes.Count];
+
+            CurrentTimeOffset = 0.15f;
+
+            NoteDisplayDistance = 400;
         }
 
         public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
@@ -51,27 +60,99 @@ namespace ChartPlayer
 
         void HandleHit(DrumHit hit)
         {
+            //if (waitingForSnare && (hit.Voice.KitPiece == EDrumKitPiece.Snare))
+            //{
+            //    Play();
+            //}
 
+            var allNotes = player.SongDrumNotes.Notes;
+
+            startNotePosition = GetStartNote<SongDrumNote>(currentTime, detectionToleranceSecs, startNotePosition, allNotes);
+
+            int pos = 0;
+
+            // TODO - should find closest, not just first match
+
+            for (pos = startNotePosition; pos < allNotes.Count; pos++)
+            {
+                SongDrumNote note = allNotes[pos];
+
+                if (note.TimeOffset > (currentTime + detectionToleranceSecs))
+                    break;
+
+                if ((notesDetected[pos] == null) && VoicesMatch(new DrumVoice(note.KitPiece, note.Articulation), hit))
+                {
+                    notesDetected[pos] = currentTime - note.TimeOffset;
+
+                    NumNotesDetected++;
+                    NumNotesTotal++;
+                }
+            }
         }
 
-        public override void Draw()
+        bool VoicesMatch(in DrumVoice eventVoice, in DrumHit hit)
         {
-            base.Draw();
+            var eventType = SongDrumNote.GetKitPieceType(eventVoice.KitPiece);
+            var hitType = SongDrumNote.GetKitPieceType(hit.Voice.KitPiece);
 
+            var eventArticulation = eventVoice.Articulation;
+            if (eventArticulation == EDrumArticulation.None)
+                eventArticulation = SongDrumNote.GetDefaultArticulation(eventVoice.KitPiece);
+
+            //if (triggerVoice.KitPiece == EDrumKitPiece.Crash3)
+            //{
+            //// Let Crash3 substitute for hihit
+            //if (eventVoice.KitPiece == EDrumKitPiece.HiHat)
+            //    return true;
+
+                //    triggerVoice.KitPiece = EDrumKitPiece.Crash;
+                //}
+
+            if (eventType == hitType)
+            {
+                if (eventType == EDrumKitPieceType.HiHat)
+                {
+                    if (eventArticulation == EDrumArticulation.HiHatOpen)
+                    {
+                        return (hit.DimensionValue < 1.0f);
+                    }
+                    else if (eventArticulation == EDrumArticulation.HiHatClosed)
+                    {
+                        return (hit.DimensionValue > 0);
+                    }
+                    else
+                    {
+                        return eventArticulation == hit.Voice.Articulation;
+                    }
+                }
+
+                return true;
+            }
+
+            return (eventType == hitType);
+        }
+
+        public override void ResetScore(float scoreStartSecs)
+        {
+            Array.Clear(notesDetected);
+
+            base.ResetScore(scoreStartSecs);
+        }
+
+        public override void UpdateCamera()
+        {
             if (ChartPlayerGame.Instance.Plugin.SongPlayer != null)
             {
-                currentTime = (float)player.CurrentSecond;
-
-                targetCameraDistance = 85;
-
                 float targetPositionKey = (float)numLanes / 2;
 
                 positionLane = MathUtil.Lerp(positionLane, targetPositionKey, 0.01f);
 
                 cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
 
-                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, -(float)(currentTime * timeScale) + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplaySeconds * timeScale) * .3f));
+                float frontPosition = -(float)((currentTime - CurrentTimeOffset) * timeScale);
+
+                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, frontPosition + cameraDistance);
+                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplayDistance * .4f)));
             }
         }
 
@@ -80,8 +161,8 @@ namespace ChartPlayer
             base.DrawQuads();
 
             FogEnabled = true;
-            FogStart = 400;
-            FogEnd = cameraDistance + (NoteDisplaySeconds * timeScale);
+            FogStart = cameraDistance + (NoteDisplayDistance * .6f);
+            FogEnd = cameraDistance + NoteDisplayDistance;
             FogColor = UIColor.Black;
 
             try
@@ -90,17 +171,58 @@ namespace ChartPlayer
                 {
                     for (int lane = 0; lane <= numLanes; lane++)
                     {
-                        DrawLaneTimeLine(lane, 0, startTime, endTime, whiteHalfAlpha);
+                        DrawLaneTimeLine(lane, 0, currentTime - CurrentTimeOffset, endTime, whiteHalfAlpha);
                     }
 
-                    var notes = player.SongDrumNotes.Notes.Where(n => n.TimeOffset >= startTime).OrderByDescending(n => n.TimeOffset);
+                    var allNotes = player.SongDrumNotes.Notes;
 
-                    // Draw the notes
-                    foreach (SongDrumNote note in notes)
+                    int pos = 0;
+
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - 0.5f, 0, startNotePosition, allNotes);
+
+                    for (pos = startNotePosition; pos < allNotes.Count; pos++)
                     {
+                        SongDrumNote note = allNotes[pos];
+
+                        if ((currentTime - note.TimeOffset) < detectionToleranceSecs)
+                            break;
+
+                        if (notesDetected[pos] != null)
+                            continue;
+
+                        if (note.TimeOffset > scoreStartSecs)
+                        {
+                            notesDetected[pos] = float.MaxValue;
+
+                            NumNotesTotal++;
+                        }
+                    }
+
+                    int lastNote = GetEndNote<SongDrumNote>(startNotePosition, endTime, allNotes);
+
+                    startNotePosition = GetStartNote<SongDrumNote>(currentTime - CurrentTimeOffset, 0, startNotePosition, allNotes);
+
+                    for (pos = lastNote; pos >= startNotePosition; pos--)
+                    {
+                        SongDrumNote note = allNotes[pos];
+
+                        float scale = 1;
+
+                        if (note.TimeOffset <= currentTime)
+                        {
+                            float range = 0.1f;
+
+                            float delta = currentTime - note.TimeOffset;
+
+                            if (delta < range)
+                            {
+                                scale = 1 + ((1.0f - (delta / range)) * .75f);
+                            }
+                        }
+
                         if (note.KitPiece == EDrumKitPiece.Kick)
                         {
-                            DrawLaneHorizontalLine(0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .1f);
+                            DrawVerticalImage(Layout.Current.GetImage("HorizontalFretLine"), 0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .04f * scale);
                         }
                         else
                         {
@@ -200,7 +322,7 @@ namespace ChartPlayer
                             }
 
                             if (imageName != null)
-                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f);
+                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f * scale);
                         }
                     }
 
