@@ -625,6 +625,23 @@ namespace ChartPlayer
             }
         }
 
+        public override bool HandleTouch(in Touch touch)
+        {
+            if (!base.HandleTouch(touch))
+            {
+                if (IsTap(touch, this))
+                {
+                    if (songPlayer != null)
+                    {
+                        if (!songPlayer.Paused)
+                            TogglePaused();
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public void TogglePaused()
         {
             if (songPlayer != null)

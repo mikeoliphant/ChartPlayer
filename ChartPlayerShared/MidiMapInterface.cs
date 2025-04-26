@@ -801,7 +801,7 @@ namespace ChartPlayer
 
         public override bool HandleTouch(in Touch touch)
         {
-            if (IsTap(touch))
+            if (IsTap(touch, this))
             {
                 float offset = (isHorizontal ? (touch.Position.X - ContentBounds.X) : (touch.Position.Y - ContentBounds.Y)) /
                     (isHorizontal ? ContentBounds.Width : ContentBounds.Height);
