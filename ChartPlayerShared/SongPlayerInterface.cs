@@ -631,11 +631,7 @@ namespace ChartPlayer
             {
                 if (IsTap(touch, this))
                 {
-                    if (songPlayer != null)
-                    {
-                        if (!songPlayer.Paused)
-                            TogglePaused();
-                    }
+                    TogglePaused();
                 }
             }
 
