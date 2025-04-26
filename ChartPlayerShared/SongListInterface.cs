@@ -209,6 +209,10 @@ namespace ChartPlayer
 
         public virtual void Opened()
         {
+            if (songIndex.Songs.Count == 0)
+            {
+                ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".\n\nIf Song Path is correct, try the \"ReScan\" button below.");
+            }
         }
 
         public override bool HandleTouch(in Touch touch)
@@ -263,12 +267,16 @@ namespace ChartPlayer
             SongIndexEntry topSong = null;
 
             if ((allSongs == null) || (allSongs.Count == 0))
+            {
+                SongList.SetItems(allSongs);
+
                 return;
+            }
+
+            IEnumerable<SongIndexEntry> songs = allSongs;
 
             if ((currentSongs != null) && (currentSongs.Count > 0))
                 topSong = currentSongs[SongList.ListDisplay.CurrentTopItemIndex];
-
-            IEnumerable<SongIndexEntry> songs = allSongs;
 
             switch (CurrentInstrument)
             {

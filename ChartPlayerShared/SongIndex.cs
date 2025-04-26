@@ -40,7 +40,7 @@ namespace ChartPlayer
     }
 
     public class SongIndex
-    {   public List<SongIndexEntry> Songs { get; private set; } = new List<SongIndexEntry>();
+    {   public List<SongIndexEntry> Songs { get; private set; } = new();
         public SongStats[] Stats = new SongStats[Enum.GetValues(typeof(ESongInstrumentType)).Length];
         public string BasePath { get; private set; }
 
