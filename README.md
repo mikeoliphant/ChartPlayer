@@ -44,7 +44,7 @@ For file browser input to work, you need to have [Zenity](https://help.gnome.org
 
 # Where to get songs
 
-See the [OpenSongChart github repository](https://github.com/mikeoliphant/OpenSongChart).
+ChartPlayer plays songs in tne [OpenSongChart](https://github.com/mikeoliphant/OpenSongChart) format. There is a [ChartConverter tool for converting songs from other formats](https://github.com/mikeoliphant/ChartConverter).
 
 # Building From Source
 
