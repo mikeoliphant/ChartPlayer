@@ -383,7 +383,7 @@ namespace ChartPlayer
 
                 tuningColumn.PropertyName = type.ToString() + "Tuning";
 
-                if (typeof(SongIndex).GetProperty(tuningColumn.PropertyName) == null)
+                if (typeof(SongIndexEntry).GetProperty(tuningColumn.PropertyName) == null)
                 {
                     tuningColumn.PropertyName = "LeadGuitarTuning";
                 }
