@@ -68,6 +68,7 @@ namespace ChartPlayer
         static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         public bool DisplayNotes { get; set; } = true;
+        public float DetectSemitoneOffset { get; set; } = 0;
 
         float targetFocusFret = 2;
         int numFrets = 24;
@@ -1315,7 +1316,7 @@ namespace ChartPlayer
 
         double GetNoteFrequency(int strng, int fret)
         {
-            double semitoneOffset = fret + stringOffsetSemitones[strng];
+            double semitoneOffset = fret + stringOffsetSemitones[strng] + DetectSemitoneOffset;
 
             if (numStrings == 6)
             {
@@ -1351,7 +1352,9 @@ namespace ChartPlayer
                 {
                     if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
                     {
-                        freqs[pos++] = GetNoteFrequency(str, chord.Frets[str]);
+                        double freq = GetNoteFrequency(str, chord.Frets[str]);
+
+                        freqs[pos++] = freq;
                     }
                 }
 

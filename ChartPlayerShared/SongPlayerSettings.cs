@@ -28,6 +28,7 @@ namespace ChartPlayer
         public bool InvertStrings { get; set; } = false;
         public bool LeftyMode { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
+        public bool BassUsingGuitar { get; set; } = false;
         public float NoteDisplaySeconds { get; set; } = 3;
         public float DrumsNoteDisplaySeconds { get; set; } = 3;
         public float KeysNoteDisplaySeconds { get; set; } = 3;
@@ -109,6 +110,7 @@ namespace ChartPlayer
 
             vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
             vStack.Children.Add(CreateEnumOption("SongTuningMode", newSettings, "Song Re-Tuning"));
+            vStack.Children.Add(CreateTextToggleOption("BassUsingGuitar", newSettings, "Play bass using a guitar: ", "Yes", "No"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
 
             return vStack;

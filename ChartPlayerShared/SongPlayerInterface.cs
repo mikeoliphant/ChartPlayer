@@ -508,7 +508,8 @@ namespace ChartPlayer
                     ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer)
                     {
                         LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
-                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDisplaySeconds
+                        NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDisplaySeconds,
+                        DetectSemitoneOffset = (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.BassUsingGuitar && (part.InstrumentType == ESongInstrumentType.BassGuitar)) ? 12 : 0
                     };
 
                     (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
