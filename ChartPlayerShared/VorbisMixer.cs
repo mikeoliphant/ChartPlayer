@@ -36,7 +36,7 @@ namespace ChartPlayer
 
         public int ReadSamples(float[] buffer, int offset, int count)
         {
-            if (readers.Count == 1)
+            if ((readers.Count == 1) && (readers[0].Channels == 2))
             {
                 return readers[0].ReadSamples(buffer, offset, count);
             }
@@ -66,6 +66,8 @@ namespace ChartPlayer
                         buffer[pos++] += mixBuf[i] * 0.6f;
                         buffer[pos++] += mixBuf[i] * 0.6f;
                     }
+
+                    read = toMix * 2;
                 }
                 else
                 {
@@ -73,9 +75,9 @@ namespace ChartPlayer
                     {
                         buffer[i + offset] += mixBuf[i] * 0.6f;
                     }
-                }
 
-                read = Math.Max(read, toMix);
+                    read = toMix;
+                }
             }
 
             return read;
