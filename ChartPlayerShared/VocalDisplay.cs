@@ -55,7 +55,7 @@ namespace ChartPlayer
 
                 for (; vocalPos >= 0; vocalPos--)
                 {
-                    if (SongPlayer.SongVocals[vocalPos].Vocal.EndsWith('\n'))
+                    if (SongPlayer.SongVocals[vocalPos].Vocal.EndsWith('\n') || ((startTime - SongPlayer.SongVocals[vocalPos].TimeOffset) > 20))
                     {
                         vocalPos++;
                         break;
@@ -73,6 +73,13 @@ namespace ChartPlayer
                         break;
 
                     font.MeasureString(vocal.Vocal, out width, out height);
+
+                    // Force a wrap if we're too wide for the content bounds
+                    if (xOffset + width > ContentBounds.Right)
+                    {
+                        xOffset = ContentBounds.X;
+                        yOffset += font.TextHeight;
+                    }
 
                     if ((vocal.TimeOffset < SongPlayer.CurrentSecond) && ((SongPlayer.CurrentSecond - vocal.TimeOffset)) < 0.5f)
                     {

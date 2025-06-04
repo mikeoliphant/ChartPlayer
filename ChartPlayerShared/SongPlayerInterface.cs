@@ -133,6 +133,7 @@ namespace ChartPlayer
 
             vocalText = new VocalDisplay()
             {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
                 Margin = new LayoutPadding(20, 5)
             };
             topStack.Children.Add(vocalText);
