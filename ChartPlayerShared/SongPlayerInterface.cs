@@ -238,7 +238,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Stretch
             });
 
-            hideNotesButton = new TextToggleButton("Show Notes", "Hide Notes")
+            hideNotesButton = new TextToggleButton("Notes", "Notes")
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = ToggleNotes
@@ -601,12 +601,13 @@ namespace ChartPlayer
                 lastMousePosition = mousePosition;
             }
             else
-            {
-                mouseIdleFrames++;
-                
-                if (mouseIdleFrames > 200)
+            {                
+                if ((songPlayer != null) && (!songPlayer.Paused))
                 {
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
+                    mouseIdleFrames++;
+
+                    if (mouseIdleFrames > 200)
+                        ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
                 }
             }
 
