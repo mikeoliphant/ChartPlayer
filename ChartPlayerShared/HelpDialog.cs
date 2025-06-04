@@ -18,7 +18,7 @@ namespace ChartPlayer
 
             Version version = this.GetType().Assembly.GetName().Version;
 
-            contents.Children.Add(new TextBlock("ChartPlayer v" + version.Major + "." + version.Minor + "." + version.Build + "\nCopyright (c) 2024 Mike Oliphant"));
+            contents.Children.Add(new TextBlock("ChartPlayer v" + version.Major + "." + version.Minor + "." + version.Build + "\nCopyright (c) 2024-2025 Mike Oliphant"));
 
             contents.Children.Add(helpElement);
 
