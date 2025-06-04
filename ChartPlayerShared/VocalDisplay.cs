@@ -50,6 +50,9 @@ namespace ChartPlayer
                         break;
                 }
 
+                if (vocalPos > 0)
+                    vocalPos--;
+
                 if (vocalPos == SongPlayer.SongVocals.Count)
                     return;
 
