@@ -34,3 +34,14 @@ jobs:
       with:
         name: ChartPlayerVST3Plugin
         path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net8.0-windows
+        
+    - name: Publish Linux-x64
+      working-directory: ${{github.workspace}}
+      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime linux-x64 -p:PublishSingleFile=true --self-contained true
+
+    - name: Create Linux-x64 Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: ChartPlayerLinux
+        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\linux-x64\publish
+        
