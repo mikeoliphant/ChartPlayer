@@ -151,7 +151,7 @@ namespace ChartPlayer
 
                 float frontPosition = -(float)((currentTime - CurrentTimeOffset) * timeScale);
 
-                Camera.Position = new Vector3(GetLanePosition(positionLane), 70, frontPosition + cameraDistance);
+                Camera.Position = new Vector3(GetLanePosition(positionLane), 90, frontPosition + cameraDistance);
                 Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplayDistance * .4f)));
             }
         }
@@ -322,7 +322,7 @@ namespace ChartPlayer
                             }
 
                             if (imageName != null)
-                                DrawVerticalImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f * scale);
+                                DrawCameraAlignedImage(Layout.Current.GetImage(imageName), drawLane + 0.5f, note.TimeOffset, 0, UIColor.White, .08f * scale);
                         }
                     }
 
@@ -394,6 +394,23 @@ namespace ChartPlayer
             float maxY = heightOffset + ((float)image.Height * imageScale);
 
             DrawQuad(image, new Vector3(startLane, minY, time), color, new Vector3(startLane, maxY, time), color, new Vector3(endLane, maxY, time), color, new Vector3(endLane, minY, time), color);
+        }
+
+        void DrawCameraAlignedImage(UIImage image, float laneCenter, float timeCenter, float heightOffset, in UIColor color, float imageScale)
+        {
+            laneCenter = GetLanePosition(laneCenter);
+            timeCenter *= -timeScale;
+            
+            Vector3 center = new Vector3(laneCenter, heightOffset, timeCenter);
+
+            float minX = -((float)image.Width * imageScale);
+            float maxX = ((float)image.Width * imageScale);
+
+            float minY = -((float)image.Height * imageScale);
+            float maxY = ((float)image.Height * imageScale);
+
+            DrawQuad(image, center + (Camera.Right * minX) + (Camera.Up * minY), color, center + (Camera.Right * minX) + (Camera.Up * maxY), color, center + (Camera.Right * maxX) + (Camera.Up * maxY), color,
+                center + (Camera.Right * maxX) + (Camera.Up * minY), color);
         }
 
 

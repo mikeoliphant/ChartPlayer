@@ -42,7 +42,6 @@ namespace ChartPlayer
         {
             Camera = new Camera3D();
             Camera.Position = new Vector3(0, 0, 5);
-            Camera.Up = Vector3.Up;
             Camera.Forward = new Vector3(0, 0, -1);
 
             basicEffect = new BasicEffect(MonoGameLayout.Current.Host.GraphicsDevice);

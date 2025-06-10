@@ -20,7 +20,8 @@ namespace ChartPlayer
         public float FarPlane { get; set; } = 10000;
 
         public Vector3 Position { get; set; }
-        public Vector3 Up { get; set; }
+        public Vector3 Up { get; set; } = Vector3.Up;
+        public Vector3 Right { get; set; }
         public Vector3 Forward { get; set; }
 
         public bool MirrorLeftRight { get; set; } = false;
@@ -33,6 +34,8 @@ namespace ChartPlayer
         public void SetLookAt(Vector3 lookAt)
         {
             Forward = Vector3.Normalize(lookAt - Position);
+            Right = Vector3.Normalize(Vector3.Cross(Forward, Vector3.Up));
+            Up = Vector3.Normalize(Vector3.Cross(Right, Forward));
         }
 
         public virtual Matrix GetProjectionMatrix()
