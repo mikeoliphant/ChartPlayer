@@ -13,8 +13,7 @@ namespace ChartPlayer
         static float[] ScaleOffsets = { 0, 0.5f, 1, 1.5f, 2, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6 };
 
         int numLanes = 5;
-        float targetCameraDistance = 75;
-        float cameraDistance = 70;
+        float cameraDistance = 75;
         float positionLane;
         float?[] notesDetected;
         int startNotePosition = 0;
@@ -35,7 +34,7 @@ namespace ChartPlayer
 
             CurrentTimeOffset = 0.15f;
 
-            NoteDisplayDistance = 400;
+            NoteDisplayDistance = 300;
         }
 
         public void HandleNoteOn(int channel, int noteNumber, float velocity, int sampleOffset)
@@ -147,12 +146,10 @@ namespace ChartPlayer
 
                 positionLane = MathUtil.Lerp(positionLane, targetPositionKey, 0.01f);
 
-                cameraDistance = MathUtil.Lerp(cameraDistance, targetCameraDistance, 0.01f);
-
                 float frontPosition = -(float)((currentTime - CurrentTimeOffset) * timeScale);
 
-                Camera.Position = new Vector3(GetLanePosition(positionLane), 90, frontPosition + cameraDistance);
-                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplayDistance * .4f)));
+                Camera.Position = new Vector3(GetLanePosition(positionLane), 150, frontPosition + cameraDistance);
+                Camera.SetLookAt(new Vector3(GetLanePosition(positionLane), 0, Camera.Position.Z - (NoteDisplayDistance * .55f)));
             }
         }
 
@@ -222,7 +219,7 @@ namespace ChartPlayer
 
                         if (note.KitPiece == EDrumKitPiece.Kick)
                         {
-                            DrawVerticalImage(Layout.Current.GetImage("HorizontalFretLine"), 0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .04f * scale);
+                            DrawLaneHorizontalLine(0.25f, numLanes - 0.25f, note.TimeOffset, 0, UIColor.Yellow, .08f * scale * scale);
                         }
                         else
                         {
