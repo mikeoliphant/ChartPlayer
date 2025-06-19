@@ -29,6 +29,8 @@ namespace ChartPlayer
         public bool Paused { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
+        public float[] Loudness { get; } = new float[512];
+        public int LoadedLoudness { get; private set; } = 0;
       
         VorbisMixer vorbisReader;
         WdlResampler resampler;
@@ -352,6 +354,10 @@ namespace ChartPlayer
 
             long framesLeft = vorbisReader.TotalSamples;
 
+            LoadedLoudness = 0;
+            float totLoud = 0;
+            int samplesPerBin = (int)Math.Ceiling(totalSamples / (float)Loudness.Length);
+
             while (framesLeft > 0)
             {
                 int samplesRequested = (int)Math.Min(framesLeft * 2, tempBuffer.Length);
@@ -399,6 +405,17 @@ namespace ChartPlayer
                     sampleData[1][currentOutputOffset] = tempBuffer[i + 1];
 
                     currentOutputOffset++;
+
+                    totLoud += tempBuffer[i] * tempBuffer[i];
+                    totLoud += tempBuffer[i + 1] * tempBuffer[i + 1];
+
+                    if ((currentOutputOffset % samplesPerBin) == 0)
+                    {
+                        Loudness[LoadedLoudness] = (float)Math.Sqrt(totLoud / (float)(samplesPerBin * 2));
+
+                        LoadedLoudness++;
+                        totLoud = 0;
+                    }
                 }
             }
         }

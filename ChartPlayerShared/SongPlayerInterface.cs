@@ -23,6 +23,9 @@ namespace ChartPlayer
 
         SongPlayer songPlayer;
         SongSectionInterface sectionInterface;
+        ImageElement waveFormDisplay;
+        EditableImage waveFormImage;
+        WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
         SongData songData;
@@ -123,13 +126,30 @@ namespace ChartPlayer
             };
             Children.Add(topStack);
 
+            Dock topDock = new Dock()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Center,
+                VerticalAlignment = EVerticalAlignment.Top
+            };
+            topStack.Children.Add(topDock);
+
+            waveFormRenderer = new WaveFormRenderer(512, 64);
+
+            waveFormDisplay = new ImageElement(waveFormRenderer.Image)
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Stretch,
+            };
+            topDock.Children.Add(waveFormDisplay);
+
             sectionInterface = new SongSectionInterface()
             {
                 HorizontalAlignment = EHorizontalAlignment.Center,
                 VerticalAlignment = EVerticalAlignment.Top,
                 Padding = new LayoutPadding(0, 5)
             };
-            topStack.Children.Add(sectionInterface);
+            topDock.Children.Add(sectionInterface);
+
 
             vocalText = new VocalDisplay()
             {
@@ -712,6 +732,8 @@ namespace ChartPlayer
         {
             if (songPlayer != null)
             {
+                waveFormRenderer.RenderImage(songPlayer.Loudness);
+
                 if (needSeek)
                 {
                     DoSeekTime(seekSecs);
@@ -828,7 +850,11 @@ namespace ChartPlayer
             }
 
             if (sections.Count == 0)
+            {
+                endTime = songPlayer.SongLengthSeconds;
+
                 return;
+            }
 
             foreach (SongSection section in sections)
             {
@@ -1000,8 +1026,36 @@ namespace ChartPlayer
             if (songPlayer.LoopMarkerEndSecond != -1)
             {
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerEndColor);
+            }          
+        }
+    }
+
+    public class WaveFormRenderer
+    {
+        public UIImage Image { get; private set; }
+        EditableImage editImage;
+        UIColor drawColor = new UIColor(100, 100, 100);
+
+        public WaveFormRenderer(int imageWidth, int imageHeight)
+        {
+            Image = new UIImage(imageWidth, imageHeight);
+            editImage = new EditableImage(Image);
+        }
+
+        public void RenderImage(ReadOnlySpan<float> audioLevelData)
+        {
+            editImage.Clear(UIColor.Transparent);
+
+            int halfHeight = editImage.ImageHeight / 2;
+
+            for (int i = 0; i < editImage.ImageWidth; i++)
+            {
+                int pixels = (int)(audioLevelData[i] * halfHeight * 2);
+
+                editImage.DrawLine(new System.Numerics.Vector2(i, halfHeight - pixels), new System.Numerics.Vector2(i, halfHeight + pixels), drawColor);
             }
-          
+
+            editImage.UpdateImageData();
         }
     }
 }
