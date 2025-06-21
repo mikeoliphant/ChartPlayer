@@ -31,7 +31,8 @@ namespace ChartPlayer
         public double TuningOffsetSemitones { get; private set; } = 0;
         public float[] Loudness { get; } = new float[512];
         public int LoadedLoudness { get; private set; } = 0;
-      
+        public float SongRMS { get; private set; } = 0;
+
         VorbisMixer vorbisReader;
         WdlResampler resampler;
         float seekTime = -1;
@@ -347,6 +348,17 @@ namespace ChartPlayer
                 }
             }
 
+            if (SongRMS != 0)
+            {
+                float linearGain = 1.0f + (0.25f - SongRMS);
+
+                for (int i = 0; i < leftChannel.Length; i++)
+                {
+                    leftChannel[i] *= linearGain;
+                    rightChannel[i] *= linearGain;
+                }
+            }
+
             CurrentSecond = ((float)currentPlaybackSample / (float)totalSamples) * SongLengthSeconds;
         }
 
@@ -359,6 +371,7 @@ namespace ChartPlayer
             long framesLeft = vorbisReader.TotalSamples;
 
             LoadedLoudness = 0;
+            float binLoud = 0;
             float totLoud = 0;
             int samplesPerBin = (int)Math.Ceiling(totalSamples / (float)Loudness.Length);
 
@@ -410,15 +423,22 @@ namespace ChartPlayer
 
                     currentOutputOffset++;
 
-                    totLoud += tempBuffer[i] * tempBuffer[i];
-                    totLoud += tempBuffer[i + 1] * tempBuffer[i + 1];
+                    binLoud += tempBuffer[i] * tempBuffer[i];
+                    binLoud += tempBuffer[i + 1] * tempBuffer[i + 1];
 
                     if ((currentOutputOffset % samplesPerBin) == 0)
                     {
-                        Loudness[LoadedLoudness] = (float)Math.Sqrt(totLoud / (float)(samplesPerBin * 2));
+                        Loudness[LoadedLoudness] = (float)Math.Sqrt(binLoud / (float)(samplesPerBin * 2));
+                        totLoud += Loudness[LoadedLoudness];
 
                         LoadedLoudness++;
-                        totLoud = 0;
+
+                        if (LoadedLoudness > (Loudness.Length * .2f))
+                        {
+                            SongRMS = totLoud / (float)LoadedLoudness;
+                        }
+
+                        binLoud = 0;
                     }
                 }
             }
