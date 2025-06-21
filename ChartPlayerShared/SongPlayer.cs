@@ -131,10 +131,14 @@ namespace ChartPlayer
 
             if (part.InstrumentType != ESongInstrumentType.Drums)
             {
-                if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
-                    TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
+                if (SongTuningMode > ESongTuningMode.A440)
+                {
+                    if ((part.Tuning != null) && part.Tuning.IsOffsetFromStandard())
+                        TuningOffsetSemitones = part.Tuning.StringSemitoneOffsets[1];
+                }
 
-                TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
+                if (SongTuningMode != ESongTuningMode.None)
+                   TuningOffsetSemitones += (double)Song.A440CentsOffset / 100.0;
 
                 TuningOffsetSemitones %= 12;
 
