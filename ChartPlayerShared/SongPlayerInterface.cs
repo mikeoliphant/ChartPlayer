@@ -728,11 +728,18 @@ namespace ChartPlayer
             }           
         }
 
+        int lastLoadedLoudness = 0;
+
         protected override void DrawContents()
         {
             if (songPlayer != null)
             {
-                waveFormRenderer.RenderImage(songPlayer.Loudness);
+                if (lastLoadedLoudness != songPlayer.LoadedLoudness)
+                {
+                    waveFormRenderer.RenderImage(songPlayer.Loudness, songPlayer.LoadedLoudness);
+
+                    lastLoadedLoudness = songPlayer.LoadedLoudness;
+                }
 
                 if (needSeek)
                 {
@@ -1042,13 +1049,13 @@ namespace ChartPlayer
             editImage = new EditableImage(Image);
         }
 
-        public void RenderImage(ReadOnlySpan<float> audioLevelData)
+        public void RenderImage(ReadOnlySpan<float> audioLevelData, int numPoints)
         {
             editImage.Clear(UIColor.Transparent);
 
             int halfHeight = editImage.ImageHeight / 2;
 
-            for (int i = 0; i < editImage.ImageWidth; i++)
+            for (int i = 0; i < numPoints; i++)
             {
                 int pixels = (int)(audioLevelData[i] * halfHeight * 2);
 
