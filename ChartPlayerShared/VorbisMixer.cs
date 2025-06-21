@@ -17,7 +17,7 @@ namespace ChartPlayer
         List<VorbisReader> readers = new List<VorbisReader>();
         float[] mixBuf = new float[0];
 
-        public VorbisMixer(string oggPath, string excludePattern)
+        public VorbisMixer(string oggPath, params string[] excludePatterns)
         {
             if (oggPath.EndsWith(".ogg", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -27,10 +27,20 @@ namespace ChartPlayer
             {
                 foreach (string ogg in Directory.GetFiles(oggPath, "*.ogg"))
                 {
-                    if ((!String.IsNullOrEmpty(excludePattern)) && Regex.IsMatch(Path.GetFileName(ogg), excludePattern, RegexOptions.IgnoreCase))
+                    bool exclude = false;
+
+                    foreach (string excludePattern in excludePatterns)
                     {
-                        continue;
+                        if ((!String.IsNullOrEmpty(excludePattern)) && Regex.IsMatch(Path.GetFileName(ogg), excludePattern, RegexOptions.IgnoreCase))
+                        {
+                            exclude = true;
+
+                            break;
+                        }
                     }
+
+                    if (exclude)
+                        continue;
 
                     readers.Add(new VorbisReader(ogg));
                 }

@@ -173,17 +173,24 @@ namespace ChartPlayer
                 SongVocals = new List<SongVocal>();
             }
 
-            string stem = MutePartStems ? part.SongStem : null;
+            string path = songPath;
 
             if (!string.IsNullOrEmpty(part.SongAudio))
             {
-                string absolutePath = Path.Combine(BasePath, part.SongAudio);
+                path = Path.Combine(BasePath, part.SongAudio);
+            }
 
-                vorbisReader = new VorbisMixer(absolutePath, stem);
+            if (MutePartStems)
+            {
+                string stem = part.SongStem;
+                string partNameStem = part.InstrumentName + "*.ogg";
+                string partTypeStem = part.InstrumentType.ToString().ToLowerInvariant() + "*.ogg";
+
+                vorbisReader = new VorbisMixer(path, stem, partNameStem, partTypeStem);
             }
             else
             {
-                vorbisReader = new VorbisMixer(songPath, stem);
+                vorbisReader = new VorbisMixer(path);
             }
 
             if (vorbisReader == null)
