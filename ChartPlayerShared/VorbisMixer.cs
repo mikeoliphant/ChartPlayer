@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using NVorbis;
 
 namespace ChartPlayer
@@ -16,7 +17,7 @@ namespace ChartPlayer
         List<VorbisReader> readers = new List<VorbisReader>();
         float[] mixBuf = new float[0];
 
-        public VorbisMixer(string oggPath)
+        public VorbisMixer(string oggPath, string excludePattern)
         {
             if (oggPath.EndsWith(".ogg", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -26,6 +27,11 @@ namespace ChartPlayer
             {
                 foreach (string ogg in Directory.GetFiles(oggPath, "*.ogg"))
                 {
+                    if ((!String.IsNullOrEmpty(excludePattern)) && Regex.IsMatch(Path.GetFileName(ogg), excludePattern, RegexOptions.IgnoreCase))
+                    {
+                        continue;
+                    }
+
                     readers.Add(new VorbisReader(ogg));
                 }
             }

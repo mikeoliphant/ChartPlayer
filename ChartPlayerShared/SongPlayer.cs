@@ -32,6 +32,7 @@ namespace ChartPlayer
         public float[] Loudness { get; } = new float[512];
         public int LoadedLoudness { get; private set; } = 0;
         public float SongRMS { get; private set; } = 0;
+        public bool MutePartStems { get; set; } = false;
 
         VorbisMixer vorbisReader;
         WdlResampler resampler;
@@ -172,15 +173,17 @@ namespace ChartPlayer
                 SongVocals = new List<SongVocal>();
             }
 
+            string stem = MutePartStems ? part.SongStem : null;
+
             if (!string.IsNullOrEmpty(part.SongAudio))
             {
                 string absolutePath = Path.Combine(BasePath, part.SongAudio);
 
-                vorbisReader = new VorbisMixer(absolutePath);
+                vorbisReader = new VorbisMixer(absolutePath, stem);
             }
             else
             {
-                vorbisReader = new VorbisMixer(Path.Combine(songPath, "song.ogg"));
+                vorbisReader = new VorbisMixer(songPath, stem);
             }
 
             if (vorbisReader == null)

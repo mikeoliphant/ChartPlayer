@@ -27,6 +27,7 @@ namespace ChartPlayer
         public string SongPath { get; set; } = null;
         public bool InvertStrings { get; set; } = false;
         public bool LeftyMode { get; set; } = false;
+        public bool MutePartStems { get; set; } = false;
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public bool BassUsingGuitar { get; set; } = false;
         public float NoteDisplaySeconds { get; set; } = 3;
@@ -100,6 +101,7 @@ namespace ChartPlayer
 
             vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
             vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
+            vStack.Children.Add(CreateTextToggleOption("MutePartStems", newSettings, "Mute current part stems: ", "Yes", "No"));
 
             return vStack;
         }
