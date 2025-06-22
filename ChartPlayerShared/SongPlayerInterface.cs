@@ -1005,9 +1005,9 @@ namespace ChartPlayer
                 bool isCurrent = (currentTime >= section.StartTime) && (currentTime < section.EndTime);
 
                 if (isCurrent)
-                    color.A = 255;
+                    color.A = 235;
                 else
-                    color.A = 192;
+                    color.A = 180;
 
                 float startPercent = section.StartTime / endTime;
                 float endPercent = section.EndTime / endTime;
