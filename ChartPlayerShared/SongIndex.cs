@@ -171,7 +171,7 @@ namespace ChartPlayer
                         AlbumName = song.AlbumName,
                         FolderPath = Path.GetRelativePath(BasePath, songPath)
                     };
-                    
+
                     foreach (SongInstrumentPart part in song.InstrumentParts.OrderBy(s => s.InstrumentType))
                     {
                         if (part.InstrumentType == ESongInstrumentType.LeadGuitar)
@@ -190,7 +190,7 @@ namespace ChartPlayer
                         {
                             indexEntry.Arrangements += "B";
 
-                            indexEntry.BassGuitarTuning = GetTuning(song,part);
+                            indexEntry.BassGuitarTuning = GetTuning(song, part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Drums)
                         {

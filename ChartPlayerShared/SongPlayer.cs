@@ -177,7 +177,7 @@ namespace ChartPlayer
 
             if (!string.IsNullOrEmpty(part.SongAudio))
             {
-                path = Path.Combine(BasePath, part.SongAudio);
+                path = Path.Combine(songPath, part.SongAudio);
             }
 
             if (MutePartStems)
@@ -382,7 +382,6 @@ namespace ChartPlayer
 
             LoadedLoudness = 0;
             float binLoud = 0;
-            float totLoud = 0;
             int samplesPerBin = (int)Math.Ceiling(totalSamples / (float)Loudness.Length);
 
             while (framesLeft > 0)
@@ -439,14 +438,14 @@ namespace ChartPlayer
                     if ((currentOutputOffset % samplesPerBin) == 0)
                     {
                         Loudness[LoadedLoudness] = (float)Math.Sqrt(binLoud / (float)(samplesPerBin * 2));
-                        totLoud += Loudness[LoadedLoudness];
-
-                        LoadedLoudness++;
 
                         if (LoadedLoudness > (Loudness.Length * .2f))
                         {
-                            SongRMS = totLoud / (float)LoadedLoudness;
+                            // Taking max bin RMS keeps silence from having too much of an impact
+                            SongRMS = Math.Max(SongRMS, Loudness[LoadedLoudness]);
                         }
+
+                        LoadedLoudness++;
 
                         binLoud = 0;
                     }
