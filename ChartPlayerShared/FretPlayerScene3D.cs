@@ -779,10 +779,6 @@ namespace ChartPlayer
                         DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.06f);
 
                     DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.04f);
-
-                    // Note Modifier
-                    if (modifierImage != null)
-                        DrawVerticalImage(modifierImage, drawFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
                 }
             }
             else    // Fretted note
@@ -838,11 +834,14 @@ namespace ChartPlayer
 
                         DrawVerticalImage(stringNoteImages[note.String], drawFret - 0.5f, noteHeadTime, noteHeadHeight, stringColor, 0.08f);
                     }
-
-                    // Note modifier
-                    if (modifierImage != null)
-                        DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
                 }
+            }
+
+            if (!isCurrent || drawCurrent)
+            {
+                // Note Modifier
+                if (modifierImage != null)
+                    DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
             }
 
             if (!isCurrent)
