@@ -46,6 +46,8 @@ namespace ChartPlayer
         double pitchShift = 1.0;
         float loopMarkerStartSecond = -1;
         float loopMarkerEndSecond = -1;
+        float linearGain = 1.0f;
+        const float SmoothEpsilon = .0001f;
 
         public SongPlayer()
         {
@@ -360,10 +362,15 @@ namespace ChartPlayer
 
             if (SongRMS != 0)
             {
-                float linearGain = 1.0f + (0.25f - SongRMS);
+                float desiredGain = 1.0f + (0.25f - SongRMS);
 
                 for (int i = 0; i < leftChannel.Length; i++)
                 {
+                    if (Math.Abs(linearGain - desiredGain) > SmoothEpsilon)
+                    {
+                        linearGain = (.99f * linearGain) + (.01f * desiredGain);
+                    }
+
                     leftChannel[i] *= linearGain;
                     rightChannel[i] *= linearGain;
                 }
