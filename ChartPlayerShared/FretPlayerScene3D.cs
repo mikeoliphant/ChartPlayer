@@ -757,9 +757,11 @@ namespace ChartPlayer
 
             int stringOffset = GetStringOffset(note.String);
 
+            float drawFret = note.Fret;
+
             if (note.Fret == 0)   // Open string
             {
-                float midAnchorFret = (float)note.HandFret + 1;
+                drawFret = (float)note.HandFret + 1 + 0.5f;
 
                 if (!(drawCurrent && isCurrent) && (note.TimeOffset + note.TimeLength > currentTime))
                 {
@@ -767,26 +769,24 @@ namespace ChartPlayer
                     maxFret = Math.Max(maxFret, note.HandFret + 3);
 
                     // Sustain note tail
-                    DrawFlatImage(stringNoteTrailImages[note.String], midAnchorFret, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
+                    DrawFlatImage(stringNoteTrailImages[note.String], drawFret - 0.5f, noteHeadTime, noteHeadTime + noteSustain, GetStringHeight(stringOffset), stringColor, .05f);
                 }
 
                 if (!isCurrent || drawCurrent)
                 {
                     // Note head
                     if (isDetected)
-                        DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.05f);
+                        DrawVerticalImage(Layout.Current.GetImage("GuitarDetected"), note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.06f);
 
-                    DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.03f);
+                    DrawVerticalImage(stringNoteImages[note.String], note.HandFret - 1, note.HandFret + 3, noteHeadTime, GetStringHeight(stringOffset), stringColor, 0.04f);
 
                     // Note Modifier
                     if (modifierImage != null)
-                        DrawVerticalImage(modifierImage, midAnchorFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
+                        DrawVerticalImage(modifierImage, drawFret, noteHeadTime, GetStringHeight(stringOffset), UIColor.White, 0.08f);
                 }
             }
             else    // Fretted note
             {
-                float drawFret = note.Fret;
-
                 if (isSlide && (note.TimeOffset < currentTime))
                 {
                     drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
@@ -839,9 +839,6 @@ namespace ChartPlayer
 
                 if (!isCurrent || drawCurrent)
                 {
-                    // Vertical line from fretboard up to note head
-                    DrawFretVerticalLine(note.Fret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
-
                     float noteHeadHeight = GetNoteHeadHeight(note);
 
                     // Note head
@@ -859,6 +856,9 @@ namespace ChartPlayer
                         DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
                 }
             }
+
+            // Vertical line from fretboard up to note head
+            DrawFretVerticalLine(drawFret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
 
             if (note.TimeOffset > currentTime)
                 firstNote = note;
