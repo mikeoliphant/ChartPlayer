@@ -825,18 +825,6 @@ namespace ChartPlayer
                     }
                 }
 
-                if (!isCurrent)
-                {
-                    // Note "shadow" on fretboard
-                    DrawFretHorizontalLine(note.Fret - 1, note.Fret, noteHeadTime, 0, whiteHalfAlpha, 0.08f);
-
-                    // Small lines for lower strings
-                    for (int prevString = 0; prevString < stringOffset; prevString++)
-                    {
-                        DrawFretHorizontalLine(note.Fret - 0.6f, note.Fret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha, .04f);
-                    }
-                }
-
                 if (!isCurrent || drawCurrent)
                 {
                     float noteHeadHeight = GetNoteHeadHeight(note);
@@ -854,6 +842,18 @@ namespace ChartPlayer
                     // Note modifier
                     if (modifierImage != null)
                         DrawVerticalImage(modifierImage, drawFret - 0.5f, noteHeadTime, noteHeadHeight, UIColor.White, 0.08f);
+                }
+            }
+
+            if (!isCurrent)
+            {
+                // Note "shadow" on fretboard
+                DrawFretHorizontalLine(drawFret - 1, drawFret, noteHeadTime, 0, whiteHalfAlpha, 0.08f);
+
+                // Small lines for lower strings
+                for (int prevString = 0; prevString < stringOffset; prevString++)
+                {
+                    DrawFretHorizontalLine(drawFret - 0.6f, drawFret - 0.4f, noteHeadTime, GetStringHeight(prevString), whiteHalfAlpha, .04f);
                 }
             }
 
