@@ -852,13 +852,16 @@ namespace ChartPlayer
 
             sections = songPlayer.SongInstrumentNotes.Sections;
 
-            if (sections.Count == 0)
+            int minUsefulSections = 3;
+
+            if (sections.Count < minUsefulSections)
             {
                 sections = songPlayer.SongStructure.Sections;
             }
 
-            if (sections.Count == 0)
+            if (sections.Count < minUsefulSections)
             {
+                sections = new();
                 endTime = songPlayer.SongLengthSeconds;
 
                 return;
