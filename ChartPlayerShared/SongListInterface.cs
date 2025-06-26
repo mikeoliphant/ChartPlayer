@@ -882,6 +882,11 @@ namespace ChartPlayer
                 ClickAction = delegate {
                     SetSortColumn(column, toggleReverse: true);
                     Sort();
+                },
+                DoubleClickAction = delegate
+                {
+                    SetSortColumn(column, toggleReverse: false);
+                    Sort(goToFirstItem: true);
                 }
             });
 
