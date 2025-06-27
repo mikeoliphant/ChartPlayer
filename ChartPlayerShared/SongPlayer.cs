@@ -360,7 +360,7 @@ namespace ChartPlayer
                 }
             }
 
-            if (SongRMS != 0)
+            if (LoadedLoudness > (Loudness.Length * .2f))
             {
                 float desiredGain = 1.0f + (0.25f - SongRMS);
 
@@ -446,11 +446,8 @@ namespace ChartPlayer
                     {
                         Loudness[LoadedLoudness] = (float)Math.Sqrt(binLoud / (float)(samplesPerBin * 2));
 
-                        if (LoadedLoudness > (Loudness.Length * .2f))
-                        {
-                            // Taking max bin RMS keeps silence from having too much of an impact
-                            SongRMS = Math.Max(SongRMS, Loudness[LoadedLoudness]);
-                        }
+                        // Taking max bin RMS keeps silence from having too much of an impact
+                        SongRMS = Math.Max(SongRMS, Loudness[LoadedLoudness]);
 
                         LoadedLoudness++;
 

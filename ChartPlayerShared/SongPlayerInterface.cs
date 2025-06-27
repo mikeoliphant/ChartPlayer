@@ -737,7 +737,7 @@ namespace ChartPlayer
             {
                 if (lastLoadedLoudness != songPlayer.LoadedLoudness)
                 {
-                    waveFormRenderer.RenderImage(songPlayer.Loudness, songPlayer.LoadedLoudness);
+                    waveFormRenderer.RenderImage(songPlayer.Loudness, songPlayer.LoadedLoudness, (songPlayer.SongRMS > 0) ? songPlayer.SongRMS : 0.25f);
 
                     lastLoadedLoudness = songPlayer.LoadedLoudness;
                 }
@@ -1053,7 +1053,7 @@ namespace ChartPlayer
             editImage = new EditableImage(Image);
         }
 
-        public void RenderImage(ReadOnlySpan<float> audioLevelData, int numPoints)
+        public void RenderImage(ReadOnlySpan<float> audioLevelData, int numPoints, float maxRMS)
         {
             editImage.Clear(UIColor.Transparent);
 
@@ -1061,7 +1061,7 @@ namespace ChartPlayer
 
             for (int i = 0; i < numPoints; i++)
             {
-                int pixels = (int)(audioLevelData[i] * halfHeight * 2);
+                int pixels = (int)(audioLevelData[i] * halfHeight * 0.8f / maxRMS);
 
                 editImage.DrawLine(new System.Numerics.Vector2(i, halfHeight - pixels), new System.Numerics.Vector2(i, halfHeight + pixels), drawColor);
             }
