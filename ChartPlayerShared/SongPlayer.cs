@@ -362,7 +362,7 @@ namespace ChartPlayer
 
             if (LoadedLoudness > (Loudness.Length * .2f))
             {
-                float desiredGain = 1.0f + (0.25f - SongRMS);
+                float desiredGain = 0.25f / SongRMS;
 
                 for (int i = 0; i < leftChannel.Length; i++)
                 {
