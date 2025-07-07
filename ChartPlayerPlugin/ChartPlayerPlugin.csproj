@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
-		<Version>0.1.16</Version>
+		<Version>0.1.17</Version>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<TieredCompilation>false</TieredCompilation>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -16,7 +16,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="AudioPlugSharp" Version="0.7.0" />
-		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.1" />
+		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.3" />
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.2.1105" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
 		<PackageReference Include="NVorbis" Version="0.9.1" />
