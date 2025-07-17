@@ -54,3 +54,13 @@ jobs:
       with:
         name: ChartPlayerMacX64
         path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\osx-x64\publish
+
+    - name: Publish OSX-Arm64
+      working-directory: ${{github.workspace}}
+      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime osx-arm64 -p:PublishSingleFile=true --self-contained true
+        
+    - name: Create OSX-Arm64 Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: ChartPlayerMacArm64
+        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\osx-arm64\publish
