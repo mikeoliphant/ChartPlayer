@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using AudioPlugSharp;
 using AudioPlugSharpJack;
 
 namespace ChartPlayer
