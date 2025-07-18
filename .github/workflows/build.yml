@@ -21,13 +21,13 @@ jobs:
     - name: Run Image Processor
       working-directory: ${{github.workspace}}
       run: |
-        msbuild .\ChartPlayer.sln /restore /t:Rebuild /t:ImageProcessor /p:Configuration="Release"
+        dotnet build -c Release ImageProcessor
         cd ImageProcessor\bin\Release\net8.0
         .\ImageProcessor.exe
         
     - name: Run MSBuild
       working-directory: ${{github.workspace}}
-      run: msbuild .\ChartPlayer.sln /p:Configuration=Release
+      run: dotnet build -c Release ChartPlayerPlugin
 
     - name: Create Plugin Archive
       uses: actions/upload-artifact@v4
