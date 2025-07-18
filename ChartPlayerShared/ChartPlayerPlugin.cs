@@ -133,18 +133,22 @@ namespace ChartPlayer
 
                 ChartPlayerGame game;
 
-                Logger.Log("Create ChartPlayer Game");
-
                 if (ChartPlayerSaveState.IsFullscreen)
                 {
                     screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
                     screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
                 }
 
+                Logger.Log("Create game host");
+
                 using (GameHost = new MonoGameHost(screenWidth, screenHeight, ChartPlayerSaveState.IsFullscreen))
                 {
+                    Logger.Log("Create game");
+
                     game = new ChartPlayerGame();
                     game.Plugin = this;
+
+                    Logger.Log("Game created");
 
                     GameHost.IsMouseVisible = true;
 
