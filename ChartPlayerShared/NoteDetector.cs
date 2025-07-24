@@ -63,7 +63,7 @@ namespace ChartPlayer
         {
             for (int pos = 0; pos < samples.Length; pos++)
             {
-                fftData[pos + offset].X = (float)samples[pos] * (float)FastFourierTransform.HammingWindow(pos + offset, fftData.Length);
+                fftData[pos + offset].X = (float)samples[pos] * (float)FastFourierTransform.HannWindow(pos + offset, fftData.Length);
                 fftData[pos + offset].Y = 0;
             }
         }
