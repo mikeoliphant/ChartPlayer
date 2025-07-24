@@ -34,22 +34,16 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup MSBuild and add to PATH
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Restore NuGet Packages
-      run: dotnet restore
-
     - name: Run Image Processor
       working-directory: ${{github.workspace}}
       run: |
-        msbuild .\ChartPlayer.sln /restore /t:Rebuild /t:ImageProcessor /p:Configuration="Release" 
+        dotnet build -c Release ImageProcessor
         cd ImageProcessor\bin\Release\net8.0
         .\ImageProcessor.exe
         
-    - name: Run MSBuild
+    - name: Build VST Plugin
       working-directory: ${{github.workspace}}
-      run: msbuild .\ChartPlayer.sln /p:Configuration=Release
+      run: dotnet build -c Release ChartPlayerPlugin
       
     - name: Add Plugin Archive
       working-directory: ${{github.workspace}}
