@@ -5,3 +5,6 @@
 	path = Dependencies/OpenSongChart
 	url = https://github.com/mikeoliphant/OpenSongChart
 
+[submodule "Dependencies/PitchDetect"]
+	path = Dependencies/PitchDetect
+	url = https://github.com/mikeoliphant/PitchDetect
