@@ -105,6 +105,11 @@ namespace ChartPlayer
         {
             if (frequencies.Length == 1)
             {
+                if (frequencies[0] == 0)
+                {
+                    return (spectrum.Max() > 1);
+                }
+
                 if (currentPitch == 0)
                     return false;
 

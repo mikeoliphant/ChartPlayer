@@ -522,7 +522,7 @@ namespace ChartPlayer
 
                                     if (stringNote.SlideFret != -1)
                                     {
-                                        drawFret = MathUtil.Lerp(stringNote.Fret, stringNote.SlideFret, MathUtil.Saturate((currentTime - stringNote.TimeOffset) / stringNote.TimeLength));
+                                        drawFret = GetSlideFret(stringNote);
                                     }
 
                                     DrawVerticalImage(Layout.Current.GetImage("FingerOutline"), drawFret - 0.5f, currentTime, GetNoteHeadHeight(stringNote), UIColor.White, 0.05f);
@@ -785,7 +785,7 @@ namespace ChartPlayer
             {
                 if (isSlide && (note.TimeOffset < currentTime))
                 {
-                    drawFret = MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+                    drawFret = GetSlideFret(note);
                 }
 
                 if (!(drawCurrent && isCurrent) && (note.TimeOffset + note.TimeLength > currentTime))
@@ -1062,6 +1062,11 @@ namespace ChartPlayer
             }
         }
 
+        float GetSlideFret(in SongNote note)
+        {
+            return MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+        }
+
         float GetCentsOffset(float strng, float cents)
         {
             if (strng < 2)
@@ -1070,11 +1075,11 @@ namespace ChartPlayer
             return cents / -30.0f;
         }
 
-        float GetBendOffset(float startTime, float strng, in CentsOffset[] bendOffsets)
+        float GetBendCents(float startTime, float strng, in CentsOffset[] bendOffsets)
         {
             if (startTime > currentTime)
             {
-                return (bendOffsets[0].TimeOffset == startTime) ? GetCentsOffset(strng, bendOffsets[0].Cents) : 0;
+                return (bendOffsets[0].TimeOffset == startTime) ? bendOffsets[0].Cents : 0;
             }
 
             int lastCents = 0;
@@ -1086,14 +1091,14 @@ namespace ChartPlayer
                 {
                     float timePercent = (offset.TimeOffset - currentTime) / (offset.TimeOffset - lastTime);
 
-                    return GetCentsOffset(strng, MathUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent));
+                    return MathUtil.Lerp((float)offset.Cents, (float)lastCents, timePercent);
                 }
 
                 lastCents = offset.Cents;
                 lastTime = offset.TimeOffset;
             }
 
-            return GetCentsOffset(strng, lastCents);
+            return lastCents;
         }
 
         float GetNoteHeadHeight(in SongNote note)
@@ -1102,7 +1107,7 @@ namespace ChartPlayer
 
             if ((note.CentsOffsets != null) && (note.CentsOffsets.Length > 0))
             {
-                float bendOffset = GetBendOffset(note.TimeOffset, note.String, note.CentsOffsets);
+                float bendOffset = GetCentsOffset(note.String, GetBendCents(note.TimeOffset, note.String, note.CentsOffsets));
 
                 if (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.InvertStrings)
                     noteHeadHeight -= bendOffset;
@@ -1313,9 +1318,9 @@ namespace ChartPlayer
             return A4Frequency / Math.Pow(HalfStepRatio, noteDiff);
         }
 
-        double GetNoteFrequency(int strng, int fret)
+        double GetNoteFrequency(int strng, int fret, double semitoneOffset)
         {
-            double semitoneOffset = fret + stringOffsetSemitones[strng] + DetectSemitoneOffset;
+            semitoneOffset = fret + stringOffsetSemitones[strng] + semitoneOffset;
 
             if (numStrings == 6)
             {
@@ -1351,7 +1356,7 @@ namespace ChartPlayer
                 {
                     if ((chord.Fingers[str] != -1) || (chord.Frets[str] != -1))
                     {
-                        double freq = GetNoteFrequency(str, chord.Frets[str]);
+                        double freq = GetNoteFrequency(str, chord.Frets[str], DetectSemitoneOffset);
 
                         freqs[pos++] = freq;
                     }
@@ -1362,7 +1367,24 @@ namespace ChartPlayer
                 return detected;
             }
 
-            return noteDetector.NoteDetect(GetNoteFrequency(note.String, note.Fret));
+            if (note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute) || note.Techniques.HasFlag(ESongNoteTechnique.PalmMute))
+            {
+                return noteDetector.NoteDetect(0);
+            }
+            else if (note.Techniques.HasFlag(ESongNoteTechnique.Slide))
+            {
+                return noteDetector.NoteDetect(note.String, GetSlideFret(note));
+            }
+            else if (note.Techniques.HasFlag(ESongNoteTechnique.Bend))
+            {
+                float centsOffset = GetBendCents(note.TimeOffset, note.SlideFret, note.CentsOffsets);
+
+                double freq = GetNoteFrequency(note.String, note.Fret, DetectSemitoneOffset + (centsOffset / 100));
+
+                return noteDetector.NoteDetect(freq);
+            }
+
+            return noteDetector.NoteDetect(GetNoteFrequency(note.String, note.Fret, DetectSemitoneOffset));
         }
     }
 }
