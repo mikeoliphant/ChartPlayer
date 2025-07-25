@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
+﻿using PitchDetect;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using UILayout;
+using System.Threading;
 
 namespace ChartPlayer
 {
@@ -11,14 +11,29 @@ namespace ChartPlayer
     {
         public double MaxFrequency { get; set; }
 
-        const int FFTSize = 4096;
-        Complex[] fftData = new Complex[FFTSize];
-        float[] fftOutput = new float[FFTSize / 2];
+        const int SpecFFTSize = 8192;
+        const int CorrFFTSize = 4096;
+
+        PitchDetector pitchDetector;
+        PitchDetector spectrumDetector;
+        float[] fftData;
+        float[] spectrum;
+        float currentPitch = 0;
         int msPerPass = 50;
 
-        List<(float Power, int Bin)> topX = null;
         Stopwatch stopwatch = new Stopwatch();
         bool stop = false;
+        float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
+        int[] topX = new int[10];
+
+        public NoteDetector(uint sampleRate)
+        {
+            pitchDetector = new(sampleRate, CorrFFTSize, zeroPad: true);
+            spectrumDetector = new(sampleRate, SpecFFTSize, zeroPad: false);
+
+            fftData = new float[Math.Max(SpecFFTSize, CorrFFTSize)];
+            spectrum = new float[SpecFFTSize / 2];
+        }
 
         public void Run()
         {
@@ -43,28 +58,16 @@ namespace ChartPlayer
             stop = true;
         }
 
-        float GetPower(double frequency)
-        {
-            double bin = GetBin(frequency);
-
-            int low = (int)Math.Floor(bin);
-
-            double partial = bin - low;
-
-            return (float)MathUtil.Lerp(fftOutput[low], fftOutput[low + 1], partial);
-        }
-
         double GetBin(double frequency)
         {
             return (fftData.Length * (frequency / ChartPlayerGame.Instance.Plugin.Host.SampleRate));
         }
 
-        void ConvertToComplex(ReadOnlySpan<float> samples, int offset)
+        void CopyAudio(ReadOnlySpan<float> samples, int offset)
         {
             for (int pos = 0; pos < samples.Length; pos++)
             {
-                fftData[pos + offset].X = (float)samples[pos] * (float)FastFourierTransform.HannWindow(pos + offset, fftData.Length);
-                fftData[pos + offset].Y = 0;
+                fftData[pos + offset] = samples[pos];
             }
         }
 
@@ -72,66 +75,87 @@ namespace ChartPlayer
         {
             SampleHistory<float> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
 
-            history.Process(ConvertToComplex, fftData.Length);
+            history.Process(CopyAudio, Math.Max(SpecFFTSize, CorrFFTSize));
 
-            FastFourierTransform.FFT(true, (int)Math.Log(fftData.Length, 2.0), fftData);
+            int offset = fftData.Length - CorrFFTSize;
 
-            for (int i = 0; i < fftData.Length / 2; i++)
-            {
-                float fft = Math.Abs(fftData[i].X + fftData[i].Y);
-                float fftMirror = Math.Abs(fftData[fftData.Length - i - 1].X + fftData[fftData.Length - i - 1].Y);
+            currentPitch = pitchDetector.GetPitch(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize));
 
-                fftOutput[i] = (fft + fftMirror) * (0.5f + (i / (fftData.Length * 2)));
-            }
+            offset = fftData.Length - SpecFFTSize;
 
-            int maxFrequencyBin = (int)GetBin(MaxFrequency);  // Max note frequency
+            spectrumDetector.GetSpectrum(new ReadOnlySpan<float>(fftData, offset, SpecFFTSize), spectrum);
+        }
 
-            topX = fftOutput.Take(maxFrequencyBin).Select((Power, Bin) => (Power, Bin)).OrderByDescending(x => x.Power).Take(10).ToList();
-            //{
-            //    topX.Add((top.Power + fftOutput[top.Bin * 2], top.Bin));
-            //}
+        bool IsPeak(double bin)
+        {
+            return topX.Contains((int)bin) || topX.Contains((int)(bin - 0.4)) || topX.Contains((int)(bin + 0.4));
+        }
+
+        bool IsCloseEnough(float pitch, float desiredPitch)
+        {
+            float ratio = desiredPitch / pitch;
+
+            if (ratio < 1)
+                ratio = 1.0f / ratio;
+
+            return ratio < validPitchRatio;
         }
 
         public bool NoteDetect(params double[] frequencies)
         {
-            if (topX == null)
+            if (frequencies.Length == 1)
+            {
+                if (currentPitch == 0)
+                    return false;
+
+                if (IsCloseEnough(currentPitch, (float)frequencies[0]))
+                    return true;
+
+                // Allow octave down
+                if (IsCloseEnough(currentPitch / 2, (float)frequencies[0]))
+                    return true;
+
+                // Allow octave up
+                if (IsCloseEnough(currentPitch * 2, (float)frequencies[0]))
+                    return true;
+
+                return false;
+            }
+
+            double max = spectrum.Max();
+
+            if (max < 1)
                 return false;
 
-            int numInTop = 0;
+            double min = max * 0.1;
+
+            int topPos = 0;
+
+            Array.Clear(topX);
+
+            for (int bin = 1; bin < (spectrum.Length - 1); bin++)
+            {
+                if (spectrum[bin] < min)
+                    continue;
+
+                if ((spectrum[bin] > spectrum[bin - 1]) && (spectrum[bin] > spectrum[bin + 1]))
+                {
+                    topX[topPos++] = bin;
+
+                    if (topPos == topX.Length)
+                        break;
+                }
+            }
 
             foreach (double freq in frequencies)
             {
-                int bin = (int)GetBin(freq);
+                double bin = GetBin(freq);
 
-                if (topX.Take(frequencies.Length * 2).Where(x => (x.Bin == bin) || (x.Bin == (bin * 2)) || (x.Bin == (bin * 3))).Any())
-                {
-                    numInTop++;
-                }
+                if (!IsPeak(bin) && !IsPeak(bin / 2) && !IsPeak(bin * 2))
+                    return false;
             }
 
-            float totPower = 0;
-
-            foreach (var freq in topX)
-            {
-                totPower += freq.Power;
-            }
-
-            if (totPower > .001)
-            {
-                if (frequencies.Length == 1)
-                {
-                    if (numInTop == 0)
-                    {
-
-                    }
-
-                    return (numInTop == 1);
-                }
-
-                return (numInTop >= frequencies.Length - 1);
-            }
-
-            return false;
+            return true;
         }
     }
 }

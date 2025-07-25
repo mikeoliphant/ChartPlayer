@@ -144,7 +144,7 @@ namespace ChartPlayer
                 stringOffsetSemitones[str] = baseOffset + player.SongInstrumentPart.Tuning.StringSemitoneOffsets[str];
             }
 
-            noteDetector = new NoteDetector();
+            noteDetector = new NoteDetector((uint)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
             noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
 
             noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
@@ -406,7 +406,7 @@ namespace ChartPlayer
 
                             if ((note.TimeOffset <= currentTime) && (note.TimeOffset > scoreStartSecs))
                             {
-                                isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : currentStringDetected[note.String];
+                                isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : (currentStringDetected[note.String] && (currentStringNotes[note.String].Value.EndTime == note.EndTime));
 
                                 if (notesDetected[pos] == 0)
                                 {

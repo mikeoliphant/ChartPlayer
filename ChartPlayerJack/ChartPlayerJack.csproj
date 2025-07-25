@@ -29,6 +29,7 @@
 		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Dependencies\PitchDetect\PitchDetect\PitchDetect.csproj" />
 		<ProjectReference Include="..\Dependencies\UILayout\UILayout.MonoGame.DesktopGL\UILayout.MonoGame.DesktopGL.csproj" />
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">

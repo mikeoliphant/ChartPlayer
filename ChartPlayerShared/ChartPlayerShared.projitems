@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ChartScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DrumPlayerScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DrumUIMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FastFourierTransform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HelpDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeysPlayerScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MidiMap.cs" />
