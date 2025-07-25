@@ -143,6 +143,8 @@ namespace ChartPlayer
 
                 using (GameHost = new MonoGameHost(screenWidth, screenHeight, ChartPlayerSaveState.IsFullscreen))
                 {
+                    GameHost.UsePremultipliedAlpha = true;
+
                     Logger.Log("Create game");
 
                     game = new ChartPlayerGame();

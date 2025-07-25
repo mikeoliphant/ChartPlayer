@@ -29,7 +29,9 @@ namespace ChartPlayer
 
             Host.InactiveSleepTime = TimeSpan.Zero;
 
-            LoadImageManifest("ImageManifest.xml");
+            var loader = new MonoGameContentLoader(Host.Content);
+
+            LoadImageManifest(loader, "ImageManifest.xml");
 
             GraphicsContext.SingleWhitePixelImage = GetImage("SingleWhitePixel");
 
