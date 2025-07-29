@@ -21,8 +21,8 @@
 		<EmbeddedResource Include="Icon.bmp" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="AudioPlugSharp" Version="0.7.4" />
-		<PackageReference Include="AudioPlugSharpJack" Version="0.7.4" />
+		<PackageReference Include="AudioPlugSharp" Version="0.7.6" />
+		<PackageReference Include="AudioPlugSharpJack" Version="0.7.7" />
 		<PackageReference Include="JackSharpCore" Version="0.1.2" />
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
