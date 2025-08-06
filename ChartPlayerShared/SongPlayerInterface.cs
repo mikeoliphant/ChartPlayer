@@ -652,37 +652,50 @@ namespace ChartPlayer
         }
 
         bool didPause = false;
+        float startDragSecs = 0;
 
         public override bool HandleTouch(in Touch touch)
         {
             if (!base.HandleTouch(touch))
             {
-                if (IsTap(touch, this) && !didPause)
+                if (songPlayer != null)
                 {
-                    if (songPlayer.Paused)
+                    if (IsTap(touch, this) && !didPause)
                     {
-                        TogglePaused();
-                    }
-                }
-
-                switch (touch.TouchState)
-                {
-                    case ETouchState.Pressed:
-                        if (!songPlayer.Paused)
+                        if (songPlayer.Paused)
                         {
                             TogglePaused();
-
-                            didPause = true;
                         }
-                        break;
-                    case ETouchState.Moved:
-                        break;
-                    case ETouchState.Released:
-                    case ETouchState.Invalid:
-                        didPause = false;
-                        break;
-                    default:
-                        break;
+                    }
+
+                    switch (touch.TouchState)
+                    {
+                        case ETouchState.Pressed:
+                            CaptureTouch(touch);
+
+                            startDragSecs = songPlayer.CurrentSecond;
+
+                            if (!songPlayer.Paused)
+                            {
+                                TogglePaused();
+
+                                didPause = true;
+                            }
+                            break;
+                        case ETouchState.Moved:
+                            float delta = (touch.Position.X - TouchCaptureStartPosition.X) + (touch.Position.Y - TouchCaptureStartPosition.Y);
+
+                            songPlayer.SeekTime(startDragSecs + (delta / 100));
+
+                            break;
+                        case ETouchState.Released:
+                        case ETouchState.Invalid:
+                            didPause = false;
+                            ReleaseTouch();
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
