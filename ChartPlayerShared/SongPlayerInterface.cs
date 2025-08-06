@@ -122,7 +122,8 @@ namespace ChartPlayer
             VerticalStack topStack = new VerticalStack()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Top
+                VerticalAlignment = EVerticalAlignment.Top,
+                AbsorbAllInput = true
             };
             Children.Add(topStack);
 
@@ -150,7 +151,6 @@ namespace ChartPlayer
             };
             topDock.Children.Add(sectionInterface);
 
-
             vocalText = new VocalDisplay()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
@@ -171,7 +171,8 @@ namespace ChartPlayer
                 Padding = new LayoutPadding(5),
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = 2
+                ChildSpacing = 2,
+                AbsorbAllInput = true
             };
             bottomStack.Children.Add(bottomButtonStack);
 
@@ -345,7 +346,8 @@ namespace ChartPlayer
                 Padding = new LayoutPadding(10),
                 HorizontalAlignment = EHorizontalAlignment.Right,
                 VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = 2
+                ChildSpacing = 2,
+                AbsorbAllInput = true
             };
 
             bottomStack.Children.Add(songInfoStack);
@@ -649,13 +651,38 @@ namespace ChartPlayer
             }
         }
 
+        bool didPause = false;
+
         public override bool HandleTouch(in Touch touch)
         {
             if (!base.HandleTouch(touch))
             {
-                if (IsTap(touch, this))
+                if (IsTap(touch, this) && !didPause)
                 {
-                    TogglePaused();
+                    if (songPlayer.Paused)
+                    {
+                        TogglePaused();
+                    }
+                }
+
+                switch (touch.TouchState)
+                {
+                    case ETouchState.Pressed:
+                        if (!songPlayer.Paused)
+                        {
+                            TogglePaused();
+
+                            didPause = true;
+                        }
+                        break;
+                    case ETouchState.Moved:
+                        break;
+                    case ETouchState.Released:
+                    case ETouchState.Invalid:
+                        didPause = false;
+                        break;
+                    default:
+                        break;
                 }
             }
 

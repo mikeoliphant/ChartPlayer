@@ -148,6 +148,7 @@ namespace ChartPlayer
             noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
 
             noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
+            noteDetectThread.Name = "NoteDetect";
             noteDetectThread.Start();
 
             notesDetected = new sbyte[player.SongInstrumentNotes.Notes.Count];
