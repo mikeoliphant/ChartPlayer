@@ -144,7 +144,7 @@ namespace ChartPlayer
                 stringOffsetSemitones[str] = baseOffset + player.SongInstrumentPart.Tuning.StringSemitoneOffsets[str];
             }
 
-            NoteDetector = new NoteDetector((uint)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
+            NoteDetector = new NoteDetector((int)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
             NoteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
 
             noteDetectThread = new Thread(new ThreadStart(NoteDetector.Run));

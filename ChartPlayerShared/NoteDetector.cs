@@ -30,7 +30,7 @@ namespace ChartPlayer
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
         int[] topX = new int[5];
 
-        public NoteDetector(uint sampleRate)
+        public NoteDetector(int sampleRate)
         {
             pitchDetector = new(sampleRate, CorrFFTSize, zeroPad: true);
             spectrumDetector = new(sampleRate, SpecFFTSize, zeroPad: false);
