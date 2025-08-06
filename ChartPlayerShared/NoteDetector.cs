@@ -10,6 +10,8 @@ namespace ChartPlayer
     public class NoteDetector
     {
         public double MaxFrequency { get; set; }
+        public float CurrentPitch { get; private set; } = 0;
+        public float RunningPitch { get; private set; } = 0;
 
         const int SpecFFTSize = 8192;
         const int CorrFFTSize = 4096;
@@ -18,13 +20,15 @@ namespace ChartPlayer
         PitchDetector spectrumDetector;
         float[] fftData;
         float[] spectrum;
-        float currentPitch = 0;
         int msPerPass = 50;
+        float[] pitchHistory = new float[5];
+        int histPos = 0;
+        int numHist = 0;
 
         Stopwatch stopwatch = new Stopwatch();
         bool stop = false;
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
-        int[] topX = new int[10];
+        int[] topX = new int[5];
 
         public NoteDetector(uint sampleRate)
         {
@@ -44,7 +48,7 @@ namespace ChartPlayer
 
                 UpdateFFT();
 
-                long elapsedMS = stopwatch.ElapsedMilliseconds;
+                double elapsedMS = stopwatch.Elapsed.TotalMilliseconds;
 
                 if (elapsedMS < msPerPass)
                 {
@@ -79,7 +83,37 @@ namespace ChartPlayer
 
             int offset = fftData.Length - CorrFFTSize;
 
-            currentPitch = pitchDetector.GetPitch(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize));
+            CurrentPitch = pitchDetector.GetPitch(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize));
+
+            if (CurrentPitch == 0)
+            {
+                RunningPitch = 0;
+                numHist = 0;
+            }
+            else
+            {
+                pitchHistory[histPos] = CurrentPitch;
+                histPos = (histPos + 1) % pitchHistory.Length;
+
+                numHist = Math.Min(numHist + 1, pitchHistory.Length);
+            }
+
+            if (numHist > 0)
+            {
+                float sum = 0;
+
+                for (int i = 0; i < numHist; i++)
+                {
+                    int ofs = histPos - i;
+
+                    if (ofs < 0)
+                        ofs += pitchHistory.Length;
+
+                    sum += pitchHistory[ofs];
+                }
+
+                RunningPitch = sum / numHist;
+            }
 
             offset = fftData.Length - SpecFFTSize;
 
@@ -110,18 +144,18 @@ namespace ChartPlayer
                     return (spectrum.Max() > 1);
                 }
 
-                if (currentPitch == 0)
+                if (CurrentPitch == 0)
                     return false;
 
-                if (IsCloseEnough(currentPitch, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch, (float)frequencies[0]))
                     return true;
 
                 // Allow octave down
-                if (IsCloseEnough(currentPitch / 2, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch / 2, (float)frequencies[0]))
                     return true;
 
                 // Allow octave up
-                if (IsCloseEnough(currentPitch * 2, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch * 2, (float)frequencies[0]))
                     return true;
 
                 return false;

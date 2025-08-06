@@ -28,6 +28,8 @@ namespace ChartPlayer
         WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
+        TunerInterface tunerInterface;
+
         SongData songData;
         VocalDisplay vocalText;
 
@@ -158,17 +160,75 @@ namespace ChartPlayer
             };
             topStack.Children.Add(vocalText);
 
+            VerticalStack bottomVstack = new VerticalStack()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Bottom
+            };
+            Children.Add(bottomVstack);
+
+            Dock tunerInfoDock = new Dock()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+            };
+            bottomVstack.Children.Add(tunerInfoDock);
+
+            VerticalStack tunerStack = new VerticalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                Padding = new LayoutPadding(5, 0)
+            };
+            tunerInfoDock.Children.Add(tunerStack);
+
+            tunerStack.Children.Add(new TextButton("Tuner")
+            {
+                ClickAction = delegate ()
+                {
+                    tunerInterface.Visible = !tunerInterface.Visible;
+                    UpdateContentLayout();
+                }
+            });
+
+            tunerInterface = new TunerInterface()
+            {
+                HorizontalAlignment = EHorizontalAlignment.Left,
+                VerticalAlignment = EVerticalAlignment.Top,
+                Visible = false
+            };
+            tunerStack.Children.Add(tunerInterface);
+
+            VerticalStack songInfoStack = new VerticalStack()
+            {
+                BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
+                Margin = new LayoutPadding(20, 0, 0, 0),
+                Padding = new LayoutPadding(10),
+                HorizontalAlignment = EHorizontalAlignment.Right,
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                ChildSpacing = 2,
+                AbsorbAllInput = true
+            };
+            tunerInfoDock.Children.Add(songInfoStack);
+
+            songNameText = new TextBlock();
+            songInfoStack.Children.Add(songNameText);
+
+            songArtistText = new TextBlock();
+            songInfoStack.Children.Add(songArtistText);
+
+            songInstrumentText = new TextBlock();
+            songInfoStack.Children.Add(songInstrumentText);
+
             HorizontalStack bottomStack = new HorizontalStack()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
             };
-            children.Add(bottomStack);
+            bottomVstack.Children.Add(bottomStack);
 
             HorizontalStack bottomButtonStack = new HorizontalStack()
             {
                 BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
-                Padding = new LayoutPadding(5),
+                Padding = new LayoutPadding(5, 0),
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2,
@@ -338,28 +398,6 @@ namespace ChartPlayer
             };
             playTimeSlider.SetLevel(0);
             playTimeStack.Children.Add(playTimeSlider);
-
-            VerticalStack songInfoStack = new VerticalStack()
-            {
-                BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
-                Margin = new LayoutPadding(20, 0, 0, 0),
-                Padding = new LayoutPadding(10),
-                HorizontalAlignment = EHorizontalAlignment.Right,
-                VerticalAlignment = EVerticalAlignment.Bottom,
-                ChildSpacing = 2,
-                AbsorbAllInput = true
-            };
-
-            bottomStack.Children.Add(songInfoStack);
-
-            songNameText = new TextBlock();
-            songInfoStack.Children.Add(songNameText);
-
-            songArtistText = new TextBlock();
-            songInfoStack.Children.Add(songArtistText);
-
-            songInstrumentText = new TextBlock();
-            songInfoStack.Children.Add(songInstrumentText);
 
             ShowSongs();
         }
@@ -808,6 +846,13 @@ namespace ChartPlayer
                 playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
 
                 CheckLoopMarkers();
+            }
+
+            FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
+
+            if (fretScene != null)
+            {
+                tunerInterface.UpdateTuner(fretScene.NoteDetector.RunningPitch);
             }
 
             ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);

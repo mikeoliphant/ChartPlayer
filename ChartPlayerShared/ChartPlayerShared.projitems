@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MidiMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MidiMapInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NoteDetector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NoteUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongIndex.cs" />
@@ -32,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SongPlayerInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FretPlayerScene3D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SongPlayerSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TunerInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VocalDisplay.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VorbisMixer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WdlResampler.cs" />

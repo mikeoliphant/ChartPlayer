@@ -69,6 +69,7 @@ namespace ChartPlayer
 
         public bool DisplayNotes { get; set; } = true;
         public float DetectSemitoneOffset { get; set; } = 0;
+        public NoteDetector NoteDetector { get; private set; }
 
         float targetFocusFret = 2;
         int numFrets = 24;
@@ -89,7 +90,6 @@ namespace ChartPlayer
 
         double[] stringOffsetSemitones;
 
-        NoteDetector noteDetector;
         Thread noteDetectThread;
 
         sbyte[] notesDetected;
@@ -144,10 +144,10 @@ namespace ChartPlayer
                 stringOffsetSemitones[str] = baseOffset + player.SongInstrumentPart.Tuning.StringSemitoneOffsets[str];
             }
 
-            noteDetector = new NoteDetector((uint)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
-            noteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
+            NoteDetector = new NoteDetector((uint)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
+            NoteDetector.MaxFrequency = (numStrings == 6) ? 2637 : 330;
 
-            noteDetectThread = new Thread(new ThreadStart(noteDetector.Run));
+            noteDetectThread = new Thread(new ThreadStart(NoteDetector.Run));
             noteDetectThread.Name = "NoteDetect";
             noteDetectThread.Start();
 
@@ -237,7 +237,7 @@ namespace ChartPlayer
 
         public void Stop()
         {
-            noteDetector.Stop();
+            NoteDetector.Stop();
             noteDetectThread.Join();
         }
 
@@ -1308,28 +1308,17 @@ namespace ChartPlayer
         static int[] GuitarStringNotes = { 40, 45, 50, 55, 59, 64 };
         static int[] BassStringNotes = { 28, 33, 38, 43 };
 
-        static double A4Frequency = 440.0;
-        static int A4MidiNoteNum = 69;
-        static double HalfStepRatio = Math.Pow(2.0, (1.0 / 12.0));
-
-        static double GetMidiNoteFrequency(double midiNoteNum)
-        {
-            double noteDiff = A4MidiNoteNum - midiNoteNum;
-
-            return A4Frequency / Math.Pow(HalfStepRatio, noteDiff);
-        }
-
         double GetNoteFrequency(int strng, int fret, double semitoneOffset)
         {
             semitoneOffset = fret + stringOffsetSemitones[strng] + semitoneOffset;
 
             if (numStrings == 6)
             {
-                return GetMidiNoteFrequency(GuitarStringNotes[strng] + semitoneOffset);
+                return NoteUtil.GetMidiNoteFrequency(GuitarStringNotes[strng] + semitoneOffset);
             }
             else
             {
-                return GetMidiNoteFrequency(BassStringNotes[strng] + semitoneOffset);
+                return NoteUtil.GetMidiNoteFrequency(BassStringNotes[strng] + semitoneOffset);
             }
         }
 
@@ -1363,18 +1352,18 @@ namespace ChartPlayer
                     }
                 }
 
-                bool detected = noteDetector.NoteDetect(freqs);
+                bool detected = NoteDetector.NoteDetect(freqs);
 
                 return detected;
             }
 
             if (note.Techniques.HasFlag(ESongNoteTechnique.FretHandMute) || note.Techniques.HasFlag(ESongNoteTechnique.PalmMute))
             {
-                return noteDetector.NoteDetect(0);
+                return NoteDetector.NoteDetect(0);
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Slide))
             {
-                return noteDetector.NoteDetect(note.String, GetSlideFret(note));
+                return NoteDetector.NoteDetect(note.String, GetSlideFret(note));
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Bend))
             {
@@ -1382,10 +1371,10 @@ namespace ChartPlayer
 
                 double freq = GetNoteFrequency(note.String, note.Fret, DetectSemitoneOffset + (centsOffset / 100));
 
-                return noteDetector.NoteDetect(freq);
+                return NoteDetector.NoteDetect(freq);
             }
 
-            return noteDetector.NoteDetect(GetNoteFrequency(note.String, note.Fret, DetectSemitoneOffset));
+            return NoteDetector.NoteDetect(GetNoteFrequency(note.String, note.Fret, DetectSemitoneOffset));
         }
     }
 }
