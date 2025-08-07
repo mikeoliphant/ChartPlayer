@@ -227,7 +227,7 @@ namespace ChartPlayer
             };
             bottomVstack.Children.Add(bottomStack);
 
-            HorizontalStack bottomButtonStack = new HorizontalStack()
+            HorizontalStack bottomHorizontalStack = new HorizontalStack()
             {
                 BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
                 Padding = new LayoutPadding(5, 0),
@@ -236,14 +236,23 @@ namespace ChartPlayer
                 ChildSpacing = 2,
                 AbsorbAllInput = true
             };
-            bottomStack.Children.Add(bottomButtonStack);
+            bottomStack.Children.Add(bottomHorizontalStack);
+
+            NinePatchWrapper leftButtonWrapper = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bottomHorizontalStack.Children.Add(leftButtonWrapper);
+
+            HorizontalStack leftButtonStack = new HorizontalStack();
+            leftButtonWrapper.Child = leftButtonStack;
 
             TextButton songsButton = new TextButton("Songs")
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = ShowSongs
             };
-            bottomButtonStack.Children.Add(songsButton);
+            leftButtonStack.Children.Add(songsButton);
 
             TextButton optionsButton = new TextButton("Options")
             {
@@ -261,7 +270,7 @@ namespace ChartPlayer
                     Layout.Current.ShowPopup(settingsInterface);
                 }
             };
-            bottomButtonStack.Children.Add(optionsButton);
+            leftButtonStack.Children.Add(optionsButton);
 
             TextButton helpButton = new TextButton("?")
             {
@@ -274,13 +283,21 @@ namespace ChartPlayer
                         "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
                 }
             };
-            bottomButtonStack.Children.Add(helpButton);
+            leftButtonStack.Children.Add(helpButton);
 
-            NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            hideNotesButton = new TextToggleButton("Notes", "Notes")
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                ClickAction = ToggleNotes
+            };
+            leftButtonStack.Children.Add(hideNotesButton);
+
+
+            NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(speedInterface);
+            bottomHorizontalStack.Children.Add(speedInterface);
 
             HorizontalStack speedStack = new HorizontalStack()
             {
@@ -290,7 +307,7 @@ namespace ChartPlayer
 
             speedStack.Children.Add(speedText = new TextBlock("Speed: 100%")
             {
-                VerticalAlignment = EVerticalAlignment.Stretch
+                VerticalAlignment = EVerticalAlignment.Center
             });
 
             speedSlider = new HorizontalSlider("HorizontalSlider")
@@ -303,11 +320,11 @@ namespace ChartPlayer
             speedSlider.SetLevel(1.0f);
             speedStack.Children.Add(speedSlider);
 
-            bpmInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            bpmInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(bpmInterface);
+            bottomHorizontalStack.Children.Add(bpmInterface);
 
             HorizontalStack bpmStack = new HorizontalStack()
             {
@@ -318,21 +335,14 @@ namespace ChartPlayer
             bpmStack.Children.Add(bpmText = new StringBuilderTextBlock("BPM:")
             {
                 DesiredWidth = 170,
-                VerticalAlignment = EVerticalAlignment.Stretch
+                VerticalAlignment = EVerticalAlignment.Center
             });
 
-            hideNotesButton = new TextToggleButton("Notes", "Notes")
-            {
-                VerticalAlignment = EVerticalAlignment.Stretch,
-                ClickAction = ToggleNotes
-            };
-            bottomButtonStack.Children.Add(hideNotesButton);
-
-            NinePatchWrapper scoreInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            NinePatchWrapper scoreInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(scoreInterface);
+            bottomHorizontalStack.Children.Add(scoreInterface);
 
             HorizontalStack scoreStack = new HorizontalStack()
             {
@@ -344,6 +354,7 @@ namespace ChartPlayer
 
             scoreTextWrapper = new UIElementWrapper()
             {
+                VerticalAlignment = EVerticalAlignment.Center,
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             };
             scoreStack.Children.Add(scoreTextWrapper);
@@ -355,12 +366,12 @@ namespace ChartPlayer
             };
             scoreTextWrapper.Child = scoreText;
 
-            NinePatchWrapper playTimeInterface = new NinePatchWrapper(Layout.Current.GetImage("ButtonUnpressed"))
+            NinePatchWrapper playTimeInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             };
-            bottomButtonStack.Children.Add(playTimeInterface);
+            bottomHorizontalStack.Children.Add(playTimeInterface);
 
             HorizontalStack playTimeStack = new HorizontalStack()
             {
@@ -369,9 +380,21 @@ namespace ChartPlayer
             };
             playTimeInterface.Child = playTimeStack;
 
+            var rewindButton = new ImageButton("Rewind")
+            {
+                VerticalAlignment = EVerticalAlignment.Center,
+                ClickAction = delegate
+                {
+                    if (songPlayer != null)
+                    {
+                        songPlayer.SeekTime(0);
+                    }
+                }
+            };
+            playTimeStack.Children.Add(rewindButton);
+
             pauseButton = new ImageToggleButton("Play", "Pause")
             {
-                HorizontalAlignment = EHorizontalAlignment.Center,
                 VerticalAlignment = EVerticalAlignment.Center,
                 ClickAction = TogglePaused
             };
@@ -709,10 +732,7 @@ namespace ChartPlayer
                 {
                     if (IsTap(touch, this) && !didPause)
                     {
-                        if (songPlayer.Paused)
-                        {
-                            TogglePaused();
-                        }
+                        Pause();
                     }
 
                     switch (touch.TouchState)
@@ -747,6 +767,15 @@ namespace ChartPlayer
             }
 
             return true;
+        }
+
+        public void Pause()
+        {
+            if (songPlayer != null)
+            {
+                if (!songPlayer.Paused)
+                    TogglePaused();
+            }
         }
 
         public void TogglePaused()

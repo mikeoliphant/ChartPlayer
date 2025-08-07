@@ -37,6 +37,7 @@ namespace ChartPlayerImageProcessor
 
             Add("Play");
             Add("Pause");
+            Add("Rewind");
 
             Add("ScrollBar");
             Add("ScrollBarGutter");
