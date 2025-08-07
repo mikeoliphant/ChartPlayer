@@ -1041,7 +1041,7 @@ namespace ChartPlayer
             {
                 float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
 
-                if (Layout.Current.InputManager.IsDown("PreciseClick"))
+                if (Layout.Current.InputManager.IsDown("PreciseClick") || (sections.Count == 0))
                 {
                     SongPlayerInterface.Instance.SeekTime(time);
                 }
