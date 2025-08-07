@@ -910,7 +910,7 @@ namespace ChartPlayer
             if ((fretScene != null) && tunerInterface.Visible)
             {
                 inputLevelDisplay.SetValue(ChartPlayerGame.Instance.Plugin.CurrentInputLevel);
-                tunerInterface.UpdateTuner(fretScene.NoteDetector.RunningPitch);
+                tunerInterface.UpdateTuner(fretScene.NoteDetector.CurrentPitch);
             }
 
             ChartScene3D chartScene = (ChartPlayerGame.Instance.Scene3D as ChartScene3D);

@@ -40,6 +40,8 @@ namespace ChartPlayer
         ConcurrentQueue<float> pitchHistory = new ConcurrentQueue<float>();
         int frameCount = 0;
         DateTime startTime = DateTime.MinValue;
+        int lastClosestNote = -1;
+        float lastCentsOffset = float.NaN;
 
         TargetNote[] targetNotes;
 
@@ -166,10 +168,10 @@ namespace ChartPlayer
             });
         }
 
-        int lastClosestNote = -1;
-
         public void UpdateTuner(float value)
         {
+            float newPitch = value;
+
             if (frameCount == 0)
             {
                 DateTime now = DateTime.Now;
@@ -194,17 +196,6 @@ namespace ChartPlayer
 
             tunerImage.Clear(UIColor.Black);
 
-            float newPitch = value;
-
-            pitchHistory.Enqueue(newPitch);
-
-            while (pitchHistory.Count > queueSize)
-            {
-                float val;
-
-                pitchHistory.TryDequeue(out val);
-            }
-
             if (newPitch > 20)
             {
                 float diff = float.MaxValue;
@@ -221,9 +212,20 @@ namespace ChartPlayer
                     closestNote = note;
                 }
 
-                //Logging.Log("Pitch: " + newPitch + " Closest: " + closestNote.Note.ToString() + closestNote.Octave.ToString() + " " + closestNote.Frequency);
-
                 currentPitchCenter = closestNote.Frequency;
+
+                float centsOffset = (float)(1200 * Math.Log(newPitch / currentPitchCenter, 2));
+
+                if (!float.IsNaN(lastCentsOffset))
+                {
+                    centsOffset = (0.1f * centsOffset) + (0.9f * lastCentsOffset);
+                }
+
+                lastCentsOffset = centsOffset;
+
+                pitchHistory.Enqueue(centsOffset);
+
+                //Logging.Log("Pitch: " + newPitch + " Closest: " + closestNote.Note.ToString() + closestNote.Octave.ToString() + " " + closestNote.Frequency);
 
                 if (currentPitchCenter != lastPitchCenter)
                 {
@@ -237,8 +239,6 @@ namespace ChartPlayer
                 tunerFrequencyDisplay.StringBuilder.Append('.');
                 tunerFrequencyDisplay.StringBuilder.AppendNumber((int)Math.Round((newPitch - (float)integer) * 10));
                 tunerFrequencyDisplay.StringBuilder.Append("Hz");
-
-                float centsOffset = (float)(1200 * Math.Log(newPitch / currentPitchCenter, 2));
 
                 if (Math.Abs(centsOffset - runningCentsOffset) > 10)
                 {
@@ -255,6 +255,19 @@ namespace ChartPlayer
                     tunerCentsDisplay.StringBuilder.Append((runningCentsOffset > 0) ? "+" : "-");
 
                 tunerCentsDisplay.StringBuilder.AppendNumber(Math.Abs((int)Math.Round(runningCentsOffset)));
+            }
+            else
+            {
+                pitchHistory.Enqueue(float.NaN);
+
+                lastCentsOffset = float.NaN;
+            }
+
+            while (pitchHistory.Count > queueSize)
+            {
+                float val;
+
+                pitchHistory.TryDequeue(out val);
             }
 
             if (lastClosestNote != (int)closestNote.Note)
@@ -273,29 +286,30 @@ namespace ChartPlayer
 
             int lastX = -1;
             int lastY = -1;
+            float lastOffset = float.NaN;
 
-            foreach (float pitch in pitchHistory)
+            foreach (float centsOffset in pitchHistory)
             {
-                if (pitch > 0)
+                if (!float.IsNaN(centsOffset))
                 {
-                    float semitoneOffset = (float)(12 * Math.Log(pitch / currentPitchCenter, 2));
+                    float semitoneOffset = centsOffset / 100;
 
-                    float y = ((float)tunerImageHeight / 2) + (-semitoneOffset  * (float)tunerImageHeight);
+                    float y = ((float)tunerImageHeight / 2) + (-semitoneOffset * (float)tunerImageHeight);
 
                     float xOffset = offset;
                     float yOffset = y;
 
                     if ((yOffset > 0) && (yOffset < tunerImageHeight))
                     {
-                        if (lastX != -1)
-                        {
+                        if (!float.IsNaN(lastOffset))
                             tunerImage.DrawLine(new Vector2(lastX, lastY), new Vector2((int)xOffset, (int)yOffset), tunerPointDrawAction);
-                        }
 
                         lastX = (int)xOffset;
                         lastY = (int)yOffset;
                     }
                 }
+
+                lastOffset = centsOffset;
 
                 offset += step;
             }
