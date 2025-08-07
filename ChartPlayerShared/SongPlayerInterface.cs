@@ -836,6 +836,16 @@ namespace ChartPlayer
                     needSeek = false;
                 }
 
+                if (songPlayer.FinishedPlaying)
+                {
+                    if (!songPlayer.Paused)
+                    {
+                        TogglePaused();
+
+                        songPlayer.SeekTime(0);
+                    }
+                }
+
                 float newSecondFloat = songPlayer.CurrentSecond;
 
                 int newMinute = (int)(newSecondFloat / 60);

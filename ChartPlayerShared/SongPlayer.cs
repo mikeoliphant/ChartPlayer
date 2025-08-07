@@ -27,6 +27,13 @@ namespace ChartPlayer
         public List<SongVocal> SongVocals { get; private set; }
         public SongStructure SongStructure { get; private set; } = null;
         public bool Paused { get; set; } = false;
+        public bool FinishedPlaying
+        {
+            get
+            {
+                return (currentPlaybackSample >= totalSamples);
+            }
+        }
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
         public float[] Loudness { get; } = new float[512];
@@ -281,7 +288,7 @@ namespace ChartPlayer
                 seekTime = -1;
             }
 
-            if (Paused)
+            if (Paused || FinishedPlaying)
             {
                 leftChannel.Clear();
                 rightChannel.Clear();
