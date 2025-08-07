@@ -28,6 +28,7 @@ namespace ChartPlayer
         WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
+        NinePatchWrapper tunerWrapper;
         TextButton tunerButton;
         TunerInterface tunerInterface;
 
@@ -164,7 +165,8 @@ namespace ChartPlayer
             VerticalStack bottomVstack = new VerticalStack()
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Bottom
+                VerticalAlignment = EVerticalAlignment.Bottom,
+                Padding = 5
             };
             Children.Add(bottomVstack);
 
@@ -174,30 +176,16 @@ namespace ChartPlayer
             };
             bottomVstack.Children.Add(tunerInfoDock);
 
-            VerticalStack tunerStack = new VerticalStack()
-            {
-                VerticalAlignment = EVerticalAlignment.Bottom,
-                Padding = new LayoutPadding(5, 0)
-            };
-            tunerInfoDock.Children.Add(tunerStack);
-
-            tunerStack.Children.Add(tunerButton = new TextButton("Tuner")
-            {
-                Visible = false,
-                ClickAction = delegate ()
-                {
-                    tunerInterface.Visible = !tunerInterface.Visible;
-                    UpdateContentLayout();
-                }
-            });
-
-            tunerInterface = new TunerInterface()
+            tunerWrapper = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 HorizontalAlignment = EHorizontalAlignment.Left,
-                VerticalAlignment = EVerticalAlignment.Top,
+                VerticalAlignment = EVerticalAlignment.Bottom,
                 Visible = false
             };
-            tunerStack.Children.Add(tunerInterface);
+            tunerInfoDock.Children.Add(tunerWrapper);
+
+            tunerInterface = new TunerInterface();
+            tunerWrapper.Child = tunerInterface;
 
             VerticalStack songInfoStack = new VerticalStack()
             {
@@ -230,7 +218,6 @@ namespace ChartPlayer
             HorizontalStack bottomHorizontalStack = new HorizontalStack()
             {
                 BackgroundColor = UIColor.Black.MultiplyAlpha(0.5f),
-                Padding = new LayoutPadding(5, 0),
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom,
                 ChildSpacing = 2,
@@ -244,7 +231,10 @@ namespace ChartPlayer
             };
             bottomHorizontalStack.Children.Add(leftButtonWrapper);
 
-            HorizontalStack leftButtonStack = new HorizontalStack();
+            HorizontalStack leftButtonStack = new HorizontalStack()
+            {
+                ChildSpacing = 2
+            };
             leftButtonWrapper.Child = leftButtonStack;
 
             TextButton songsButton = new TextButton("Songs")
@@ -292,6 +282,15 @@ namespace ChartPlayer
             };
             leftButtonStack.Children.Add(hideNotesButton);
 
+            leftButtonStack.Children.Add(tunerButton = new TextButton("Tuner")
+            {
+                Visible = false,
+                ClickAction = delegate ()
+                {
+                    tunerWrapper.Visible = !tunerWrapper.Visible;
+                    UpdateContentLayout();
+                }
+            });
 
             NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
