@@ -55,6 +55,11 @@ namespace ChartPlayer
             quadIndexBuffer.SetData(indices);
         }
 
+        public virtual void Stop()
+        {
+
+        }
+
         public virtual void Draw()
         {
             basicEffect.Projection = Camera.GetProjectionMatrix();

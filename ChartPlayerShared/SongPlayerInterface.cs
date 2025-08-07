@@ -28,6 +28,7 @@ namespace ChartPlayer
         WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
+        TextButton tunerButton;
         TunerInterface tunerInterface;
 
         SongData songData;
@@ -180,8 +181,9 @@ namespace ChartPlayer
             };
             tunerInfoDock.Children.Add(tunerStack);
 
-            tunerStack.Children.Add(new TextButton("Tuner")
+            tunerStack.Children.Add(tunerButton = new TextButton("Tuner")
             {
+                Visible = false,
                 ClickAction = delegate ()
                 {
                     tunerInterface.Visible = !tunerInterface.Visible;
@@ -537,6 +539,12 @@ namespace ChartPlayer
 
                 songPlayer.SetSong(songPath, songData, part);
 
+
+                if (ChartPlayerGame.Instance.Scene3D != null)
+                {
+                    ChartPlayerGame.Instance.Scene3D.Stop();
+                }
+
                 //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));
 
                 ChartPlayerGame.Instance.Plugin.SetSongPlayer(songPlayer);
@@ -551,6 +559,8 @@ namespace ChartPlayer
                         LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
                         NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.DrumsNoteDisplaySeconds
                     };
+
+                    tunerButton.Visible = false;
                 }
                 else if (part.InstrumentType == ESongInstrumentType.Keys)
                 {
@@ -559,14 +569,11 @@ namespace ChartPlayer
                         LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
                         NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.KeysNoteDisplaySeconds
                     };
+
+                    tunerButton.Visible = false;
                 }
                 else
                 {
-                    if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
-                    {
-                        (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
-                    }
-
                     ChartPlayerGame.Instance.Scene3D = new FretPlayerScene3D(songPlayer)
                     {
                         LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
@@ -575,6 +582,8 @@ namespace ChartPlayer
                     };
 
                     (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
+
+                    tunerButton.Visible = true;
                 }
 
                 SongStatsEntry stats = songIndex.GetSongStats(song, songList.CurrentInstrument);
