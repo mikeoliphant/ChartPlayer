@@ -7,6 +7,7 @@ using System.Threading;
 using AudioPlugSharp;
 using Microsoft.Xna.Framework.Graphics;
 using UILayout;
+using PitchDetect;
 
 namespace ChartPlayer
 {
@@ -17,11 +18,13 @@ namespace ChartPlayer
         public SampleHistory<float> SampleHistory { get; private set; } = new SampleHistory<float>();
         public MonoGameHost GameHost { get; private set; } = null;
         public IMidiHandler MidiHandler { get; set; } = null;
+        public float CurrentInputLevel { get; private set; } = 0;
 
         FloatAudioIOPort stereoInput;
         FloatAudioIOPort stereoOutput;
         Thread gameThread = null;
         AudioPluginParameter pedalParameter;
+        EnvelopeFollower levelEnv;
 
         public ChartPlayerPlugin()
         {
@@ -113,6 +116,7 @@ namespace ChartPlayer
             }
 
             SampleHistory.SetSize((int)Host.SampleRate);
+            levelEnv = new EnvelopeFollower(0, 100, (int)Host.SampleRate);
         }
 
         public void SetHiHatPedalController(uint controller)
@@ -269,6 +273,13 @@ namespace ChartPlayer
 
             int currentSample = 0;
             int nextSample = 0;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                float val = input[i];
+
+                CurrentInputLevel = levelEnv.Advance(val * val);
+            }
 
             SampleHistory.CopyFrom(input);
 

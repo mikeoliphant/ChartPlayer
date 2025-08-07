@@ -28,6 +28,7 @@ namespace ChartPlayer
         WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
+        AudioLevelDisplay inputLevelDisplay;
         NinePatchWrapper tunerWrapper;
         TextButton tunerButton;
         TunerInterface tunerInterface;
@@ -184,8 +185,17 @@ namespace ChartPlayer
             };
             tunerInfoDock.Children.Add(tunerWrapper);
 
+            HorizontalStack tunerLevelStack = new HorizontalStack()
+            {
+                ChildSpacing = 5
+            };
+            tunerWrapper.Child = tunerLevelStack;
+
+            inputLevelDisplay = new AudioLevelDisplay();
+            tunerLevelStack.Children.Add(inputLevelDisplay);
+
             tunerInterface = new TunerInterface();
-            tunerWrapper.Child = tunerInterface;
+            tunerLevelStack.Children.Add(tunerInterface);
 
             VerticalStack songInfoStack = new VerticalStack()
             {
@@ -897,8 +907,9 @@ namespace ChartPlayer
 
             FretPlayerScene3D fretScene = (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D);
 
-            if (fretScene != null)
+            if ((fretScene != null) && tunerInterface.Visible)
             {
+                inputLevelDisplay.SetValue(ChartPlayerGame.Instance.Plugin.CurrentInputLevel);
                 tunerInterface.UpdateTuner(fretScene.NoteDetector.RunningPitch);
             }
 

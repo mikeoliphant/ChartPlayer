@@ -21,9 +21,16 @@
           <Height>325</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
-          <ImageName>ChordOutline</ImageName>
+          <ImageName>LevelDisplay</ImageName>
           <XOffset>509</XOffset>
           <YOffset>1</YOffset>
+          <Width>20</Width>
+          <Height>98</Height>
+        </ImageManifestSheetImage>
+        <ImageManifestSheetImage>
+          <ImageName>ChordOutline</ImageName>
+          <XOffset>257</XOffset>
+          <YOffset>664</YOffset>
           <Width>64</Width>
           <Height>64</Height>
         </ImageManifestSheetImage>
@@ -35,162 +42,162 @@
           <Height>32</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
+          <ImageName>CymbalGreen</ImageName>
+          <XOffset>531</XOffset>
+          <YOffset>1</YOffset>
+          <Width>52</Width>
+          <Height>48</Height>
+        </ImageManifestSheetImage>
+        <ImageManifestSheetImage>
           <ImageName>CymbalBlueBell</ImageName>
           <XOffset>257</XOffset>
-          <YOffset>664</YOffset>
+          <YOffset>730</YOffset>
           <Width>52</Width>
           <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>GuitarPurple</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>67</YOffset>
+          <XOffset>323</XOffset>
+          <YOffset>664</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteTrailRed</ImageName>
-          <XOffset>575</XOffset>
-          <YOffset>1</YOffset>
-          <Width>52</Width>
-          <Height>3</Height>
-        </ImageManifestSheetImage>
-        <ImageManifestSheetImage>
-          <ImageName>NoteTrailYellow</ImageName>
           <XOffset>63</XOffset>
           <YOffset>991</YOffset>
           <Width>52</Width>
           <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
+          <ImageName>NoteTrailYellow</ImageName>
+          <XOffset>531</XOffset>
+          <YOffset>51</YOffset>
+          <Width>52</Width>
+          <Height>3</Height>
+        </ImageManifestSheetImage>
+        <ImageManifestSheetImage>
           <ImageName>NoteTrailCyan</ImageName>
-          <XOffset>257</XOffset>
-          <YOffset>714</YOffset>
+          <XOffset>585</XOffset>
+          <YOffset>1</YOffset>
           <Width>52</Width>
           <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteTrailOrange</ImageName>
-          <XOffset>311</XOffset>
-          <YOffset>664</YOffset>
+          <XOffset>257</XOffset>
+          <YOffset>780</YOffset>
           <Width>52</Width>
           <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteTrailGreen</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>93</YOffset>
+          <XOffset>323</XOffset>
+          <YOffset>690</YOffset>
           <Width>52</Width>
           <Height>3</Height>
+        </ImageManifestSheetImage>
+        <ImageManifestSheetImage>
+          <ImageName>CymbalBlue</ImageName>
+          <XOffset>585</XOffset>
+          <YOffset>6</YOffset>
+          <Width>52</Width>
+          <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteTrailPurple</ImageName>
-          <XOffset>575</XOffset>
-          <YOffset>6</YOffset>
+          <XOffset>377</XOffset>
+          <YOffset>664</YOffset>
           <Width>52</Width>
           <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
-          <ImageName>NoteTrailWhite</ImageName>
-          <XOffset>629</XOffset>
-          <YOffset>1</YOffset>
+          <ImageName>GuitarOrange</ImageName>
+          <XOffset>63</XOffset>
+          <YOffset>996</YOffset>
           <Width>52</Width>
-          <Height>3</Height>
+          <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteTrailBlack</ImageName>
-          <XOffset>63</XOffset>
-          <YOffset>996</YOffset>
+          <XOffset>117</XOffset>
+          <YOffset>991</YOffset>
           <Width>52</Width>
           <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>DrumRed</ImageName>
-          <XOffset>257</XOffset>
-          <YOffset>719</YOffset>
+          <XOffset>531</XOffset>
+          <YOffset>56</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>DrumYellow</ImageName>
-          <XOffset>311</XOffset>
-          <YOffset>669</YOffset>
+          <XOffset>639</XOffset>
+          <YOffset>1</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>DrumBlue</ImageName>
-          <XOffset>365</XOffset>
-          <YOffset>664</YOffset>
+          <XOffset>257</XOffset>
+          <YOffset>785</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>DrumGreen</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>98</YOffset>
+          <XOffset>323</XOffset>
+          <YOffset>695</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>CymbalYellow</ImageName>
-          <XOffset>575</XOffset>
-          <YOffset>11</YOffset>
+          <XOffset>377</XOffset>
+          <YOffset>669</YOffset>
           <Width>52</Width>
           <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>CymbalYellowFoot</ImageName>
-          <XOffset>629</XOffset>
-          <YOffset>6</YOffset>
+          <XOffset>431</XOffset>
+          <YOffset>664</YOffset>
           <Width>52</Width>
           <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>CymbalYellowOpen</ImageName>
-          <XOffset>683</XOffset>
-          <YOffset>1</YOffset>
-          <Width>52</Width>
-          <Height>48</Height>
-        </ImageManifestSheetImage>
-        <ImageManifestSheetImage>
-          <ImageName>CymbalGreen</ImageName>
           <XOffset>257</XOffset>
-          <YOffset>745</YOffset>
+          <YOffset>811</YOffset>
           <Width>52</Width>
           <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
-          <ImageName>CymbalBlue</ImageName>
-          <XOffset>311</XOffset>
-          <YOffset>695</YOffset>
+          <ImageName>NoteTrailWhite</ImageName>
+          <XOffset>117</XOffset>
+          <YOffset>996</YOffset>
           <Width>52</Width>
-          <Height>48</Height>
-        </ImageManifestSheetImage>
-        <ImageManifestSheetImage>
-          <ImageName>GuitarOrange</ImageName>
-          <XOffset>365</XOffset>
-          <YOffset>690</YOffset>
-          <Width>52</Width>
-          <Height>24</Height>
+          <Height>3</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>GuitarCyan</ImageName>
-          <XOffset>419</XOffset>
-          <YOffset>664</YOffset>
+          <XOffset>585</XOffset>
+          <YOffset>56</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>GuitarGreen</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>124</YOffset>
+          <XOffset>639</XOffset>
+          <YOffset>27</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>GuitarRed</ImageName>
-          <XOffset>737</XOffset>
+          <XOffset>693</XOffset>
           <YOffset>1</YOffset>
           <Width>52</Width>
           <Height>24</Height>
@@ -198,203 +205,203 @@
         <ImageManifestSheetImage>
           <ImageName>GuitarYellow</ImageName>
           <XOffset>257</XOffset>
-          <YOffset>795</YOffset>
+          <YOffset>861</YOffset>
           <Width>52</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>DrumRedStick</ImageName>
-          <XOffset>311</XOffset>
-          <YOffset>745</YOffset>
+          <XOffset>257</XOffset>
+          <YOffset>887</YOffset>
           <Width>24</Width>
           <Height>48</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>CymbalChoke</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>150</YOffset>
+          <XOffset>639</XOffset>
+          <YOffset>53</YOffset>
           <Width>28</Width>
           <Height>28</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>FingerOutline</ImageName>
-          <XOffset>257</XOffset>
-          <YOffset>821</YOffset>
+          <XOffset>283</XOffset>
+          <YOffset>887</YOffset>
           <Width>28</Width>
           <Height>28</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>HorizontalFretLine</ImageName>
-          <XOffset>563</XOffset>
-          <YOffset>67</YOffset>
+          <XOffset>509</XOffset>
+          <YOffset>101</YOffset>
           <Width>1</Width>
           <Height>24</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>VerticalFretLine</ImageName>
-          <XOffset>117</XOffset>
-          <YOffset>991</YOffset>
+          <XOffset>63</XOffset>
+          <YOffset>1022</YOffset>
           <Width>24</Width>
           <Height>1</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>TabForeground</ImageName>
-          <XOffset>63</XOffset>
-          <YOffset>1001</YOffset>
+          <XOffset>485</XOffset>
+          <YOffset>664</YOffset>
           <Width>22</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>TabBackground</ImageName>
-          <XOffset>365</XOffset>
-          <YOffset>716</YOffset>
+          <XOffset>117</XOffset>
+          <YOffset>1001</YOffset>
           <Width>22</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteHammerOn</ImageName>
-          <XOffset>419</XOffset>
-          <YOffset>690</YOffset>
+          <XOffset>693</XOffset>
+          <YOffset>27</YOffset>
           <Width>22</Width>
           <Height>15</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NotePullOff</ImageName>
-          <XOffset>473</XOffset>
-          <YOffset>664</YOffset>
+          <XOffset>747</XOffset>
+          <YOffset>1</YOffset>
           <Width>22</Width>
           <Height>15</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>Rewind</ImageName>
-          <XOffset>737</XOffset>
-          <YOffset>27</YOffset>
+          <XOffset>257</XOffset>
+          <YOffset>937</YOffset>
           <Width>19</Width>
           <Height>18</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>PopupBackground</ImageName>
-          <XOffset>791</XOffset>
-          <YOffset>1</YOffset>
+          <XOffset>669</XOffset>
+          <YOffset>53</YOffset>
           <Width>18</Width>
           <Height>18</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>HorizontalSlider</ImageName>
           <XOffset>311</XOffset>
-          <YOffset>795</YOffset>
+          <YOffset>730</YOffset>
           <Width>10</Width>
           <Height>18</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>Play</ImageName>
-          <XOffset>337</XOffset>
-          <YOffset>745</YOffset>
+          <XOffset>323</XOffset>
+          <YOffset>721</YOffset>
           <Width>12</Width>
           <Height>18</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>Pause</ImageName>
-          <XOffset>509</XOffset>
-          <YOffset>180</YOffset>
+          <XOffset>283</XOffset>
+          <YOffset>917</YOffset>
           <Width>14</Width>
           <Height>18</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>VerticalPointerLeft</ImageName>
-          <XOffset>539</XOffset>
-          <YOffset>150</YOffset>
+          <XOffset>531</XOffset>
+          <YOffset>82</YOffset>
           <Width>13</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>TabPanelBackground</ImageName>
-          <XOffset>257</XOffset>
-          <YOffset>851</YOffset>
+          <XOffset>512</XOffset>
+          <YOffset>101</YOffset>
           <Width>16</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteHarmonic</ImageName>
-          <XOffset>287</XOffset>
-          <YOffset>821</YOffset>
+          <XOffset>485</XOffset>
+          <YOffset>682</YOffset>
           <Width>16</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NotePalmMute</ImageName>
-          <XOffset>87</XOffset>
+          <XOffset>141</XOffset>
           <YOffset>1001</YOffset>
           <Width>16</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ScrollUpArrow</ImageName>
-          <XOffset>389</XOffset>
-          <YOffset>716</YOffset>
+          <XOffset>717</XOffset>
+          <YOffset>27</YOffset>
           <Width>16</Width>
           <Height>12</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ScrollDownArrow</ImageName>
-          <XOffset>443</XOffset>
-          <YOffset>690</YOffset>
+          <XOffset>771</XOffset>
+          <YOffset>1</YOffset>
           <Width>16</Width>
           <Height>12</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>VerticalPointer</ImageName>
-          <XOffset>758</XOffset>
-          <YOffset>27</YOffset>
+          <XOffset>257</XOffset>
+          <YOffset>957</YOffset>
           <Width>13</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NotePinchHarmonic</ImageName>
-          <XOffset>811</XOffset>
-          <YOffset>1</YOffset>
+          <XOffset>278</XOffset>
+          <YOffset>937</YOffset>
           <Width>16</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>NoteMute</ImageName>
-          <XOffset>257</XOffset>
-          <YOffset>869</YOffset>
+          <XOffset>337</XOffset>
+          <YOffset>721</YOffset>
           <Width>16</Width>
           <Height>16</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ButtonUnpressed</ImageName>
-          <XOffset>323</XOffset>
-          <YOffset>795</YOffset>
+          <XOffset>299</XOffset>
+          <YOffset>917</YOffset>
           <Width>12</Width>
           <Height>12</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ButtonPressed</ImageName>
-          <XOffset>337</XOffset>
-          <YOffset>765</YOffset>
+          <XOffset>546</XOffset>
+          <YOffset>82</YOffset>
           <Width>12</Width>
           <Height>12</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ScrollBar</ImageName>
-          <XOffset>566</XOffset>
-          <YOffset>67</YOffset>
+          <XOffset>171</XOffset>
+          <YOffset>991</YOffset>
           <Width>6</Width>
           <Height>6</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>ScrollBarGutter</ImageName>
-          <XOffset>365</XOffset>
-          <YOffset>734</YOffset>
+          <XOffset>693</XOffset>
+          <YOffset>44</YOffset>
           <Width>6</Width>
           <Height>6</Height>
         </ImageManifestSheetImage>
         <ImageManifestSheetImage>
           <ImageName>SingleWhitePixel</ImageName>
-          <XOffset>575</XOffset>
-          <YOffset>61</YOffset>
+          <XOffset>89</XOffset>
+          <YOffset>1022</YOffset>
           <Width>1</Width>
           <Height>1</Height>
         </ImageManifestSheetImage>
