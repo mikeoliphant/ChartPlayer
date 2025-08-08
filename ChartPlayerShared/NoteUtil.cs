@@ -178,6 +178,11 @@ namespace ChartPlayer
         {
             return ((octave + 1) * 12) + (int)note;
         }
+
+        public static double GetSemitoneDifference(double freq1, double freq2)
+        {
+            return 12 * Math.Log2(freq1 / freq2);
+        }
     }
 
     public enum EChordType

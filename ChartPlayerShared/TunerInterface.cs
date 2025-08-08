@@ -251,10 +251,12 @@ namespace ChartPlayer
 
                 tunerCentsDisplay.StringBuilder.Clear();
 
-                if (runningCentsOffset != 0)
+                int intOffset = (int)Math.Round(runningCentsOffset);
+
+                if (intOffset != 0)
                     tunerCentsDisplay.StringBuilder.Append((runningCentsOffset > 0) ? "+" : "-");
 
-                tunerCentsDisplay.StringBuilder.AppendNumber(Math.Abs((int)Math.Round(runningCentsOffset)));
+                tunerCentsDisplay.StringBuilder.AppendNumber(Math.Abs(intOffset));
             }
             else
             {
@@ -302,7 +304,7 @@ namespace ChartPlayer
                     if ((yOffset > 0) && (yOffset < tunerImageHeight))
                     {
                         if (!float.IsNaN(lastOffset))
-                            tunerImage.DrawLine(new Vector2(lastX, lastY), new Vector2((int)xOffset, (int)yOffset), tunerPointDrawAction);
+                            tunerImage.DrawLine(new Vector2(lastX, lastY), new Vector2((int)xOffset, (int)Math.Round(yOffset)), tunerPointDrawAction);
 
                         lastX = (int)xOffset;
                         lastY = (int)yOffset;

@@ -25,6 +25,7 @@ namespace ChartPlayer
         bool stop = false;
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
         int[] topX = new int[5];
+        (float Freq, float Corr)[] peaks = new (float Freq, float Corr)[16];
 
         public NoteDetector(int sampleRate)
         {
@@ -79,7 +80,34 @@ namespace ChartPlayer
 
             int offset = fftData.Length - CorrFFTSize;
 
-            CurrentPitch = pitchDetector.GetPitch(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize));
+            float newPitch = 0;
+
+            int numPeaks = pitchDetector.GetPitchPeaks(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize), peaks);
+
+            if (numPeaks > 0)
+            {
+                if (CurrentPitch != 0)
+                {
+                    for (int i = 0; i < numPeaks; i++)
+                    {
+                        if (Math.Abs(NoteUtil.GetSemitoneDifference(CurrentPitch, peaks[i].Freq)) < 0.5)
+                        {
+                            newPitch = peaks[i].Freq;
+
+                            break;
+                        }
+                    }
+                }
+
+                if (newPitch == 0)
+                {
+                    float maxPeak = peaks.Select(p => p.Corr).Max();
+
+                    newPitch = peaks.Where(p => p.Corr > (maxPeak * 0.25f)).FirstOrDefault().Freq;
+                }
+            }
+
+            CurrentPitch = newPitch;
 
             offset = fftData.Length - SpecFFTSize;
 
