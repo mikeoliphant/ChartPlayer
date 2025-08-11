@@ -37,7 +37,7 @@ namespace ChartPlayer
         float runningCentsOffset = 0;
 
         int queueSize = 40;
-        ConcurrentQueue<float> pitchHistory = new ConcurrentQueue<float>();
+        Queue<float> pitchHistory = new Queue<float>();
         int frameCount = 0;
         DateTime startTime = DateTime.MinValue;
         int lastClosestNote = -1;
