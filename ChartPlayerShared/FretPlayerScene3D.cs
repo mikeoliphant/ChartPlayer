@@ -1308,7 +1308,7 @@ namespace ChartPlayer
         static int[] GuitarStringNotes = { 40, 45, 50, 55, 59, 64 };
         static int[] BassStringNotes = { 28, 33, 38, 43 };
 
-        double GetNoteFrequency(int strng, int fret, double semitoneOffset)
+        double GetNoteFrequency(int strng, double fret, double semitoneOffset)
         {
             semitoneOffset = fret + stringOffsetSemitones[strng] + semitoneOffset;
 
@@ -1321,6 +1321,8 @@ namespace ChartPlayer
                 return NoteUtil.GetMidiNoteFrequency(BassStringNotes[strng] + semitoneOffset);
             }
         }
+
+        double[] freqs = new double[6];
 
         bool NoteDetect(in SongNote note)
         {                
@@ -1338,8 +1340,6 @@ namespace ChartPlayer
                     }
                 }
 
-                double[] freqs = new double[numNotes];
-
                 int pos = 0;
 
                 for (int str = 0; str < chord.Fingers.Count; str++)
@@ -1352,7 +1352,7 @@ namespace ChartPlayer
                     }
                 }
 
-                bool detected = NoteDetector.NoteDetect(freqs);
+                bool detected = NoteDetector.NoteDetect(freqs, pos);
 
                 return detected;
             }
@@ -1363,7 +1363,7 @@ namespace ChartPlayer
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Slide))
             {
-                return NoteDetector.NoteDetect(note.String, GetSlideFret(note));
+                return NoteDetector.NoteDetect(GetNoteFrequency(note.String, GetSlideFret(note), DetectSemitoneOffset));
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Bend))
             {

@@ -1,4 +1,5 @@
-﻿using PitchDetect;
+﻿using AudioPlugSharp;
+using PitchDetect;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -129,11 +130,9 @@ namespace ChartPlayer
             return ratio < validPitchRatio;
         }
 
-        public bool NoteDetect(params double[] frequencies)
+        public bool NoteDetect(double frequency)
         {
-            if (frequencies.Length == 1)
-            {
-                if (frequencies[0] == 0)
+                if (frequency == 0)
                 {
                     return (spectrum.Max() > 1);
                 }
@@ -141,20 +140,22 @@ namespace ChartPlayer
                 if (CurrentPitch == 0)
                     return false;
 
-                if (IsCloseEnough(CurrentPitch, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch, (float)frequency))
                     return true;
 
                 // Allow octave down
-                if (IsCloseEnough(CurrentPitch / 2, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch / 2, (float)frequency))
                     return true;
 
                 // Allow octave up
-                if (IsCloseEnough(CurrentPitch * 2, (float)frequencies[0]))
+                if (IsCloseEnough(CurrentPitch * 2, (float)frequency))
                     return true;
 
                 return false;
-            }
+        }
 
+        public bool NoteDetect(double[] frequencies, int numFreqs)
+        {
             double max = spectrum.Max();
 
             if (max < 1)
@@ -180,9 +181,9 @@ namespace ChartPlayer
                 }
             }
 
-            foreach (double freq in frequencies)
+            for(int pos = 0; pos < numFreqs; pos++)
             {
-                double bin = GetBin(freq);
+                double bin = GetBin(frequencies[pos]);
 
                 if (!IsPeak(bin) && !IsPeak(bin / 2) && !IsPeak(bin / 4) && !IsPeak(bin * 2))
                     return false;
