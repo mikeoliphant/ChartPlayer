@@ -741,7 +741,7 @@ namespace ChartPlayer
                 {
                     if (IsTap(touch, this) && !didPause)
                     {
-                        Pause();
+                        TogglePaused();
                     }
 
                     switch (touch.TouchState)
