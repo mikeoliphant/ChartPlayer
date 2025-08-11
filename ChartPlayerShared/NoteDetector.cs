@@ -24,7 +24,7 @@ namespace ChartPlayer
         Stopwatch stopwatch = new Stopwatch();
         bool stop = false;
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
-        int[] topX = new int[5];
+        int[] topX = new int[6];
         (float Freq, float Corr)[] peaks = new (float Freq, float Corr)[16];
 
         public NoteDetector(int sampleRate)
@@ -184,7 +184,7 @@ namespace ChartPlayer
             {
                 double bin = GetBin(freq);
 
-                if (!IsPeak(bin) && !IsPeak(bin / 2) && !IsPeak(bin * 2))
+                if (!IsPeak(bin) && !IsPeak(bin / 2) && !IsPeak(bin / 4) && !IsPeak(bin * 2))
                     return false;
             }
 
