@@ -27,6 +27,7 @@ namespace ChartPlayer
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
         int[] topX = new int[6];
         (float Freq, float Corr)[] peaks = new (float Freq, float Corr)[16];
+        SampleHistory<float>.SampleProcessDelegate copyDelegate;
 
         public NoteDetector(int sampleRate)
         {
@@ -35,6 +36,8 @@ namespace ChartPlayer
 
             fftData = new float[Math.Max(SpecFFTSize, CorrFFTSize)];
             spectrum = new float[SpecFFTSize / 2];
+
+            copyDelegate = CopyAudio;
         }
 
         public void Run()
@@ -77,7 +80,7 @@ namespace ChartPlayer
         {
             SampleHistory<float> history = ChartPlayerGame.Instance.Plugin.SampleHistory;
 
-            history.Process(CopyAudio, Math.Max(SpecFFTSize, CorrFFTSize));
+            history.Process(copyDelegate, Math.Max(SpecFFTSize, CorrFFTSize));
 
             int offset = fftData.Length - CorrFFTSize;
 
