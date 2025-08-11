@@ -77,7 +77,7 @@ namespace ChartPlayer
             // Move backward until we find a note that is not visible (or we hit the start)
             while (startNotePosition > 0)
             {
-                ISongEvent note = notes[startNotePosition];
+                T note = notes[startNotePosition];
 
                 float endTime = Math.Max(note.EndTime, note.TimeOffset + minLength);
 
@@ -90,7 +90,7 @@ namespace ChartPlayer
             // Now move forward until we find a note that is visible (or we hit the end)
             while (startNotePosition < notes.Count)
             {
-                ISongEvent note = notes[startNotePosition];
+                T note = notes[startNotePosition];
 
                 float endTime = Math.Max(note.EndTime, note.TimeOffset + minLength);
 
@@ -107,7 +107,7 @@ namespace ChartPlayer
         {
             while (startPosition < notes.Count)
             {
-                ISongEvent note = notes[startPosition];
+                T note = notes[startPosition];
 
                 if (note.TimeOffset > endTime)
                     break;
