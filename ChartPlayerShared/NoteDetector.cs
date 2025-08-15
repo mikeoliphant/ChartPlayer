@@ -26,6 +26,7 @@ namespace ChartPlayer
         bool stop = false;
         float validPitchRatio = MathF.Pow(2, 0.5f / 12.0f); // half a semitone
         int[] topX = new int[6];
+        int numPeaks;
         (float Freq, float Corr)[] peaks = new (float Freq, float Corr)[16];
         SampleHistory<float>.SampleProcessDelegate copyDelegate;
 
@@ -86,7 +87,7 @@ namespace ChartPlayer
 
             float newPitch = 0;
 
-            int numPeaks = pitchDetector.GetPitchPeaks(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize), peaks);
+            numPeaks = pitchDetector.GetPitchPeaks(new ReadOnlySpan<float>(fftData, offset, CorrFFTSize), peaks);
 
             if (numPeaks > 0)
             {
@@ -135,26 +136,29 @@ namespace ChartPlayer
 
         public bool NoteDetect(double frequency)
         {
-                if (frequency == 0)
-                {
-                    return (spectrum.Max() > 1);
-                }
+            if (frequency == 0)
+            {
+                return (spectrum.Max() > 1);
+            }
 
-                if (CurrentPitch == 0)
-                    return false;
+            if (numPeaks == 0)
+                return false;
 
-                if (IsCloseEnough(CurrentPitch, (float)frequency))
+            foreach (var peak in peaks)
+            {
+                if (IsCloseEnough(peak.Freq, (float)frequency))
                     return true;
 
                 // Allow octave down
-                if (IsCloseEnough(CurrentPitch / 2, (float)frequency))
+                if (IsCloseEnough(peak.Freq / 2, (float)frequency))
                     return true;
 
                 // Allow octave up
-                if (IsCloseEnough(CurrentPitch * 2, (float)frequency))
+                if (IsCloseEnough(peak.Freq * 2, (float)frequency))
                     return true;
+            }
 
-                return false;
+            return false;
         }
 
         public bool NoteDetect(double[] frequencies, int numFreqs)
