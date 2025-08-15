@@ -4,7 +4,7 @@ ChartPlayer is a cross-platform application for playing along to charts in [Open
 
 It runs as a VST plugin inside your DAW (or as a [Jack Audio](https://github.com/jackaudio) client) so that you can use any other plugin you like (ie: guitar amp simulation) for your instrument sounds.
 
-![ChartPlayerSultans](https://github.com/user-attachments/assets/17c38536-040f-4a24-b97a-97cbb9548b4d)
+<img width="1707" height="1006" alt="Image" src="https://github.com/user-attachments/assets/4bc3a62d-64af-4820-be7d-8f8b173f5639" />
 
 # Features
 
