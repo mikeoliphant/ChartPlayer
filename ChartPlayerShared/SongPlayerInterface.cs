@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using Microsoft.Xna.Framework;
-using UILayout;
-using SongFormat;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Xml.Serialization;
-using System.Xml.Linq;
-using System.Data.SqlTypes;
-using System.Media;
+using UILayout;
+using Microsoft.Xna.Framework;
+using SongFormat;
 
 namespace ChartPlayer
 {
@@ -18,13 +15,15 @@ namespace ChartPlayer
     {
         public static SongPlayerInterface Instance { get; private set; }
 
+        public float LoopMarkerStartSecond { get; set; } = -1;
+        public float LoopMarkerEndSecond { get; set; } = -1;
+
         SongListDisplay songList = new SongListDisplay();
         SongIndex songIndex;
 
         SongPlayer songPlayer;
         SongSectionInterface sectionInterface;
         ImageElement waveFormDisplay;
-        EditableImage waveFormImage;
         WaveFormRenderer waveFormRenderer;
         SongPlayerSettingsInterface settingsInterface;
 
@@ -721,12 +720,41 @@ namespace ChartPlayer
             //vocalText.FontScale = (float)PixGame.Instance.ScreenHeight / 800f;
             if (inputManager.WasPressed("LoopMarkerStart"))
             {
-                songPlayer.LoopMarkerStartSecond = songPlayer.CurrentSecond;               
-
+                ToggleLoopStart(songPlayer.CurrentSecond);               
             }
             if (inputManager.WasPressed("LoopMarkerEnd"))
             {
-                songPlayer.LoopMarkerEndSecond = songPlayer.CurrentSecond;
+                ToggleLoopEnd(songPlayer.CurrentSecond);
+            }
+        }
+
+        public void ToggleLoopStart(float second)
+        {
+            if (LoopMarkerStartSecond == -1)
+            {
+                if ((LoopMarkerEndSecond == -1) || (LoopMarkerEndSecond > second))
+                {
+                    LoopMarkerStartSecond = second;
+                }
+            }
+            else
+            {
+                LoopMarkerStartSecond = -1;
+            }
+        }
+
+        public void ToggleLoopEnd(float second)
+        {
+            if (LoopMarkerEndSecond == -1)
+            {
+                if ((LoopMarkerStartSecond == -1) || (LoopMarkerStartSecond < second))
+                {
+                    LoopMarkerEndSecond = second;
+                }
+            }
+            else
+            {
+                LoopMarkerEndSecond = -1;
             }
         }
 
@@ -845,11 +873,11 @@ namespace ChartPlayer
 
         public void CheckLoopMarkers()       
         {
-            if (songPlayer.LoopMarkerStartSecond != -1 && songPlayer.LoopMarkerEndSecond != -1)
+            if (LoopMarkerStartSecond != -1 && LoopMarkerEndSecond != -1)
             {
-                if (songPlayer.CurrentSecond > songPlayer.LoopMarkerEndSecond)
+                if (songPlayer.CurrentSecond > LoopMarkerEndSecond)
                 {
-                    SeekTime(songPlayer.LoopMarkerStartSecond);
+                    SeekTime(LoopMarkerStartSecond);
                 }
             }           
         }
@@ -1086,21 +1114,50 @@ namespace ChartPlayer
             if (songPlayer == null)
                 return false;
 
-            if ((touch.TouchState == ETouchState.Pressed) || (touch.TouchState == ETouchState.Moved))
-            {
-                float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
+            float time = endTime * ((touch.Position.X - ContentBounds.X) / ContentBounds.Width);
 
-                if (Layout.Current.InputManager.IsDown("PreciseClick") || (sections.Count == 0))
+            if (IsDoubleTap(touch, this) && (sections.Count > 0))
+            {
+                foreach (SongSection section in sections)
                 {
-                    SongPlayerInterface.Instance.SeekTime(time);
-                }
-                else if (touch.TouchState == ETouchState.Pressed)
-                {
-                    foreach (SongSection section in sections)
+                    if ((time >= section.StartTime) && (time < section.EndTime))
                     {
-                        if ((time >= section.StartTime) && (time < section.EndTime))
+                        if ((SongPlayerInterface.Instance.LoopMarkerStartSecond == section.StartTime) &&
+                            (SongPlayerInterface.Instance.LoopMarkerEndSecond == section.EndTime))
                         {
-                            SongPlayerInterface.Instance.SeekTime(section.StartTime);
+                            SongPlayerInterface.Instance.LoopMarkerStartSecond = -1;
+                            SongPlayerInterface.Instance.LoopMarkerEndSecond = -1;
+                        }
+                        else
+                        {
+                            SongPlayerInterface.Instance.LoopMarkerStartSecond = section.StartTime;
+                            SongPlayerInterface.Instance.LoopMarkerEndSecond = section.EndTime;
+
+                            songPlayer.SeekTime(section.StartTime);
+                        }
+
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if ((touch.TouchState == ETouchState.Pressed) || (touch.TouchState == ETouchState.Moved))
+                {
+                    if (Layout.Current.InputManager.IsDown("PreciseClick") || (sections.Count == 0))
+                    {
+                        SongPlayerInterface.Instance.SeekTime(time);
+                    }
+                    else if (touch.TouchState == ETouchState.Pressed)
+                    {
+                        foreach (SongSection section in sections)
+                        {
+                            if ((time >= section.StartTime) && (time < section.EndTime))
+                            {
+                                SongPlayerInterface.Instance.SeekTime(section.StartTime);
+
+                                break;
+                            }
                         }
                     }
                 }
@@ -1168,16 +1225,16 @@ namespace ChartPlayer
             }
 
             int playPixel = (int)(((float)currentTime / endTime) * ContentBounds.Width);
-            int loopMarkerStartPixel = (int)(((float)songPlayer.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
-            int loopMarkerEndPixel = (int)(((float)songPlayer.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
+            int loopMarkerStartPixel = (int)(((float)SongPlayerInterface.Instance.LoopMarkerStartSecond / endTime) * ContentBounds.Width);
+            int loopMarkerEndPixel = (int)(((float)SongPlayerInterface.Instance.LoopMarkerEndSecond / endTime) * ContentBounds.Width);
 
             Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + playPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), lineColor);
 
-            if (songPlayer.LoopMarkerStartSecond != -1)
+            if (SongPlayerInterface.Instance.LoopMarkerStartSecond != -1)
             {
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerStartPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerStartColor);
             }
-            if (songPlayer.LoopMarkerEndSecond != -1)
+            if (SongPlayerInterface.Instance.LoopMarkerEndSecond != -1)
             {
                 Layout.Current.GraphicsContext.DrawRectangle(new RectF(ContentBounds.X + loopMarkerEndPixel - 1, (int)ContentBounds.Top, 2, (int)ContentBounds.Height), loopMarkerEndColor);
             }          

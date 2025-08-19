@@ -51,8 +51,6 @@ namespace ChartPlayer
         RubberBandStretcherStereo stretcher = null;
         float[][] stretchBuf = new float[2][];
         double pitchShift = 1.0;
-        float loopMarkerStartSecond = -1;
-        float loopMarkerEndSecond = -1;
         float linearGain = 1.0f;
         const float SmoothEpsilon = .0001f;
 
@@ -232,51 +230,6 @@ namespace ChartPlayer
         {
             seekTime = secs;
             CurrentSecond = seekTime;
-        }
-
-        public float LoopMarkerStartSecond
-        {
-            get
-            {
-                return loopMarkerStartSecond;                             
-            }
-            set
-            {
-                if (loopMarkerStartSecond == -1)
-                {
-                    if (loopMarkerEndSecond != -1 && value >= loopMarkerEndSecond)
-                    {
-                        loopMarkerStartSecond = -1;
-                    }
-                    else
-                    {
-                        loopMarkerStartSecond = value;
-                    }
-                }
-                else
-                {
-                    loopMarkerStartSecond = -1;
-                }               
-            }
-        }
-
-        public float LoopMarkerEndSecond
-        {
-            get
-            {
-                return loopMarkerEndSecond;
-            }
-            set
-            {
-                if (loopMarkerEndSecond == -1)
-                {
-                    loopMarkerEndSecond = value;
-                }
-                else
-                {
-                    loopMarkerEndSecond = -1;
-                }
-            }
         }
 
         public void ReadSamples(Span<float> leftChannel, Span<float> rightChannel)
