@@ -12,9 +12,10 @@ It runs as a VST plugin inside your DAW (or as a [Jack Audio](https://github.com
 * Song browser
 * Very fast startup and song loading
 * 3D, "note highway" display
-* Note detection
-* Pitch shifting of songs that are slightly off of standard tuning
+* Note/chord detection
+* Pitch shifting of songs to match desired guitar tuning
 * Adjustable song playback speed
+* Section looping
 
 # Platforms Supported
 
