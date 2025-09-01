@@ -23,6 +23,7 @@ namespace ChartPlayer
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
+        public float[] SongDifficulty { get; set; }
         [XmlIgnore]
         [JsonIgnore]
         public SongStatsEntry[] Stats { get; set; } = new SongStatsEntry[Enum.GetValues(typeof(ESongInstrumentType)).Length];
@@ -45,6 +46,8 @@ namespace ChartPlayer
         public string BasePath { get; private set; }
 
         Dictionary<string, int> tagDict = new Dictionary<string, int>();
+
+        static int numInstrumentTypes = Enum.GetValues(typeof(ESongInstrumentType)).Length;
 
         public IEnumerable<string> AllTags
         {
@@ -75,6 +78,26 @@ namespace ChartPlayer
                     using (Stream indexStream = File.OpenRead(indexFile))
                     {
                         Songs = JsonSerializer.Deserialize<List<SongIndexEntry>>(indexStream);
+
+                        if (Songs != null)
+                        {
+                            // Quick check for valid values
+                            foreach (var song in Songs)
+                            {
+                                if (song.SongDifficulty == null)
+                                {
+                                    song.SongDifficulty = new float[numInstrumentTypes];
+                                }
+                                else if (song.SongDifficulty.Length != numInstrumentTypes)
+                                {
+                                    var old = song.SongDifficulty;
+
+                                    song.SongDifficulty = new float[numInstrumentTypes];
+
+                                    Array.Copy(old, song.SongDifficulty, old.Length);
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -169,11 +192,17 @@ namespace ChartPlayer
                         SongName = song.SongName,
                         ArtistName = song.ArtistName,
                         AlbumName = song.AlbumName,
-                        FolderPath = Path.GetRelativePath(BasePath, songPath)
+                        FolderPath = Path.GetRelativePath(BasePath, songPath),
+                        SongDifficulty = new float[numInstrumentTypes]
                     };
 
                     foreach (SongInstrumentPart part in song.InstrumentParts.OrderBy(s => s.InstrumentType))
                     {
+                        if (indexEntry.SongDifficulty[(int)part.InstrumentType] == 0)
+                        {
+                            indexEntry.SongDifficulty[(int)part.InstrumentType] = part.SongDifficulty;
+                        }
+
                         if (part.InstrumentType == ESongInstrumentType.LeadGuitar)
                         {
                             indexEntry.Arrangements += "L";

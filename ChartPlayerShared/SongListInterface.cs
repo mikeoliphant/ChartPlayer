@@ -62,9 +62,16 @@ namespace ChartPlayer
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
+                DisplayName = "Diff",
+                ValueFunc = delegate (SongIndexEntry entry) { return entry.SongDifficulty[(int)CurrentInstrument].ToString("0.0"); },
+                RequestedDisplayWidth = 40,
+                SecondarySortColumn = artistColumn
+            });
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
+            {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
-                RequestedDisplayWidth = 70,
+                RequestedDisplayWidth = 50,
                 StartReversed = true,
                 SecondarySortColumn = artistColumn
             });
@@ -73,7 +80,7 @@ namespace ChartPlayer
                 DisplayName = "Last Play",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? "" : GetDayString(entry.Stats[(int)CurrentInstrument].LastPlayed); },
                 SortValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? DateTime.MinValue : entry.Stats[(int)CurrentInstrument].LastPlayed; },
-                RequestedDisplayWidth = 80,
+                RequestedDisplayWidth = 90,
                 StartReversed = true,
                 SecondarySortColumn = artistColumn
             });
