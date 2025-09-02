@@ -20,6 +20,7 @@ namespace ChartPlayer
         public string AlbumName { get; set; }
         public string FolderPath { get; set; }
         public string Arrangements { get; set; } = "";
+        public float LengthSeconds { get; set; }
         public string LeadGuitarTuning { get; set; }
         public string RhythmGuitarTuning { get; set; }
         public string BassGuitarTuning { get; set; }
@@ -193,6 +194,7 @@ namespace ChartPlayer
                         ArtistName = song.ArtistName,
                         AlbumName = song.AlbumName,
                         FolderPath = Path.GetRelativePath(BasePath, songPath),
+                        LengthSeconds = song.SongLengthSeconds,
                         SongDifficulty = new float[numInstrumentTypes]
                     };
 

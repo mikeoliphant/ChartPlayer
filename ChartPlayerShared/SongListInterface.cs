@@ -69,6 +69,14 @@ namespace ChartPlayer
             });
             SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
             {
+                DisplayName = "Length",
+                ValueFunc = delegate (SongIndexEntry entry) { return TimeSpan.FromSeconds(entry.LengthSeconds).ToString("m\\:ss"); },
+                SortValueFunc = delegate (SongIndexEntry entry) { return entry.LengthSeconds; },
+                RequestedDisplayWidth = 60,
+                SecondarySortColumn = artistColumn
+            });
+            SongList.AddColumn(new ItemDisplayColum<SongIndexEntry>
+            {
                 DisplayName = "Plays",
                 ValueFunc = delegate (SongIndexEntry entry) { return (entry.Stats[(int)CurrentInstrument] == null) ? 0 : entry.Stats[(int)CurrentInstrument].NumPlays; },
                 RequestedDisplayWidth = 50,
