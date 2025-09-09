@@ -975,9 +975,9 @@ namespace ChartPlayer
                             scoreText.StringBuilder.AppendNumber(evenPercent);
                             scoreText.StringBuilder.Append('.');
 
-                            percent -= evenPercent / 100;
+                            percent -= evenPercent / 100.0f;
 
-                            scoreText.StringBuilder.AppendNumber((int)(percent * 10));
+                            scoreText.StringBuilder.AppendNumber((int)(percent * 1000));
                             scoreText.StringBuilder.Append("%)");
                         }
                     }
