@@ -408,14 +408,6 @@ namespace ChartPlayer
                             if ((note.TimeOffset <= currentTime) && (note.TimeOffset > scoreStartSecs))
                             {
                                 isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : (currentStringDetected[note.String] && (currentStringNotes[note.String].Value.EndTime == note.EndTime));
-
-                                if (notesDetected[pos] == 0)
-                                {
-                                    // Mark note as played
-                                    notesDetected[pos] = -1;
-
-                                    NumNotesTotal++;
-                                }
                             }
 
                             if (DisplayNotes)
@@ -423,13 +415,27 @@ namespace ChartPlayer
                                 DrawNote(note);
                             }
 
+                            // Check to see if we should mark as detected
                             if (isDetected && (notesDetected[pos] != 1))
                             {
-                                // Mark as detected
-                                notesDetected[pos] = 1;
+                                if (notesDetected[pos] == 0)
+                                    NumNotesTotal++;
 
                                 NumNotesDetected++;
+
+                                notesDetected[pos] = 1;
                             }
+                        }
+
+                        // Check for missed notes
+                        for (; pos >= 0; pos--)
+                        {
+                            if (notesDetected[pos] != 0)
+                                break;
+
+                            notesDetected[pos] = -1;
+
+                            NumNotesTotal++;
                         }
                     }
 
