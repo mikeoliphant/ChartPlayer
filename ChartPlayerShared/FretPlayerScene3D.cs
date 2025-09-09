@@ -433,6 +433,9 @@ namespace ChartPlayer
                             if (notesDetected[pos] != 0)
                                 break;
 
+                            if (allNotes[pos].TimeOffset < scoreStartSecs)
+                                break;
+
                             notesDetected[pos] = -1;
 
                             NumNotesTotal++;
