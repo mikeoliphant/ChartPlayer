@@ -964,15 +964,22 @@ namespace ChartPlayer
 
                         float percent = (float)detectedNotes / (float)totalNotes;
 
-                        int evenPercent = (int)(percent * 100);
+                        if (percent == 1)
+                        {
+                            scoreText.StringBuilder.Append("100%)");
+                        }
+                        else
+                        {
+                            int evenPercent = (int)(percent * 100);
 
-                        scoreText.StringBuilder.AppendNumber(evenPercent);
-                        scoreText.StringBuilder.Append('.');
+                            scoreText.StringBuilder.AppendNumber(evenPercent);
+                            scoreText.StringBuilder.Append('.');
 
-                        percent -= evenPercent / 100;
+                            percent -= evenPercent / 100;
 
-                        scoreText.StringBuilder.AppendNumber((int)(percent * 10));
-                        scoreText.StringBuilder.Append("%)");
+                            scoreText.StringBuilder.AppendNumber((int)(percent * 10));
+                            scoreText.StringBuilder.Append("%)");
+                        }
                     }
 
                     scoreTextWrapper.UpdateContentLayout();
