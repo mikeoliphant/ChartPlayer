@@ -405,7 +405,7 @@ namespace ChartPlayer
 
                             isDetected = false;
 
-                            if ((note.TimeOffset <= currentTime) && (note.TimeOffset > scoreStartSecs))
+                            if (note.TimeOffset <= currentTime)
                             {
                                 isDetected = note.Techniques.HasFlag(ESongNoteTechnique.Chord) ? currentChordDetected : (currentStringDetected[note.String] && (currentStringNotes[note.String].Value.EndTime == note.EndTime));
                             }

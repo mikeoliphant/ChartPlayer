@@ -1097,7 +1097,7 @@ namespace ChartPlayer
                 }
                 else if ((note is SongDrumNote drumNote) && (lastNote is SongDrumNote lastDrumNote))
                 {
-                    density += ((drumNote.KitPiece == lastDrumNote.KitPiece) && (drumNote.Articulation == lastDrumNote.Articulation)) ? 5 : 1;
+                    density += ((drumNote.KitPiece != lastDrumNote.KitPiece) || (drumNote.Articulation != lastDrumNote.Articulation)) ? 5 : 1;
                 }
                 else if ((note is SongKeyboardNote keyNote) && (lastNote is SongKeyboardNote lastKeyNote))
                 {
