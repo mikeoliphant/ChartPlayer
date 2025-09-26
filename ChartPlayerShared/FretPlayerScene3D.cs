@@ -532,7 +532,7 @@ namespace ChartPlayer
 
                                     if (stringNote.SlideFret != -1)
                                     {
-                                        drawFret = GetSlideFret(stringNote);
+                                        drawFret = GetSlideFret(stringNote, currentTime);
                                     }
 
                                     DrawVerticalImage(Layout.Current.GetImage("FingerOutline"), drawFret - 0.5f, currentTime, GetNoteHeadHeight(stringNote), UIColor.White, 0.05f);
@@ -795,7 +795,7 @@ namespace ChartPlayer
             {
                 if (isSlide && (note.TimeOffset < currentTime))
                 {
-                    drawFret = GetSlideFret(note);
+                    drawFret = GetSlideFret(note, currentTime);
                 }
 
                 if (!(drawCurrent && isCurrent) && (note.TimeOffset + note.TimeLength > currentTime))
@@ -1072,9 +1072,9 @@ namespace ChartPlayer
             }
         }
 
-        float GetSlideFret(in SongNote note)
+        float GetSlideFret(in SongNote note, float refTime)
         {
-            return MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((currentTime - note.TimeOffset) / note.TimeLength));
+            return MathUtil.Lerp(note.Fret, note.SlideFret, MathUtil.Saturate((refTime - note.TimeOffset) / note.TimeLength));
         }
 
         float GetCentsOffset(float strng, float cents)
@@ -1372,7 +1372,10 @@ namespace ChartPlayer
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Slide))
             {
-                return NoteDetector.NoteDetect(GetNoteFrequency(note.String, GetSlideFret(note), DetectSemitoneOffset));
+                double freq1 = GetNoteFrequency(note.String, GetSlideFret(note, currentTime - 0.5f), DetectSemitoneOffset);
+                double freq2 = GetNoteFrequency(note.String, GetSlideFret(note, currentTime + 0.5f), DetectSemitoneOffset);
+
+                return NoteDetector.NoteDetect(Math.Min(freq1, freq2), Math.Max(freq1, freq2));
             }
             else if (note.Techniques.HasFlag(ESongNoteTechnique.Bend))
             {

@@ -134,6 +134,28 @@ namespace ChartPlayer
             return ratio < validPitchRatio;
         }
 
+        public bool NoteDetect(double minFrequency, double maxFrequency)
+        {
+            if (numPeaks == 0)
+                return false;
+
+            foreach (var peak in peaks)
+            {
+                if ((peak.Freq > minFrequency) && (peak.Freq < maxFrequency))
+                    return true;
+
+                // Allow octave down
+                if (((peak.Freq / 2) > minFrequency) && ((peak.Freq / 2) < maxFrequency))
+                    return true;
+
+                // Allow octave up
+                if (((peak.Freq * 2) > minFrequency) && ((peak.Freq * 2) < maxFrequency))
+                    return true;
+            }
+
+            return false;
+        }
+
         public bool NoteDetect(double frequency)
         {
             if (frequency == 0)
@@ -141,24 +163,7 @@ namespace ChartPlayer
                 return (spectrum.Max() > 1);
             }
 
-            if (numPeaks == 0)
-                return false;
-
-            foreach (var peak in peaks)
-            {
-                if (IsCloseEnough(peak.Freq, (float)frequency))
-                    return true;
-
-                // Allow octave down
-                if (IsCloseEnough(peak.Freq / 2, (float)frequency))
-                    return true;
-
-                // Allow octave up
-                if (IsCloseEnough(peak.Freq * 2, (float)frequency))
-                    return true;
-            }
-
-            return false;
+            return NoteDetect(frequency / validPitchRatio, frequency * validPitchRatio);
         }
 
         public bool NoteDetect(double[] frequencies, int numFreqs)
