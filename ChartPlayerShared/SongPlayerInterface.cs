@@ -613,6 +613,7 @@ namespace ChartPlayer
                     };
 
                     (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).DisplayNotes = !hideNotesButton.IsPressed;
+                    (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).CapoFret = part.CapoFret;
 
                     tunerButton.Visible = true;
                 }

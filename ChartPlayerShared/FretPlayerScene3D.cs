@@ -70,6 +70,7 @@ namespace ChartPlayer
         public bool DisplayNotes { get; set; } = true;
         public float DetectSemitoneOffset { get; set; } = 0;
         public NoteDetector NoteDetector { get; private set; }
+        public int CapoFret { get; set; } = 0;
 
         float targetFocusFret = 2;
         int numFrets = 24;
@@ -1314,6 +1315,18 @@ namespace ChartPlayer
             }
         }
 
+        double GetStringNote(int strng, double fret)
+        {
+            if (numStrings == 6)
+            {
+                return GuitarStringNotes[strng] + Math.Max(fret, CapoFret);
+            }
+            else
+            {
+                return (BassStringNotes[strng] + Math.Max(fret, CapoFret));
+            }
+        }
+
         static int[] GuitarStringNotes = { 40, 45, 50, 55, 59, 64 };
         static int[] BassStringNotes = { 28, 33, 38, 43 };
 
@@ -1321,14 +1334,7 @@ namespace ChartPlayer
         {
             semitoneOffset = fret + stringOffsetSemitones[strng] + semitoneOffset;
 
-            if (numStrings == 6)
-            {
-                return NoteUtil.GetMidiNoteFrequency(GuitarStringNotes[strng] + semitoneOffset);
-            }
-            else
-            {
-                return NoteUtil.GetMidiNoteFrequency(BassStringNotes[strng] + semitoneOffset);
-            }
+            return NoteUtil.GetMidiNoteFrequency(GetStringNote(strng, fret) + semitoneOffset);
         }
 
         double[] freqs = new double[6];
