@@ -191,11 +191,11 @@ namespace ChartPlayer
                 string partNameStem = part.InstrumentName + "*.ogg";
                 string partTypeStem = part.InstrumentType.ToString().ToLowerInvariant() + "*.ogg";
 
-                vorbisReader = new VorbisMixer(path, stem, partNameStem, partTypeStem);
+                vorbisReader = new VorbisMixer(path, stem, partNameStem, partTypeStem, "preview.ogg");
             }
             else
             {
-                vorbisReader = new VorbisMixer(path);
+                vorbisReader = new VorbisMixer(path, "preview.ogg");
             }
 
             if (vorbisReader == null)
