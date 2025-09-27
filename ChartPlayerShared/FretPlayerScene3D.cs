@@ -454,7 +454,7 @@ namespace ChartPlayer
 
                     for (int fret = 1; fret < numFrets; fret++)
                     {
-                        DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha);
+                        DrawFretVerticalLine(fret - 1, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha, 0.03f);
 
                         UIColor color = UIColor.White;
 
@@ -467,6 +467,11 @@ namespace ChartPlayer
                         }
 
                         DrawVerticalText(numberStrings[fret], fret - 0.5f, 0, currentTime, color, 0.08f);
+                    }
+
+                    if (CapoFret != 0)
+                    {
+                        DrawFretVerticalLine(CapoFret - 0.1f, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha, 0.05f);
                     }
 
                     if (DisplayNotes)
@@ -868,7 +873,7 @@ namespace ChartPlayer
             }
 
             // Vertical line from fretboard up to note head
-            DrawFretVerticalLine(drawFret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha);
+            DrawFretVerticalLine(drawFret - 0.5f, noteHeadTime, 0, GetStringHeight(stringOffset), whiteHalfAlpha, 0.03f);
 
             if (note.TimeOffset > currentTime)
                 firstNote = note;
@@ -908,14 +913,12 @@ namespace ChartPlayer
             DrawQuad(image, new Vector3(startFret, heightOffset, minZ), color, new Vector3(startFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, maxZ), color, new Vector3(endFret, heightOffset, minZ), color);
         }
 
-        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, in UIColor color)
+        void DrawFretVerticalLine(float fretCenter, float time, float startHeight, float endEndHeight, in UIColor color, float imageScale)
         {
             fretCenter = GetFretPosition(fretCenter);
             time *= -timeScale;
 
             UIImage image = Layout.Current.GetImage("VerticalFretLine");
-
-            float imageScale = .03f;
 
             float minX = (float)fretCenter - ((float)image.Width * imageScale);
             float maxX = (float)fretCenter + ((float)image.Width * imageScale);
