@@ -32,7 +32,7 @@ namespace ChartPlayer
 
             notesDetected = new float?[player.SongDrumNotes.Notes.Count];
 
-            CurrentTimeOffset = 0.15f;
+            CurrentTimeOffset = 0.35f;
 
             NoteDisplayDistance = 300;
         }
