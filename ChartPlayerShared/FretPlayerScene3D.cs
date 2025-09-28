@@ -471,7 +471,7 @@ namespace ChartPlayer
 
                     if (CapoFret != 0)
                     {
-                        DrawFretVerticalLine(CapoFret - 0.1f, startTime, GetStringHeight(0), GetStringHeight(numStrings - 1), whiteHalfAlpha, 0.05f);
+                        DrawFretVerticalLine(CapoFret - 0.1f, startTime, GetStringHeight(-0.2f), GetStringHeight(numStrings - 1 + 0.2f), whiteHalfAlpha, 0.08f);
                     }
 
                     if (DisplayNotes)
