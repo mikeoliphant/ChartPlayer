@@ -623,7 +623,7 @@ namespace ChartPlayer
                 stats.LastPlayed = DateTime.Now;
                 stats.NumPlays++;
 
-                songIndex.SaveStats();
+                songIndex.SaveStats(songList.CurrentInstrument);
 
                 songNameText.Text = song.SongName;
                 songArtistText.Text = song.ArtistName;

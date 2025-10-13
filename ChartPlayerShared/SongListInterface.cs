@@ -290,7 +290,7 @@ namespace ChartPlayer
 
                     UpdateSelectedSongDisplay();
 
-                    songIndex.SaveStats();
+                    songIndex.SaveStats(CurrentInstrument);
                 }
 
                 if (inputManager.WasClicked("PlayCurrent", this))
@@ -500,7 +500,7 @@ namespace ChartPlayer
                 else
                     selectedSong.Stats[(int)CurrentInstrument].RemoveTag("*");
 
-                songIndex.SaveStats();
+                songIndex.SaveStats(CurrentInstrument);
             };
 
             tagStack.Children.Clear();
@@ -525,7 +525,7 @@ namespace ChartPlayer
 
                                         stats.RemoveTag(tag);
 
-                                        songIndex.SaveStats();
+                                        songIndex.SaveStats(CurrentInstrument);
 
                                         UpdateSelectedSongDisplay();
                                     });
@@ -586,7 +586,7 @@ namespace ChartPlayer
 
                         stats.AddTag(tag);
 
-                        songIndex.SaveStats();
+                        songIndex.SaveStats(CurrentInstrument);
 
                         UpdateSelectedSongDisplay();
                     }
@@ -610,7 +610,7 @@ namespace ChartPlayer
 
                             stats.AddTag(text);
 
-                            songIndex.SaveStats();
+                            songIndex.SaveStats(CurrentInstrument);
 
                             UpdateSelectedSongDisplay();
                         }

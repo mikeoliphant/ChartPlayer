@@ -304,6 +304,11 @@ namespace ChartPlayer
             return null;
         }
 
+        public void SaveStats(ESongInstrumentType type)
+        {
+            Stats[(int)type].Save();
+        }
+
         public void SaveStats()
         {
             for (int i = 0; i < Stats.Length; i++)
