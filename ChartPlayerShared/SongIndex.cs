@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
 using System.Xml.Serialization;
+using AudioPlugSharp;
 using Microsoft.Xna.Framework.Media;
 using SongFormat;
 using UILayout;
@@ -176,7 +177,14 @@ namespace ChartPlayer
 
             if (File.Exists(songFile))
             {
-                AddSong(folderPath);
+                try
+                {
+                    AddSong(folderPath);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Failed to add song [" + folderPath + "] with error: " + ex.ToString());
+                }
             }
         }
 
