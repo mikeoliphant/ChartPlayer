@@ -213,7 +213,7 @@ namespace ChartPlayer
 
                             if (delta < range)
                             {
-                                scale = 1 + ((1.0f - (delta / range)) * .75f);
+                                scale = 1 + ((1.0f - (delta / range)) * 1.5f);
                             }
                         }
 

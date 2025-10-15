@@ -93,8 +93,7 @@ namespace ChartPlayer
             if (InputManager.WasClicked("ToggleFullscreen", this))
             {
                 Plugin.ToggleFullScreen();
-            }
-           
+            }           
         }
 
         public override void Exiting()
