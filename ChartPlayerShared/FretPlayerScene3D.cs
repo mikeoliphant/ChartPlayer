@@ -64,8 +64,8 @@ namespace ChartPlayer
 
     public class FretPlayerScene3D : ChartScene3D
     {
-        static UIColor[] stringColors = new UIColor[] { UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
-        static string[] stringColorNames = { "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
+        static UIColor[] stringColors = new UIColor[] { new UIColor(.1f, .8f, 0), UIColor.Red, UIColor.Yellow, new UIColor(0, .6f, 1.0f, 1.0f), UIColor.Orange, new UIColor(.1f, .8f, 0), new UIColor(.8f, 0, .8f) };
+        static string[] stringColorNames = { "Green", "Red", "Yellow", "Cyan", "Orange", "Green", "Purple" };
 
         public bool DisplayNotes { get; set; } = true;
         public float DetectSemitoneOffset { get; set; } = 0;
@@ -79,6 +79,7 @@ namespace ChartPlayer
         SongNote? firstNote;
         int numStrings;
         bool isDetected = false;
+        int stringColorOffset = 0;
 
         FretCamera fretCamera;
 
@@ -116,15 +117,6 @@ namespace ChartPlayer
             highwayStartX = GetFretPosition(0);
             highwayEndX = GetFretPosition(numFrets);
 
-            stringNoteImages = new UIImage[6];
-            stringNoteTrailImages = new UIImage[6];
-
-            for (int strng = 0; strng < 6; strng++)
-            {
-                stringNoteImages[strng] = Layout.Current.GetImage("Guitar" + stringColorNames[strng]);
-                stringNoteTrailImages[strng] = Layout.Current.GetImage("NoteTrail" + stringColorNames[strng]);
-            }
-
             numStrings = (player.SongInstrumentPart.InstrumentType == ESongInstrumentType.BassGuitar) ? 4 : 6;
 
             currentStringNotes = new SongNote?[numStrings];
@@ -143,6 +135,22 @@ namespace ChartPlayer
             for (int str = 0; str < numStrings; str++)
             {
                 stringOffsetSemitones[str] = baseOffset + player.SongInstrumentPart.Tuning.StringSemitoneOffsets[str];
+            }
+
+            stringColorOffset = 1;
+
+            if ((numStrings == 4) && ((player.SongTuningMode <= ESongTuningMode.A440) || (player.SongTuningMode == ESongTuningMode.BStandard)) && (player.SongInstrumentPart.Tuning.StringSemitoneOffsets[1] < -4))
+            {
+                stringColorOffset = 0;  // Offset to use Green as low string for tunings B and below
+            }
+
+            stringNoteImages = new UIImage[6];
+            stringNoteTrailImages = new UIImage[6];
+
+            for (int strng = 0; strng < 6; strng++)
+            {
+                stringNoteImages[strng] = Layout.Current.GetImage("Guitar" + GetStringColorName(strng));
+                stringNoteTrailImages[strng] = Layout.Current.GetImage("NoteTrail" + GetStringColorName(strng));
             }
 
             NoteDetector = new NoteDetector((int)ChartPlayerGame.Instance.Plugin.Host.SampleRate);
@@ -446,7 +454,7 @@ namespace ChartPlayer
                     // Draw the front section
                     for (int str = 0; str < numStrings; str++)
                     {
-                        UIColor color = stringColors[str];
+                        UIColor color = GetStringColor(str);
                         color.A = 192;
 
                         DrawFretHorizontalLine(0, numFrets, startTime, GetStringHeight(GetStringOffset(str)), color, .04f);
@@ -706,7 +714,7 @@ namespace ChartPlayer
                     dimAmount -= (0.1f - timeDiff) * 2;
                 }
 
-                stringColor = UIColor.Lerp(UIColor.White, stringColors[note.String], dimAmount);
+                stringColor = UIColor.Lerp(UIColor.White, GetStringColor(note.String), dimAmount);
                 stringColor = UIColor.Lerp(stringColor, UIColor.Black, dimAmount);
             }
 
@@ -884,6 +892,16 @@ namespace ChartPlayer
         public static float GetFretPosition(float fret)
         {
             return scaleLength - (scaleLength / (float)(Math.Pow(2, (double)fret / 12.0)));
+        }
+
+        UIColor GetStringColor(int str)
+        {
+            return stringColors[str + stringColorOffset];
+        }
+
+        string GetStringColorName(int str)
+        {
+            return stringColorNames[str + stringColorOffset];
         }
 
         int GetStringOffset(int str)
