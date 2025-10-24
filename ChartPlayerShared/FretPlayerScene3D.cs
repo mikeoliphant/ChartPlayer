@@ -133,11 +133,11 @@ namespace ChartPlayer
 
             stringOffsetSemitones = new double[numStrings];
 
-            double baseOffset = 0;
+            double baseOffset = player.Song.A440CentsOffset / 100.0;
 
             if (player.SongTuningMode != ESongTuningMode.None)
             {
-                baseOffset = -player.TuningOffsetSemitones;
+                baseOffset += -player.TuningOffsetSemitones;
             }
 
             for (int str = 0; str < numStrings; str++)
