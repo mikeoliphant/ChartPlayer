@@ -217,7 +217,10 @@ namespace ChartPlayer
                         {
                             indexEntry.Arrangements += "L";
 
-                            indexEntry.LeadGuitarTuning = GetTuning(song, part);
+                            if (string.IsNullOrEmpty(indexEntry.LeadGuitarTuning))
+                            {
+                                indexEntry.LeadGuitarTuning = GetTuning(song, part);
+                            }
                         }
                         else if (part.InstrumentType == ESongInstrumentType.RhythmGuitar)
                         {
@@ -229,7 +232,10 @@ namespace ChartPlayer
                         {
                             indexEntry.Arrangements += "B";
 
-                            indexEntry.BassGuitarTuning = GetTuning(song, part);
+                            if (string.IsNullOrEmpty(indexEntry.BassGuitarTuning))
+                            {
+                                indexEntry.BassGuitarTuning = GetTuning(song, part);
+                            }
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Drums)
                         {
