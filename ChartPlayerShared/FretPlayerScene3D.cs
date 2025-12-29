@@ -1353,7 +1353,7 @@ namespace ChartPlayer
 
         double GetNoteFrequency(int strng, double fret, double semitoneOffset)
         {
-            semitoneOffset += stringOffsetSemitones[strng];
+            semitoneOffset += stringOffsetSemitones[strng] + player.PitchShiftSemitones;
 
             return NoteUtil.GetMidiNoteFrequency(GetStringNote(strng, fret) + semitoneOffset);
         }
