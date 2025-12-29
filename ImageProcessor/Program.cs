@@ -47,6 +47,7 @@ namespace ChartPlayerImageProcessor
             Add("ScrollDownArrow");
 
             Add("HorizontalSlider");
+            Add("VerticalSlider");
 
             Add("VerticalPointer");
             Add("VerticalPointerLeft");

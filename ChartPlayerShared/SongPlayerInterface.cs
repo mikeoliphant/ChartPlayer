@@ -39,8 +39,8 @@ namespace ChartPlayer
         TextBlock songArtistText;
         TextBlock songInstrumentText;
 
-        TextBlock speedText;
-        HorizontalSlider speedSlider;
+        TextButton speedButton;
+        VerticalSlider speedSlider;
 
         TextToggleButton hideNotesButton;
 
@@ -301,32 +301,23 @@ namespace ChartPlayer
                 }
             });
 
-            NinePatchWrapper speedInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
-            {
-                VerticalAlignment = EVerticalAlignment.Stretch
-            };
-            bottomHorizontalStack.Children.Add(speedInterface);
-
-            HorizontalStack speedStack = new HorizontalStack()
-            {
-                VerticalAlignment = EVerticalAlignment.Stretch
-            };
-            speedInterface.Child = speedStack;
-
-            speedStack.Children.Add(speedText = new TextBlock("Speed: 100%")
-            {
-                VerticalAlignment = EVerticalAlignment.Center
-            });
-
-            speedSlider = new HorizontalSlider("HorizontalSlider")
+            leftButtonStack.Children.Add(speedButton = new ("100%")
             {
                 VerticalAlignment = EVerticalAlignment.Center,
-                DesiredWidth = 100,
+                ClickAction = delegate
+                {
+                    Layout.Current.ShowPopup(new PopupWrapper(speedSlider), new System.Numerics.Vector2(speedButton.ContentBounds.Left, bottomHorizontalStack.ContentBounds.Top));
+                }
+            });
+
+            speedSlider = new VerticalSlider("VerticalSlider")
+            {
+                DesiredHeight = 100,
                 BackgroundColor = UIColor.Black,
+                InvertLevel = true,
                 ChangeAction = SpeedChanged
             };
             speedSlider.SetLevel(1.0f);
-            speedStack.Children.Add(speedSlider);
 
             bpmInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
@@ -467,7 +458,7 @@ namespace ChartPlayer
                 songPlayer.SetPlaybackSpeed(newSpeed);
             }
 
-            speedText.Text = "Speed: " + (newSpeed * 100).ToString("0") + "%";
+            speedButton.Text = (newSpeed * 100).ToString("0") + "%";
         }
 
         public void RescanSongIndex()
