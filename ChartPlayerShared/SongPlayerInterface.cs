@@ -555,7 +555,7 @@ namespace ChartPlayer
 
                 songPlayer.BasePath = songIndex.BasePath;
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
-                SpeedChanged(speedSlider.Level);
+                SpeedChanged(speedSlider.GetLevel());
                 songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;
                 songPlayer.MutePartStems = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.MutePartStems;
 
