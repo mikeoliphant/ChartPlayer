@@ -34,6 +34,7 @@ namespace ChartPlayer
         }
         public ESongTuningMode SongTuningMode { get; set; } = ESongTuningMode.A440;
         public double TuningOffsetSemitones { get; private set; } = 0;
+        public double PitchShiftSemitones { get; private set; } = 0;
         public float[] Loudness { get; } = new float[512];
         public int LoadedLoudness { get; private set; } = 0;
         public float SongRMS { get; private set; } = 0;
@@ -89,6 +90,26 @@ namespace ChartPlayer
             if (stretcher != null)
             {
                 stretcher.SetTimeRatio(1.0 / speed);
+            }
+        }
+
+        public void SetPitchShiftSemitones(double semitones)
+        {
+            PitchShiftSemitones = semitones;
+
+            UpdatePitchShift();
+        }
+
+        void UpdatePitchShift()
+        {
+            double semitones = TuningOffsetSemitones - PitchShiftSemitones;
+
+            if ((SongTuningMode != ESongTuningMode.None) && (semitones != 0))
+                pitchShift = 1.0 / Math.Pow(2, (double)semitones / 12.0);
+
+            if (stretcher != null)
+            {
+                stretcher.SetPitchScale(pitchShift);
             }
         }
 
@@ -205,13 +226,7 @@ namespace ChartPlayer
 
             SongLengthSeconds = (float)vorbisReader.TotalTime.TotalSeconds;
 
-            if ((SongTuningMode != ESongTuningMode.None) && (TuningOffsetSemitones != 0))
-                pitchShift = 1.0 / Math.Pow(2, (double)TuningOffsetSemitones / 12.0);
-
-            if (stretcher != null)
-            {
-                stretcher.SetPitchScale(pitchShift);
-            }
+            UpdatePitchShift();
 
             resampler.SetRates(vorbisReader.SampleRate, PlaybackSampleRate);
 

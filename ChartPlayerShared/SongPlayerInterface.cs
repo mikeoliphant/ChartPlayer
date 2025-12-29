@@ -42,6 +42,9 @@ namespace ChartPlayer
         TextButton speedButton;
         VerticalSlider speedSlider;
 
+        NinePatchWrapper tuningInterface;
+        TextBlock tuningText;
+
         TextToggleButton hideNotesButton;
 
         UIElementWrapper scoreTextWrapper;
@@ -319,6 +322,52 @@ namespace ChartPlayer
             };
             speedSlider.SetLevel(1.0f);
 
+            tuningInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            bottomHorizontalStack.Children.Add(tuningInterface);
+
+            HorizontalStack tuningStack = new HorizontalStack()
+            {
+                VerticalAlignment = EVerticalAlignment.Stretch
+            };
+            tuningInterface.Child = tuningStack;
+
+            tuningStack.Children.Add(new TextButton("-")
+            {
+                ClickAction = delegate
+                {
+                    if (songPlayer != null)
+                    {
+                        SetPitchShift(songPlayer.PitchShiftSemitones - 1);
+                    }
+                }
+            });
+
+            tuningStack.Children.Add(new UIElementWrapper
+            {
+                Child = tuningText = new TextBlock("0")
+                {
+                    HorizontalAlignment = EHorizontalAlignment.Center,
+                    VerticalAlignment = EVerticalAlignment.Center
+                },
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                VerticalAlignment = EVerticalAlignment.Stretch,
+                DesiredWidth = 40
+            });
+
+            tuningStack.Children.Add(new TextButton("+")
+            {
+                ClickAction = delegate
+                {
+                    if (songPlayer != null)
+                    {
+                        SetPitchShift(songPlayer.PitchShiftSemitones + 1);
+                    }
+                }
+            });
+
             bpmInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
@@ -461,6 +510,16 @@ namespace ChartPlayer
             speedButton.Text = (newSpeed * 100).ToString("0") + "%";
         }
 
+        void SetPitchShift(double pitchShift)
+        {
+            pitchShift = Math.Clamp(pitchShift, -12, 12);
+
+            songPlayer.SetPitchShiftSemitones(pitchShift);
+
+            tuningText.Text = ((int)pitchShift).ToString();
+            tuningInterface.UpdateContentLayout();
+        }
+
         public void RescanSongIndex()
         {
             songIndex = new SongIndex(songBasePath, forceRescan: true);
@@ -558,9 +617,9 @@ namespace ChartPlayer
                 SpeedChanged(speedSlider.GetLevel());
                 songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;
                 songPlayer.MutePartStems = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.MutePartStems;
+                SetPitchShift(0);
 
                 songPlayer.SetSong(songPath, songData, part);
-
 
                 if (ChartPlayerGame.Instance.Scene3D != null)
                 {
