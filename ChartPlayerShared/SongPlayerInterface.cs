@@ -527,6 +527,19 @@ namespace ChartPlayer
             songList.SetSongIndex(songIndex);
         }
 
+        public void ShowOptions()
+        {
+            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+
+            if (songPlayer != null)
+            {
+                if (!songPlayer.Paused)
+                    TogglePaused();
+            }
+
+            Layout.Current.ShowPopup(settingsInterface);
+        }
+
         public SongPlayerSettings LoadDefaultOptions()
         {
             SongPlayerSettings settings = null;
