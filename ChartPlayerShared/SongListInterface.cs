@@ -185,6 +185,7 @@ namespace ChartPlayer
             buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Drums", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Drums); } });
             buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
+            buttonInputStack.AddInput(new DialogInput { Text = "Options", Action = delegate { SongPlayerInterface.Instance.ShowOptions(); } });
             buttonInputStack.AddInput(new DialogInput { Text = "ReScan", Action = delegate { SongPlayerInterface.Instance.RescanSongIndex(); } });
             buttonInputStack.AddInput(new DialogInput
             {
