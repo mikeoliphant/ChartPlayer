@@ -102,6 +102,18 @@ namespace ChartPlayer
         bool[] currentStringDetected;
         int[] currentStringFingers;
         int startNotePosition = 0;
+        
+        NoteFilter noteFilter;
+        List<SongNote> displayNotes;
+        public float DifficultyPercent 
+        { 
+            get => noteFilter?.DifficultyPercent ?? 100.0f;
+            set 
+            {
+                if (noteFilter != null)
+                    noteFilter.DifficultyPercent = value;
+            }
+        }
 
         public FretPlayerScene3D(SongPlayer player)
             : base(player)
@@ -160,10 +172,14 @@ namespace ChartPlayer
             noteDetectThread.Name = "NoteDetect";
             noteDetectThread.Start();
 
-            notesDetected = new sbyte[player.SongInstrumentNotes.Notes.Count];
+            notesDetected = new sbyte[player.SongInstrumentNotes.Notes.Count]; // Size for all notes, filter applied at render time
 
             // Sort notes by time and then by string
             player.SongInstrumentNotes.Notes = player.SongInstrumentNotes.Notes.OrderBy(n => n.TimeOffset).ThenByDescending(n => GetStringOffset(n.String)).ToList();
+
+            // Initialize note filter for difficulty adjustment
+            noteFilter = new NoteFilter(player.SongInstrumentNotes, player.SongStructure);
+            displayNotes = player.SongInstrumentNotes.Notes; // Default to all notes
 
             // Do a pre-pass on the notes to find spot where we want to add note numbers on the fretboard or re-show the full chord
             SongNote? lastNote = null;
@@ -307,7 +323,9 @@ namespace ChartPlayer
                     UIColor handPositionColor = UIColor.White;
                     handPositionColor.A = 32;
 
-                    List<SongNote> allNotes = player.SongInstrumentNotes.Notes;
+                    // Apply difficulty filter
+                    displayNotes = noteFilter.GetFilteredNotes();
+                    List<SongNote> allNotes = displayNotes;
 
                     startNotePosition = GetStartNote<SongNote>(currentTime, secsBehind, startNotePosition, allNotes);
 
@@ -475,6 +493,19 @@ namespace ChartPlayer
                         }
 
                         DrawVerticalText(numberStrings[fret], fret - 0.5f, 0, currentTime, color, 0.08f);
+
+                        // Draw fret marker dot between strings
+                        if (singleDotFrets.Contains(fret))
+                        {
+                            // Single dot between strings 2 and 3
+                            DrawFretMarkerDot(fret - 0.5f, currentTime, 2.5f, color);
+                        }
+                        else if (doubleDotFrets.Contains(fret))
+                        {
+                            // Double dots - one between strings 1-2, one between strings 3-4
+                            DrawFretMarkerDot(fret - 0.5f, currentTime, 1.5f, color);
+                            DrawFretMarkerDot(fret - 0.5f, currentTime, 3.5f, color);
+                        }
                     }
 
                     if (CapoFret != 0)
@@ -915,6 +946,35 @@ namespace ChartPlayer
         float GetStringHeight(float str)
         {
             return 3.0f + (str * 4.0f);
+        }
+
+        // Frets that have single dot markers (standard guitar inlays)
+        static readonly HashSet<int> singleDotFrets = new HashSet<int> { 3, 5, 7, 9, 15, 17, 19, 21 };
+        // Frets that have double dot markers
+        static readonly HashSet<int> doubleDotFrets = new HashSet<int> { 12, 24 };
+
+        void DrawFretMarkerDot(float fretCenter, float time, float stringPosition, UIColor color)
+        {
+            // Draw a vertical dot marker (facing camera) at the specified string position
+            float fretX = GetFretPosition(fretCenter);
+            float z = time * -timeScale;
+            
+            UIImage image = Layout.Current.GetImage("SingleWhitePixel");
+            
+            // Position at the specified string position
+            float dotY = GetStringHeight(stringPosition);
+            float dotSize = 1.2f;
+            
+            // Make dots visible but not too bright
+            UIColor dotColor = color;
+            dotColor.A = (byte)Math.Min(255, color.A + 40);
+            
+            // Draw vertical quad facing camera (X varies, Y varies, Z constant)
+            DrawQuad(image, 
+                new Vector3(fretX - dotSize, dotY - dotSize, z), dotColor,
+                new Vector3(fretX - dotSize, dotY + dotSize, z), dotColor,
+                new Vector3(fretX + dotSize, dotY + dotSize, z), dotColor,
+                new Vector3(fretX + dotSize, dotY - dotSize, z), dotColor);
         }
 
         void DrawFretHorizontalLine(float startFret, float endFret, float time, float heightOffset, UIColor color, float imageScale)

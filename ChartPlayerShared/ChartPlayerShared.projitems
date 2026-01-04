@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MidiMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MidiMapInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NoteDetector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NoteFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NoteUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SampleHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene3D.cs" />

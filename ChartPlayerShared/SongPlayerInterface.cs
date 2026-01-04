@@ -578,6 +578,9 @@ namespace ChartPlayer
             {
                 (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
             }
+
+            // Auto-save settings on exit
+            SaveDefaultOptions(ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings);
         }
 
         public void ResizeScreen()
@@ -659,6 +662,7 @@ namespace ChartPlayer
                     {
                         LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode,
                         NoteDisplaySeconds = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDisplaySeconds,
+                        DifficultyPercent = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.NoteDifficultyPercent,
                         DetectSemitoneOffset = (ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.BassUsingGuitar && (part.InstrumentType == ESongInstrumentType.BassGuitar)) ? 12 : 0
                     };
 
@@ -888,6 +892,12 @@ namespace ChartPlayer
                 (ChartPlayerGame.Instance.Scene3D as ChartScene3D).LeftyMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.LeftyMode;
 
                 (ChartPlayerGame.Instance.Scene3D as ChartScene3D).NoteDisplaySeconds = (ChartPlayerGame.Instance.Scene3D is FretPlayerScene3D) ? settings.NoteDisplaySeconds : settings.DrumsNoteDisplaySeconds;
+
+                // Apply difficulty setting to fret scenes
+                if (ChartPlayerGame.Instance.Scene3D is FretPlayerScene3D fretScene)
+                {
+                    fretScene.DifficultyPercent = settings.NoteDifficultyPercent;
+                }
             }
 
             // Check if song path changed
@@ -902,6 +912,9 @@ namespace ChartPlayer
 
             ChartPlayerGame.Instance.Scale = settings.UIScale;
             Layout.Current.UpdateLayout();
+
+            // Auto-save settings when applied
+            SaveDefaultOptions(settings);
         }
 
         public void SeekTime(float secs)

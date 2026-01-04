@@ -38,6 +38,7 @@ namespace ChartPlayer
         public bool SongListSortReversed { get; set; } = false;
         public float UIScale { get; set; } = 1.0f;
         public string DrumMidiMapName { get; set; } = null;
+        public float NoteDifficultyPercent { get; set; } = 100.0f;
     }
 
     public class SongPlayerSettingsInterface : InputDialog
@@ -114,6 +115,7 @@ namespace ChartPlayer
             vStack.Children.Add(CreateEnumOption("SongTuningMode", newSettings, "Song Re-Tuning"));
             vStack.Children.Add(CreateTextToggleOption("BassUsingGuitar", newSettings, "Play bass using a guitar: ", "Yes", "No"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
+            vStack.Children.Add(CreateFloatOption("NoteDifficultyPercent", newSettings, "Note Difficulty (%):", 0, 100, 0));
 
             return vStack;
         }
