@@ -227,11 +227,6 @@ namespace ChartPlayer
 
         public virtual void Opened()
         {
-            if (songIndex.Songs.Count == 0)
-            {
-                ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".\n\nIf Song Path is correct, try the \"ReScan\" button below.");
-            }
-
             midiHandlerBak = ChartPlayerGame.Instance.Plugin.MidiHandler;
 
             ChartPlayerGame.Instance.Plugin.MidiHandler = this;

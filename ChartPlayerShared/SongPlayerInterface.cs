@@ -477,6 +477,16 @@ namespace ChartPlayer
 
         void ShowSongs()
         {
+            if (songIndex.Songs.Count == 0)
+            {
+                SongPlayerInterface.Instance.RescanSongIndex();
+                
+                if (songIndex.Songs.Count == 0)
+                    ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".");
+
+                return;
+            }
+
             ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
 
             Layout.Current.ShowPopup(songList);
