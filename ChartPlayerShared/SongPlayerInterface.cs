@@ -1240,6 +1240,13 @@ namespace ChartPlayer
         {
             base.HandleInput(inputManager);
 
+            int wheelDelta = inputManager.MouseWheelDelta;
+
+            if (wheelDelta != 0)
+            {
+                SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond + (0.2f * Math.Sign(wheelDelta)));
+            }
+
             if (inputManager.WasClicked("FastForward", this))
             {
                 SongPlayerInterface.Instance.SeekTime(songPlayer.CurrentSecond + 0.2f);
