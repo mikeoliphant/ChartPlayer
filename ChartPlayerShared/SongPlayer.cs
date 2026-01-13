@@ -203,7 +203,7 @@ namespace ChartPlayer
 
             if (!string.IsNullOrEmpty(part.SongAudio))
             {
-                path = Path.Combine(songPath, part.SongAudio);
+                path = Path.Combine(songPath, part.SongAudio).Replace('\\', Path.DirectorySeparatorChar);
             }
 
             if (MutePartStems)
