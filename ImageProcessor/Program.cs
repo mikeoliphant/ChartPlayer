@@ -115,7 +115,7 @@ namespace ChartPlayerImageProcessor
             processor.SrcPath = Path.Combine(path, "SrcTextures");
             processor.ForceRegen = false;
 
-            processor.RenderImages(Path.Combine(path, @"ChartPlayerShared\Content\Textures"));
+            processor.RenderImages(Path.Combine(path, "ChartPlayerShared", "Content", "Textures"));
         }
 
     }
