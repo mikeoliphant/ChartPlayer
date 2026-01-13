@@ -110,7 +110,7 @@ namespace ChartPlayerImageProcessor
         {
             var processor = new ChartPlayerImageProcessor();
 
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\..");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..", "..", "..", "..");
 
             processor.SrcPath = Path.Combine(path, "SrcTextures");
             processor.ForceRegen = false;
