@@ -67,7 +67,6 @@ namespace ChartPlayer
             {
                 ID = "hihat-pedal",
                 Name = "HiHat Pedal",
-                Type = EAudioPluginParameterType.Float,
                 MinValue = 0,
                 MaxValue = 1,
                 DefaultValue = 0,
