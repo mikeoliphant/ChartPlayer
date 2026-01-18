@@ -282,11 +282,11 @@ namespace ChartPlayer
 
             SampleHistory.CopyFrom(input);
 
+            DrumMidiDeviceConfiguration.CurrentMap.SetHiHatPedalValue((float)pedalParameter.ProcessValue);
+
             do
             {
                 nextSample = Host.ProcessEvents();
-
-                DrumMidiDeviceConfiguration.CurrentMap.SetHiHatPedalValue((float)pedalParameter.GetInterpolatedProcessValue(currentSample));
 
                 if (SongPlayer != null)
                 {
