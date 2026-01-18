@@ -41,8 +41,6 @@ You need to have a running [Jack](https://jackaudio.org/) instance for it to wor
 
 For speed/pitch shifting to work, you need to have Rubber Band (librubberband2) installed.
 
-For file browser input to work, you need to have [Zenity](https://help.gnome.org/users/zenity/stable/index.html.en) installed.
-
 ## MacOS Note
 
 If you are running on an Arm Mac, and the Arm64 build does not work - try the x64 build with [Rosetta](https://en.wikipedia.org/wiki/Rosetta_(software)).
