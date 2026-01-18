@@ -15,8 +15,8 @@
 		<DefineConstants>$(DefineConstants);XNA</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="AudioPlugSharp" Version="0.7.4" />
-		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.4" />
+		<PackageReference Include="AudioPlugSharp" Version="0.7.9" />
+		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.9" />
 		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
 		<PackageReference Include="NVorbis" Version="0.9.1" />
