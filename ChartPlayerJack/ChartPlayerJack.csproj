@@ -12,6 +12,9 @@
 		<ApplicationIcon>Icon.ico</ApplicationIcon>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);NU1605</NoWarn>
+	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Icon.ico" />
 		<None Remove="Icon.bmp" />
@@ -26,6 +29,7 @@
 		<PackageReference Include="JackSharpCore" Version="0.1.6" />
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
+		<PackageReference Include="NVorbis" Version="0.9.1" />
 		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
 	<ItemGroup>
