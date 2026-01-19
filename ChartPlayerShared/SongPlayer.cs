@@ -236,6 +236,7 @@ namespace ChartPlayer
             sampleData[1] = new float[totalSamples];
 
             decodeThread = new Thread(new ThreadStart(RunDecode));
+            decodeThread.Priority = ThreadPriority.BelowNormal;
             decodeThread.Start();
         }
 
