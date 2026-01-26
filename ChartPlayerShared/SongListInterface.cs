@@ -293,6 +293,8 @@ namespace ChartPlayer
                     Play();
                 }
             }
+
+            DrumUIMapping.ClearHits();
         }
 
         public void SetSongIndex(SongIndex songIndex)
@@ -647,8 +649,6 @@ namespace ChartPlayer
         protected override void DrawContents()
         {
             base.DrawContents();
-
-            DrumUIMapping.ClearHits();
         }
     }
 
