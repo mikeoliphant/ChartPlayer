@@ -584,9 +584,11 @@ namespace ChartPlayer
 
         public void Exit()
         {
-            if ((ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D) != null)
+            if (ChartPlayerGame.Instance.Scene3D != null)
             {
-                (ChartPlayerGame.Instance.Scene3D as FretPlayerScene3D).Stop();
+                ChartPlayerGame.Instance.Scene3D.Stop();
+                ChartPlayerGame.Instance.Scene3D.Dispose();
+                ChartPlayerGame.Instance.Scene3D = null;
             }
         }
 
@@ -634,6 +636,8 @@ namespace ChartPlayer
                 if (ChartPlayerGame.Instance.Scene3D != null)
                 {
                     ChartPlayerGame.Instance.Scene3D.Stop();
+                    ChartPlayerGame.Instance.Scene3D.Dispose();
+                    ChartPlayerGame.Instance.Scene3D = null;
                 }
 
                 //songPlayer.SeekTime(Math.Max(songPlayer.SongInstrumentNotes.Notes[0].TimeOffset - 2, 0));

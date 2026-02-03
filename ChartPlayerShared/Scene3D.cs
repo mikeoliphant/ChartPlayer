@@ -1,10 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using UILayout;
 
 namespace ChartPlayer
 {
-    public class Scene3D
+    public class Scene3D : IDisposable
     {
         public Camera3D Camera { get; set; }
 
@@ -33,8 +34,7 @@ namespace ChartPlayer
         }
 
         BasicEffect basicEffect;
-        VertexBuffer quadVertexBuffer;
-        IndexBuffer quadIndexBuffer;
+        QuadBatch quadBatch;
 
         VertexPositionColorTexture[] verts = new VertexPositionColorTexture[4];
 
@@ -48,16 +48,35 @@ namespace ChartPlayer
             basicEffect.VertexColorEnabled = true;
             basicEffect.TextureEnabled = true;
 
-            quadVertexBuffer = new VertexBuffer(MonoGameLayout.Current.Host.GraphicsDevice, typeof(VertexPositionColorTexture), 4, BufferUsage.WriteOnly);
-            quadIndexBuffer = new IndexBuffer(MonoGameLayout.Current.Host.GraphicsDevice, IndexElementSize.SixteenBits, 6, BufferUsage.WriteOnly);
+            quadBatch = new QuadBatch(43688);
+        }
 
-            ushort[] indices = new ushort[] { 0, 1, 2, 0, 2, 3 };
-            quadIndexBuffer.SetData(indices);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (basicEffect != null)
+                        basicEffect.Dispose();
+
+                    if (quadBatch != null)
+                        quadBatch.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         public virtual void Stop()
         {
-
         }
 
         public virtual void Draw()
@@ -65,13 +84,18 @@ namespace ChartPlayer
             basicEffect.Projection = Camera.GetProjectionMatrix();
             basicEffect.View = Camera.GetViewMatrix();
             basicEffect.World = Matrix.Identity;
+            basicEffect.Texture = MonoGameLayout.Current.GraphicsContext.SingleWhitePixelImage.Texture;
 
             MonoGameLayout.Current.Host.GraphicsDevice.SamplerStates[0] = SamplerState.AnisotropicClamp;
             MonoGameLayout.Current.Host.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             MonoGameLayout.Current.Host.GraphicsDevice.DepthStencilState = DepthStencilState.None;
             MonoGameLayout.Current.Host.GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
+            quadBatch.Begin();
+
             DrawQuads();
+
+            quadBatch.Draw(basicEffect);
         }
 
         public virtual void DrawQuads()
@@ -145,6 +169,7 @@ namespace ChartPlayer
         float[] xTexCoords = new float[4];
         float[] yTexCoords = new float[4];
         float[] blah = new float[4];
+        private bool disposedValue;
 
         public void DrawNinePatch(UIImage image, int xCornerSize, int yCornerSize, Vector3 bottomLeft, Vector3 topLeft,
             Vector3 topRight, Vector3 bottomRight, UIColor color)
@@ -221,21 +246,7 @@ namespace ChartPlayer
 
         public void DrawQuad(UIImage image, VertexPositionColorTexture[] vertices)
         {
-            quadVertexBuffer.SetData(vertices);
-
-            MonoGameLayout.Current.Host.GraphicsDevice.SetVertexBuffer(quadVertexBuffer);
-            MonoGameLayout.Current.Host.GraphicsDevice.Indices = quadIndexBuffer;
-
-            basicEffect.Texture = image.Texture;
-
-            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-
-                MonoGameLayout.Current.Host.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-            }
-
-            MonoGameLayout.Current.Host.GraphicsDevice.SetVertexBuffer(null);
+            quadBatch.AddQuad(vertices);
         }
     }
 }
