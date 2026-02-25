@@ -71,12 +71,16 @@ namespace ChartPlayer
         {
             this.BasePath = basePath;
 
+            Logger.Log("Song path is: " + basePath);
+
             if (!string.IsNullOrEmpty(basePath))
             {
                 string indexFile = Path.Combine(basePath, "index.json");
 
                 if (File.Exists(indexFile) && !forceRescan)
                 {
+                    Logger.Log("Loading songs from index.json");
+
                     using (Stream indexStream = File.OpenRead(indexFile))
                     {
                         Songs = JsonSerializer.Deserialize<List<SongIndexEntry>>(indexStream);
@@ -104,6 +108,8 @@ namespace ChartPlayer
                 }
                 else
                 {
+                    Logger.Log("Initiating rescan");
+
                     if (Directory.Exists(basePath))
                     {
                         IndexFolder(basePath);
@@ -112,6 +118,10 @@ namespace ChartPlayer
                         {
                             JsonSerializer.Serialize(indexStream, Songs);
                         }
+                    }
+                    else
+                    {
+                        Logger.Log("Song folder does not exist");
                     }
                 }
 

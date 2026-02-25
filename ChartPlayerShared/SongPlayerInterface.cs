@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using UILayout;
 using Microsoft.Xna.Framework;
 using SongFormat;
+using AudioPlugSharp;
 
 namespace ChartPlayer
 {
@@ -479,7 +480,9 @@ namespace ChartPlayer
         {
             if (songIndex.Songs.Count == 0)
             {
-                SongPlayerInterface.Instance.RescanSongIndex();
+                Logger.Log("No songs found - rescanning");
+
+                RescanSongIndex();
                 
                 if (songIndex.Songs.Count == 0)
                     ChartPlayerGame.Instance.ShowContinuePopup("No songs found.\n\nMake sure you have configured your Song Path in \"Options\".");
@@ -532,9 +535,16 @@ namespace ChartPlayer
 
         public void RescanSongIndex()
         {
-            songIndex = new SongIndex(songBasePath, forceRescan: true);
+            try
+            {
+                songIndex = new SongIndex(songBasePath, forceRescan: true);
 
-            songList.SetSongIndex(songIndex);
+                songList.SetSongIndex(songIndex);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Error scanning songs: " + ex.ToString());
+            }
         }
 
         public SongPlayerSettings LoadDefaultOptions()
