@@ -30,6 +30,17 @@ namespace ChartPlayer
         [JsonIgnore]
         public SongStatsEntry[] Stats { get; set; } = new SongStatsEntry[Enum.GetValues(typeof(ESongInstrumentType)).Length];
 
+        public bool HasTag(string tag)
+        {
+            foreach (ESongInstrumentType type in Enum.GetValues(typeof(ESongInstrumentType)))
+            {
+                if (HasTag(tag, type))
+                    return true;
+            }
+
+            return false;
+        }
+
         public bool HasTag(string tag, ESongInstrumentType instrument)
         {
             if (Stats[(int)instrument] == null)
@@ -155,6 +166,8 @@ namespace ChartPlayer
                     }
                 }
             }
+
+            Logger.Log("Loaded " + Songs.Count + " songs");
         }
 
         public SongStatsEntry GetSongStats(SongIndexEntry song, ESongInstrumentType instrumentType)

@@ -33,6 +33,7 @@ namespace ChartPlayer
         HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
         HorizontalStack filterStack;
+        TextToggleButton globalTagButton;
         TextButton filterButton;
         NinePatchWrapper bottomInterface;
         string currentFilterTag = null;
@@ -218,6 +219,18 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center
             });
 
+            filterStack.Children.Add(new TextBlock(" Instrument: ") { VerticalAlignment = EVerticalAlignment.Center });
+
+            globalTagButton = new TextToggleButton("Current", "All")
+            {
+                VerticalAlignment = EVerticalAlignment.Center,
+                PressAction = delegate
+                {
+                    SetCurrentSongs();
+                }
+            };
+            filterStack.Children.Add(globalTagButton);
+
             SongList.SetSortColumn("Artist");
 
             CloseAction = Close;
@@ -350,7 +363,7 @@ namespace ChartPlayer
 
             if (currentFilterTag != null)
             {
-                songs = songs.Where(s => s.HasTag(currentFilterTag, CurrentInstrument));
+                songs = songs.Where(s => globalTagButton.IsPressed ? s.HasTag(currentFilterTag, CurrentInstrument) : s.HasTag(currentFilterTag));
             }
 
             currentSongs = songs.ToList();
