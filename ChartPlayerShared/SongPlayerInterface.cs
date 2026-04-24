@@ -61,6 +61,8 @@ namespace ChartPlayer
         int currentMinute = 0;
         int currentSecond = 0;
 
+        TextBlock songLengthText;
+
         NinePatchWrapper bpmInterface;
         StringBuilderTextBlock bpmText;
         float lastBPM = 0;
@@ -473,6 +475,8 @@ namespace ChartPlayer
             playTimeSlider.SetLevel(0);
             playTimeStack.Children.Add(playTimeSlider);
 
+            playTimeStack.Children.Add(songLengthText = new TextBlock("0:00"));
+
             ShowSongs();
         }
 
@@ -730,6 +734,8 @@ namespace ChartPlayer
                 bpmText.StringBuilder.Clear();
                 bpmText.StringBuilder.Append("BPM: ");
                 bpmText.StringBuilder.AppendNumber(songBPM);
+
+                songLengthText.Text = ((int)(songPlayer.SongLengthSeconds / 60)).ToString() + ":" + (songPlayer.SongLengthSeconds % 60).ToString("00");
 
                 UpdateContentLayout();
 
