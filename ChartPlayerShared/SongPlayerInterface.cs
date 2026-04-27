@@ -427,7 +427,8 @@ namespace ChartPlayer
             HorizontalStack playTimeStack = new HorizontalStack()
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
-                HorizontalAlignment = EHorizontalAlignment.Stretch
+                HorizontalAlignment = EHorizontalAlignment.Stretch,
+                ChildSpacing = 5
             };
             playTimeInterface.Child = playTimeStack;
 
@@ -475,7 +476,7 @@ namespace ChartPlayer
             playTimeSlider.SetLevel(0);
             playTimeStack.Children.Add(playTimeSlider);
 
-            playTimeStack.Children.Add(songLengthText = new TextBlock("0:00"));
+            playTimeStack.Children.Add(songLengthText = new TextBlock("0:00") { VerticalAlignment = EVerticalAlignment.Center });
 
             ShowSongs();
         }
