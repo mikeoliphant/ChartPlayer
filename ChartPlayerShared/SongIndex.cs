@@ -231,6 +231,8 @@ namespace ChartPlayer
 
                     foreach (SongInstrumentPart part in song.InstrumentParts.OrderBy(s => s.InstrumentType))
                     {
+                        char partChar = '\0';
+
                         if (indexEntry.SongDifficulty[(int)part.InstrumentType] == 0)
                         {
                             indexEntry.SongDifficulty[(int)part.InstrumentType] = part.SongDifficulty;
@@ -238,7 +240,7 @@ namespace ChartPlayer
 
                         if (part.InstrumentType == ESongInstrumentType.LeadGuitar)
                         {
-                            indexEntry.Arrangements += "L";
+                            partChar = 'L';
 
                             if (string.IsNullOrEmpty(indexEntry.LeadGuitarTuning))
                             {
@@ -247,13 +249,13 @@ namespace ChartPlayer
                         }
                         else if (part.InstrumentType == ESongInstrumentType.RhythmGuitar)
                         {
-                            indexEntry.Arrangements += "R";
+                            partChar = 'R';
 
                             indexEntry.RhythmGuitarTuning = GetTuning(song, part);
                         }
                         else if (part.InstrumentType == ESongInstrumentType.BassGuitar)
                         {
-                            indexEntry.Arrangements += "B";
+                            partChar = 'B';
 
                             if (string.IsNullOrEmpty(indexEntry.BassGuitarTuning))
                             {
@@ -262,11 +264,20 @@ namespace ChartPlayer
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Drums)
                         {
-                            indexEntry.Arrangements += "D";
+                            partChar = 'D';
                         }
                         else if (part.InstrumentType == ESongInstrumentType.Keys)
                         {
-                            indexEntry.Arrangements += "K";
+                            partChar = 'K';
+                        }
+                        else if (part.InstrumentType == ESongInstrumentType.Vocals)
+                        {
+                            partChar = 'V';
+                        }
+
+                        if (!indexEntry.Arrangements.Contains(partChar))
+                        {
+                            indexEntry.Arrangements += partChar;
                         }
                     }
 
