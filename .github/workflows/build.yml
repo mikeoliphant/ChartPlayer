@@ -16,7 +16,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         dotnet build -c Release ImageProcessor
-        cd ImageProcessor\bin\Release\net8.0
+        cd ImageProcessor\bin\Release\net10.0
         .\ImageProcessor.exe
         
     - name: Build VST Plugin
@@ -27,7 +27,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ChartPlayerVST3Plugin
-        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net8.0-windows
+        path: ${{github.workspace}}\ChartPlayerPlugin\bin\Release\net10.0-windows
         
     - name: Publish Linux-x64
       working-directory: ${{github.workspace}}
@@ -37,7 +37,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ChartPlayerLinux
-        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\linux-x64\publish
+        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net10.0\linux-x64\publish
 
     - name: Publish OSX-x64
       working-directory: ${{github.workspace}}
@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ChartPlayerMacX64
-        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\osx-x64\publish
+        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net10.0\osx-x64\publish
 
     - name: Publish OSX-Arm64
       working-directory: ${{github.workspace}}
@@ -57,4 +57,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ChartPlayerMacArm64
-        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net8.0\osx-arm64\publish
+        path: ${{github.workspace}}\ChartPlayerJack\bin\Release\net10.0\osx-arm64\publish

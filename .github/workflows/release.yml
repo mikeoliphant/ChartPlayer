@@ -38,7 +38,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         dotnet build -c Release ImageProcessor
-        cd ImageProcessor\bin\Release\net8.0
+        cd ImageProcessor\bin\Release\net10.0
         .\ImageProcessor.exe
         
     - name: Build VST Plugin
@@ -49,7 +49,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir plugin-build
-        move ChartPlayerPlugin\bin\Release\net8.0-windows plugin-build\ChartPlayer
+        move ChartPlayerPlugin\bin\Release\net10.0-windows plugin-build\ChartPlayer
         cp ChartPlayerPlugin\README.txt plugin-build
         Compress-Archive -Path plugin-build\* -Destination ChartPlayerVST3Plugin.zip
     
@@ -71,7 +71,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir linux-x64-build
-        move ChartPlayerJack\bin\Release\net8.0\linux-x64\publish linux-x64-build\ChartPlayer
+        move ChartPlayerJack\bin\Release\net10.0\linux-x64\publish linux-x64-build\ChartPlayer
         Compress-Archive -Path linux-x64-build\* -Destination ChartPlayerLinux.zip
 
     - name: Upload Linux-x64 Asset
@@ -92,7 +92,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir osx-x64-build
-        move ChartPlayerJack\bin\Release\net8.0\osx-x64\publish osx-x64-build\ChartPlayer
+        move ChartPlayerJack\bin\Release\net10.0\osx-x64\publish osx-x64-build\ChartPlayer
         Compress-Archive -Path osx-x64-build\* -Destination ChartPlayerMacX64.zip
 
     - name: Upload OSX-x64 Asset
@@ -113,7 +113,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         mkdir osx-arm64-build
-        move ChartPlayerJack\bin\Release\net8.0\osx-arm64\publish osx-arm64-build\ChartPlayer
+        move ChartPlayerJack\bin\Release\net10.0\osx-arm64\publish osx-arm64-build\ChartPlayer
         Compress-Archive -Path osx-arm64-build\* -Destination ChartPlayerMacArm64.zip
         
     - name: Upload OSX-arm64 Asset
