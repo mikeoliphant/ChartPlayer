@@ -17,8 +17,8 @@
 	<ItemGroup>
 		<PackageReference Include="AudioPlugSharp" Version="0.7.13" />
 		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.13" />
-		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4" />
-		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4" />
+		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.6.1" />
+		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.6.1" />
 		<PackageReference Include="NVorbis" Version="0.9.1" />
 		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
