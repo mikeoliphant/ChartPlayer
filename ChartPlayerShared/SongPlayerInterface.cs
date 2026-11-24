@@ -264,7 +264,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                     if (songPlayer != null)
                     {
@@ -282,7 +282,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
                         "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
@@ -495,7 +495,7 @@ namespace ChartPlayer
                 return;
             }
 
-            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+            ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
             Layout.Current.ShowPopup(songList);
         }
@@ -779,7 +779,7 @@ namespace ChartPlayer
             {
                 mouseIdleFrames = 0;
 
-                ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                 lastMousePosition = mousePosition;
             }
@@ -790,7 +790,7 @@ namespace ChartPlayer
                     mouseIdleFrames++;
 
                     if (mouseIdleFrames > 200)
-                        ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
+                        ChartPlayerGame.Instance.Plugin.IsMouseVisible = false;
                 }
             }
 

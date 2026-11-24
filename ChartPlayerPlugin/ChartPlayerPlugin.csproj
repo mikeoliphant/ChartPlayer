@@ -1,30 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net10.0-windows</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Version>0.1.25</Version>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<TieredCompilation>false</TieredCompilation>
-		<UseWindowsForms>true</UseWindowsForms>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>$(DefineConstants);XNA</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>$(DefineConstants);XNA</DefineConstants>
+		<!-- Loaded by the AudioPlugSharp CLAP/VST3 adapters: needs a .deps.json listing every dependency -->
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+		<!-- As in ChartPlayerJack: NVorbis 0.9.1 although MonoGame DesktopGL asks for 0.10.4 -->
+		<NoWarn>$(NoWarn);NU1605</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="AudioPlugSharp" Version="0.7.13" />
-		<PackageReference Include="AudioPlugSharpVst3" Version="0.7.13" />
-		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.6.1" />
+		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.6.1" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.6.1" />
 		<PackageReference Include="NVorbis" Version="0.9.1" />
 		<PackageReference Include="RubberBandSharp" Version="0.0.6" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Dependencies\PitchDetect\PitchDetect\PitchDetect.csproj" />
-	  <ProjectReference Include="..\Dependencies\UILayout\UILayout.MonoGame.WindowsDX\UILayout.MonoGame.WindowsDX.csproj" />
+		<ProjectReference Include="..\Dependencies\AudioPlugSharp\AudioPlugSharpUILayout\AudioPlugSharpUILayout.csproj" />
+		<ProjectReference Include="..\Dependencies\AudioPlugSharp\AudioPlugSharp\AudioPlugSharp.csproj" />
+		<ProjectReference Include="..\Dependencies\AudioPlugSharp\Dependencies\UILayout\UILayout.MonoGame.Embedded\UILayout.MonoGame.Embedded.csproj" />
+		<ProjectReference Include="..\Dependencies\PitchDetect\PitchDetect\PitchDetect.csproj" />
+		<!-- AudioPlugSharp (crossplatform branch) and its UILayout editor glue. The adapter's bridge provides the one shared
+		     AudioPlugSharp.dll at run time. -->
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />

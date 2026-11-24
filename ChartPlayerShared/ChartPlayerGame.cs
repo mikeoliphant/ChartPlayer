@@ -25,6 +25,9 @@ namespace ChartPlayer
 
         public override void SetHost(MonoGameHost host)
         {
+            // Before base.SetHost: it picks the blend state from this
+            //host.UsePremultipliedAlpha = true;
+
             base.SetHost(host);
 
             Host.InactiveSleepTime = TimeSpan.Zero;
@@ -67,6 +70,8 @@ namespace ChartPlayer
 
             InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.LeftAlt });
             InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.Enter) { Modifier = InputKey.RightAlt });
+            // Hosts may keep Alt+Enter for themselves (Reaper does)
+            InputManager.AddMapping("ToggleFullscreen", new KeyMapping(InputKey.F11));
 
             InputManager.AddMapping("PauseGame", new KeyMapping(InputKey.Space));
 
@@ -98,7 +103,7 @@ namespace ChartPlayer
 
         public override void Exiting()
         {
-            SongPlayerInterface.Instance.Exit();
+            SongPlayerInterface.Instance?.Exit(); // null if the editor failed while opening
 
             base.Exiting();
         }

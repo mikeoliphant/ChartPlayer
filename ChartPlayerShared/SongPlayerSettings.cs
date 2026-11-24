@@ -135,7 +135,7 @@ namespace ChartPlayer
 
         void ShowDrumMidiConfig()
         {
-            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+            ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
             midiEditor.CloseAction = Test;
 
