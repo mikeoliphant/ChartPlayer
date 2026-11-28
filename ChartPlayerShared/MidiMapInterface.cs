@@ -78,7 +78,6 @@ namespace ChartPlayer
         bool isSave = false;
 
         public MidiConfigSelectionDialog(bool isSave)
-            : base(Layout.Current.DefaultOutlineNinePatch)
         {
             this.isSave = isSave;
 
@@ -182,10 +181,10 @@ namespace ChartPlayer
             midiNoteStack = new HorizontalStack() { HorizontalAlignment = EHorizontalAlignment.Center, VerticalAlignment = EVerticalAlignment.Top, ChildSpacing = 20 };
             noteWrapper.Child = midiNoteStack;
 
-            NinePatchWrapper noteDisplay = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch) { HorizontalAlignment = EHorizontalAlignment.Stretch };
+            Frame noteDisplay = new Frame { HorizontalAlignment = EHorizontalAlignment.Stretch };
             leftStack.Children.Add(noteDisplay);
             midiEventText = new StringBuilderTextBlock("Last Note: None");
-            noteDisplay.Child = midiEventText;
+            noteDisplay.Content = midiEventText;
 
             //hiHatPedalDisplay = new HiHatPedalDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             //leftStack.Children.Add(hiHatPedalDisplay);
@@ -193,7 +192,7 @@ namespace ChartPlayer
             //snarePositionDisplay = new PositionalSensingDisplay() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             //leftStack.Children.Add(snarePositionDisplay);
 
-            NinePatchWrapper configPanel = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            Frame configPanel = new Frame
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 VerticalAlignment = EVerticalAlignment.Bottom
@@ -202,7 +201,7 @@ namespace ChartPlayer
 
             VerticalStack configStack = new VerticalStack { ChildSpacing = 5, HorizontalAlignment = EHorizontalAlignment.Stretch };
 
-            configPanel.Child = configStack;
+            configPanel.Content = configStack;
 
             configWrapper = new UIElementWrapper() { HorizontalAlignment = EHorizontalAlignment.Stretch };
             configStack.Children.Add(configWrapper);
@@ -292,7 +291,7 @@ namespace ChartPlayer
                 float width;
                 float height;
 
-                Layout.Current.DefaultFont.MeasureString("000", out width, out height);
+                Layout.Current.Theme.Font.MeasureString("000", out width, out height);
 
                 noteDisplay.Children.Add(new TextButton(String.Format("{0}", midiNoteNumber.ToString("D3")))
                 {
@@ -410,7 +409,6 @@ namespace ChartPlayer
         VerticalStack editStack;
 
         public MidiNoteEditor(int midiNoteNumber)
-            : base(Layout.Current.DefaultOutlineNinePatch)
         {
             DesiredWidth = 230;
 
@@ -520,388 +518,388 @@ namespace ChartPlayer
         }
     }
 
-    public class HiHatLevelLine : UIElementWrapper
-    {
-        public bool HideIfZero { get; set; }
+    // Not in use: the MIDI editor's hi-hat pedal display, and the multi-slider it uses.
+    //public class HiHatLevelLine : UIElementWrapper
+    //{
+        //public bool HideIfZero { get; set; }
 
-        UIElement levelLine;
+        //UIElement levelLine;
 
-        public override void UpdateContentLayout()
-        {
-            base.UpdateContentLayout();
-        }
-
-        public void SetLevel(float level)
-        {
-            if (HideIfZero)
-            {
-                if (level == 0)
-                {
-                    Visible = false;
-                }
-                else
-                {
-                    Visible = true;
-                }
-            }
-
-            levelLine.Margin = (0, (ContentBounds.Height * level) - (levelLine.DesiredHeight / 2));
-
-            UpdateContentLayout();
-        }
-
-        public HiHatLevelLine(UIColor color)
-        {
-            HorizontalAlignment = EHorizontalAlignment.Stretch;
-            VerticalAlignment = EVerticalAlignment.Stretch;
-
-            levelLine = new UIElement
-            {
-                BackgroundColor = color,
-                HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Absolute,
-                DesiredHeight = 4,
-            };
-
-            Child = levelLine;
-        }
-
-        protected override void DrawContents()
-        {
-            base.DrawContents();
-        }
-    }
-
-    public class HiHatPedalDisplay : NinePatchWrapper
-    {
-        HiHatLevelLine activePedalLine;
-        HiHatLevelLine closedLine;
-        HiHatLevelLine semiOpenLine;
-        HiHatLevelLine openLine;
-        TextBlock pedalText;
-        VerticalMultiSlider slider;
-
-        public HiHatPedalDisplay()
-            : base(Layout.Current.DefaultOutlineNinePatch)
-        {
-            VerticalStack stack = new VerticalStack() { HorizontalAlignment = EHorizontalAlignment.Stretch, ChildSpacing = 5 };
-            Child = stack;
-
-            pedalText = new TextBlock();
-            stack.Children.Add(pedalText);
-
-            Dock pedalDock = new Dock()
-            {
-                DesiredHeight = 200
-            };
-            stack.Children.Add(pedalDock);
-
-            closedLine = new HiHatLevelLine(UIColor.Yellow);
-            pedalDock.Children.Add(closedLine);
-
-            semiOpenLine = new HiHatLevelLine(UIColor.Orange);
-            pedalDock.Children.Add(semiOpenLine);
-
-            openLine = new HiHatLevelLine(UIColor.Red);
-            pedalDock.Children.Add(openLine);
-
-            activePedalLine = new HiHatLevelLine(UIColor.Green) { HideIfZero = true };
-            pedalDock.Children.Add(activePedalLine);
-
-            slider = new VerticalMultiSlider("VerticalPointerLeft", 3)
-            {
-                InvertLevel = false,
-                ChangeAction = SliderChanged,
-                HorizontalAlignment = EHorizontalAlignment.Right
-            };
-            pedalDock.Children.Add(slider);
-
-            SetPedalLevel(0);
-        }
-
-        void SliderChanged(int slider, float value)
-        {
-            switch (slider)
-            {
-                case 0:
-                    DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalOpen = value;
-                    break;
-                case 1:
-                    DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen = value;
-                    break;
-                case 2:
-                    DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed = value;
-                    break;
-            }
-
-            UpdateHiHatLines();
-        }
-
-        public void UpdateHiHatLevels()
-        {
-            slider.SetLevel(0, DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen);
-            slider.SetLevel(2, DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed);
-
-            UpdateHiHatLines();
-        }
-
-        void UpdateHiHatLines()
-        {
-            openLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalOpen);
-            semiOpenLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen);
-            closedLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed);
-
-            UpdateContentLayout();
-        }
-
-        public void SetPedalLevel(float level)
-        {
-            activePedalLine.SetLevel(level);
-
-            pedalText.Text = String.Format("Hi Hat Pedal: {0}%", (int)(level * 100));
-
-            UpdateContentLayout();
-        }
-    }
-
-    public class MultiSlider : Dock
-    {
-        public Action<int, float> ChangeAction { get; set; }
-        public bool InvertLevel { get; set; }
-        public bool EnforceOrder { get; set; }
-
-        protected int numSliders;
-        protected float[] levels;
-        protected UIImage levelImage;
-        protected bool haveCapture;
-        protected int activeSlider;
-        protected int captureTouchID;
-        protected float startLevel;
-        protected float startOffset;
-
-        bool isHorizontal;
-        ImageElement[] levelImageElements;
-        bool slid;
-
-        public MultiSlider(string imageName, int numSliders, bool isHorizontal)
-        {
-            this.isHorizontal = isHorizontal;
-            this.numSliders = numSliders;
-
-            EnforceOrder = true;
-
-            levelImage = Layout.Current.GetImage(imageName);
-
-            levels = new float[numSliders];
-
-            levelImageElements = new ImageElement[numSliders];
-
-            for (int i = 0; i < numSliders; i++)
-            {
-                levelImageElements[i] = new ImageElement(levelImage)
-                {
-                    HorizontalAlignment = isHorizontal ? EHorizontalAlignment.Left : EHorizontalAlignment.Left,
-                    VerticalAlignment = isHorizontal ? EVerticalAlignment.Top : EVerticalAlignment.Top,
-                };
-
-                Children.Add(levelImageElements[i]);
-            }
-        }
-
-        public override void UpdateContentLayout()
-        {
-            for (int i = 0; i < numSliders; i++)
-            {
-                if (isHorizontal)
-                {
-                    levelImageElements[i].Margin = ((ContentBounds.Width * levels[i]) - (float)Math.Ceiling((levelImage.Width) / 2f), 0);
-                }
-                else
-                {
-                    levelImageElements[i].Margin = (0, (ContentBounds.Height * levels[i]) - (float)Math.Ceiling((levelImage.Height) / 2f));
-                }
-            }
-
-            base.UpdateContentLayout();
-        }
-
-        public void SetLevel(int sliderIndex, float level)
-        {
-            UpdateLevel(sliderIndex, InvertLevel ? (1.0f - level) : level, enforceOrder: false, sendUpdate: false);
-        }
-
-        void UpdateLevel(int sliderIndex, float level, bool enforceOrder, bool sendUpdate)
-        {
-            level = Math.Max(Math.Min(level, 1.0f), 0);
-
-            int newActiveSlider = activeSlider;
-
-            if (enforceOrder)
-            {
-                if (sliderIndex > 0)
-                {
-                    if (level < levels[sliderIndex - 1])
-                    {
-                        level = levels[sliderIndex - 1];
-
-                        if (!slid)
-                        {
-                            newActiveSlider = sliderIndex - 1;
-                        }
-                    }
-                }
-
-                if (sliderIndex < (numSliders - 1))
-                {
-                    if (level > levels[sliderIndex + 1])
-                    {
-                        level = levels[sliderIndex + 1];
-
-                        if (!slid)
-                        {
-                            newActiveSlider = sliderIndex + 1;
-                        }
-                    }
-                }
-            }
-
-            levels[sliderIndex] = level;
-
-            if (sendUpdate && (ChangeAction != null))
-            {
-                ChangeAction(activeSlider, InvertLevel ? 1.0f - levels[activeSlider] : levels[activeSlider]);
-            }
-
-            activeSlider = newActiveSlider;
-
-            UpdateContentLayout();
-        }
-
-        int GetClosestSlider(Vector2 position)
-        {
-            float offset = (isHorizontal ? (position.X - ContentBounds.X) : (position.Y - ContentBounds.Y)) /
-                (isHorizontal ? ContentBounds.Width : ContentBounds.Height);
-
-            int closestIndex = 0;
-            float closestDist = float.MaxValue;
-
-            for (int i = 0; i < numSliders; i++)
-            {
-                float dist = Math.Abs(levels[i] - offset);
-
-                if ((dist < closestDist) || ((levels[i] < 1.0f) && (dist == closestDist)))
-                {
-                    closestIndex = i;
-                    closestDist = dist;
-                }
-            }
-
-            return closestIndex;
-        }
-
-        public override bool HandleTouch(in Touch touch)
-        {
-            if (IsTap(touch, this))
-            {
-                float offset = (isHorizontal ? (touch.Position.X - ContentBounds.X) : (touch.Position.Y - ContentBounds.Y)) /
-                    (isHorizontal ? ContentBounds.Width : ContentBounds.Height);
-
-                UpdateLevel(activeSlider, offset, EnforceOrder, sendUpdate: true);
-            }
-
-            if (touch.TouchState == ETouchState.Pressed)
-            {
-                haveCapture = true;
-                captureTouchID = touch.TouchID;
-
-                activeSlider = GetClosestSlider(touch.Position);
-
-                startLevel = levels[activeSlider];
-                startOffset = isHorizontal ? touch.Position.X : touch.Position.Y;
-                slid = false;
-
-                CaptureTouch(touch);
-
-                return true;
-            }
-            else if (touch.TouchState == ETouchState.Moved)
-            {
-                float delta = ((isHorizontal ? touch.Position.X : touch.Position.Y) - startOffset) / (isHorizontal ? ContentBounds.Width : ContentBounds.Height);
-
-                if (Math.Abs(levels[activeSlider] - startLevel) > 0.01f)
-                {
-                    slid = true;
-                }
-
-                UpdateLevel(activeSlider, startLevel + delta, EnforceOrder, sendUpdate: true);
-            }
-            else if (touch.TouchState == ETouchState.Released)
-            {
-                if (touch.TouchID == captureTouchID)
-                {
-                    ReleaseTouch(captureTouchID);
-
-                    haveCapture = false;
-
-                    return true;
-                }
-            }
-
-            return base.HandleTouch(touch);
-        }
-    }
-
-    public class VerticalMultiSlider : MultiSlider
-    {
-        public VerticalMultiSlider(int numSliders)
-            : this("VerticalPointer", numSliders)
-        {
-        }
-
-        public VerticalMultiSlider(string imageName, int numSliders)
-            : base(imageName, numSliders, isHorizontal: false)
-        {
-        }
-
-        protected override void GetContentSize(out float width, out float height)
-        {
-            base.GetContentSize(out width, out height);
-
-            height = 0;
-        }
-
-        //public override void SetLayout(UILayout layout, UIElement parent)
+        //public override void UpdateContentLayout()
         //{
-        //    base.SetLayout(layout, parent);
-
-        //    InputLayout = new UILayout(new Vector2(layout.Offset.X - (levelImage.Width * PixUI.DefaultScale), layout.Offset.Y), layout.Width + (levelImage.Width * PixUI.DefaultScale), layout.Height);
+            //base.UpdateContentLayout();
         //}
-    }
 
-    public class HorizontalMultiSlider : MultiSlider
-    {
-        public HorizontalMultiSlider(int numSliders)
-            : this("HorizontalSlider", numSliders)
-        {
-        }
+        //public void SetLevel(float level)
+        //{
+            //if (HideIfZero)
+            //{
+                //if (level == 0)
+                //{
+                    //Visible = false;
+                //}
+                //else
+                //{
+                    //Visible = true;
+                //}
+            //}
 
-        public HorizontalMultiSlider(string imageName, int numSliders)
-            : base(imageName, numSliders, isHorizontal: true)
-        {
-            Children.Insert(0, new UIElement
-            {
-                HorizontalAlignment = EHorizontalAlignment.Stretch,
-                VerticalAlignment = EVerticalAlignment.Center,
-                BackgroundColor = UIColor.Black,
-                DesiredHeight = 4
-            });
-        }
+            //levelLine.Margin = (0, (ContentBounds.Height * level) - (levelLine.DesiredHeight / 2));
 
-        protected override void GetContentSize(out float width, out float height)
-        {
-            base.GetContentSize(out width, out height);
+            //UpdateContentLayout();
+        //}
 
-            width = 0;
-        }
-    }
+        //public HiHatLevelLine(UIColor color)
+        //{
+            //HorizontalAlignment = EHorizontalAlignment.Stretch;
+            //VerticalAlignment = EVerticalAlignment.Stretch;
+
+            //levelLine = new UIElement
+            //{
+                //BackgroundColor = color,
+                //HorizontalAlignment = EHorizontalAlignment.Stretch,
+                //VerticalAlignment = EVerticalAlignment.Absolute,
+                //DesiredHeight = 4,
+            //};
+
+            //Child = levelLine;
+        //}
+
+        //protected override void DrawContents()
+        //{
+            //base.DrawContents();
+        //}
+    //}
+
+    //public class HiHatPedalDisplay : Frame
+    //{
+        //HiHatLevelLine activePedalLine;
+        //HiHatLevelLine closedLine;
+        //HiHatLevelLine semiOpenLine;
+        //HiHatLevelLine openLine;
+        //TextBlock pedalText;
+        //VerticalMultiSlider slider;
+
+        //public HiHatPedalDisplay()
+        //{
+            //VerticalStack stack = new VerticalStack() { HorizontalAlignment = EHorizontalAlignment.Stretch, ChildSpacing = 5 };
+            //Content = stack;
+
+            //pedalText = new TextBlock();
+            //stack.Children.Add(pedalText);
+
+            //Dock pedalDock = new Dock()
+            //{
+                //DesiredHeight = 200
+            //};
+            //stack.Children.Add(pedalDock);
+
+            //closedLine = new HiHatLevelLine(UIColor.Yellow);
+            //pedalDock.Children.Add(closedLine);
+
+            //semiOpenLine = new HiHatLevelLine(UIColor.Orange);
+            //pedalDock.Children.Add(semiOpenLine);
+
+            //openLine = new HiHatLevelLine(UIColor.Red);
+            //pedalDock.Children.Add(openLine);
+
+            //activePedalLine = new HiHatLevelLine(UIColor.Green) { HideIfZero = true };
+            //pedalDock.Children.Add(activePedalLine);
+
+            //slider = new VerticalMultiSlider("VerticalPointerLeft", 3)
+            //{
+                //InvertLevel = false,
+                //ChangeAction = SliderChanged,
+                //HorizontalAlignment = EHorizontalAlignment.Right
+            //};
+            //pedalDock.Children.Add(slider);
+
+            //SetPedalLevel(0);
+        //}
+
+        //void SliderChanged(int slider, float value)
+        //{
+            //switch (slider)
+            //{
+                //case 0:
+                    //DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalOpen = value;
+                    //break;
+                //case 1:
+                    //DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen = value;
+                    //break;
+                //case 2:
+                    //DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed = value;
+                    //break;
+            //}
+
+            //UpdateHiHatLines();
+        //}
+
+        //public void UpdateHiHatLevels()
+        //{
+            //slider.SetLevel(0, DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen);
+            //slider.SetLevel(2, DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed);
+
+            //UpdateHiHatLines();
+        //}
+
+        //void UpdateHiHatLines()
+        //{
+            //openLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalOpen);
+            //semiOpenLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalSemiOpen);
+            //closedLine.SetLevel(DrumMidiDeviceConfiguration.CurrentMap.HiHatPedalClosed);
+
+            //UpdateContentLayout();
+        //}
+
+        //public void SetPedalLevel(float level)
+        //{
+            //activePedalLine.SetLevel(level);
+
+            //pedalText.Text = String.Format("Hi Hat Pedal: {0}%", (int)(level * 100));
+
+            //UpdateContentLayout();
+        //}
+    //}
+
+    //public class MultiSlider : Dock
+    //{
+        //public Action<int, float> ChangeAction { get; set; }
+        //public bool InvertLevel { get; set; }
+        //public bool EnforceOrder { get; set; }
+
+        //protected int numSliders;
+        //protected float[] levels;
+        //protected UIImage levelImage;
+        //protected bool haveCapture;
+        //protected int activeSlider;
+        //protected int captureTouchID;
+        //protected float startLevel;
+        //protected float startOffset;
+
+        //bool isHorizontal;
+        //ImageElement[] levelImageElements;
+        //bool slid;
+
+        //public MultiSlider(string imageName, int numSliders, bool isHorizontal)
+        //{
+            //this.isHorizontal = isHorizontal;
+            //this.numSliders = numSliders;
+
+            //EnforceOrder = true;
+
+            //levelImage = Layout.Current.GetImage(imageName);
+
+            //levels = new float[numSliders];
+
+            //levelImageElements = new ImageElement[numSliders];
+
+            //for (int i = 0; i < numSliders; i++)
+            //{
+                //levelImageElements[i] = new ImageElement(levelImage)
+                //{
+                    //HorizontalAlignment = isHorizontal ? EHorizontalAlignment.Left : EHorizontalAlignment.Left,
+                    //VerticalAlignment = isHorizontal ? EVerticalAlignment.Top : EVerticalAlignment.Top,
+                //};
+
+                //Children.Add(levelImageElements[i]);
+            //}
+        //}
+
+        //public override void UpdateContentLayout()
+        //{
+            //for (int i = 0; i < numSliders; i++)
+            //{
+                //if (isHorizontal)
+                //{
+                    //levelImageElements[i].Margin = ((ContentBounds.Width * levels[i]) - (float)Math.Ceiling((levelImage.Width) / 2f), 0);
+                //}
+                //else
+                //{
+                    //levelImageElements[i].Margin = (0, (ContentBounds.Height * levels[i]) - (float)Math.Ceiling((levelImage.Height) / 2f));
+                //}
+            //}
+
+            //base.UpdateContentLayout();
+        //}
+
+        //public void SetLevel(int sliderIndex, float level)
+        //{
+            //UpdateLevel(sliderIndex, InvertLevel ? (1.0f - level) : level, enforceOrder: false, sendUpdate: false);
+        //}
+
+        //void UpdateLevel(int sliderIndex, float level, bool enforceOrder, bool sendUpdate)
+        //{
+            //level = Math.Max(Math.Min(level, 1.0f), 0);
+
+            //int newActiveSlider = activeSlider;
+
+            //if (enforceOrder)
+            //{
+                //if (sliderIndex > 0)
+                //{
+                    //if (level < levels[sliderIndex - 1])
+                    //{
+                        //level = levels[sliderIndex - 1];
+
+                        //if (!slid)
+                        //{
+                            //newActiveSlider = sliderIndex - 1;
+                        //}
+                    //}
+                //}
+
+                //if (sliderIndex < (numSliders - 1))
+                //{
+                    //if (level > levels[sliderIndex + 1])
+                    //{
+                        //level = levels[sliderIndex + 1];
+
+                        //if (!slid)
+                        //{
+                            //newActiveSlider = sliderIndex + 1;
+                        //}
+                    //}
+                //}
+            //}
+
+            //levels[sliderIndex] = level;
+
+            //if (sendUpdate && (ChangeAction != null))
+            //{
+                //ChangeAction(activeSlider, InvertLevel ? 1.0f - levels[activeSlider] : levels[activeSlider]);
+            //}
+
+            //activeSlider = newActiveSlider;
+
+            //UpdateContentLayout();
+        //}
+
+        //int GetClosestSlider(Vector2 position)
+        //{
+            //float offset = (isHorizontal ? (position.X - ContentBounds.X) : (position.Y - ContentBounds.Y)) /
+                //(isHorizontal ? ContentBounds.Width : ContentBounds.Height);
+
+            //int closestIndex = 0;
+            //float closestDist = float.MaxValue;
+
+            //for (int i = 0; i < numSliders; i++)
+            //{
+                //float dist = Math.Abs(levels[i] - offset);
+
+                //if ((dist < closestDist) || ((levels[i] < 1.0f) && (dist == closestDist)))
+                //{
+                    //closestIndex = i;
+                    //closestDist = dist;
+                //}
+            //}
+
+            //return closestIndex;
+        //}
+
+        //public override bool HandleTouch(in Touch touch)
+        //{
+            //if (IsTap(touch, this))
+            //{
+                //float offset = (isHorizontal ? (touch.Position.X - ContentBounds.X) : (touch.Position.Y - ContentBounds.Y)) /
+                    //(isHorizontal ? ContentBounds.Width : ContentBounds.Height);
+
+                //UpdateLevel(activeSlider, offset, EnforceOrder, sendUpdate: true);
+            //}
+
+            //if (touch.TouchState == ETouchState.Pressed)
+            //{
+                //haveCapture = true;
+                //captureTouchID = touch.TouchID;
+
+                //activeSlider = GetClosestSlider(touch.Position);
+
+                //startLevel = levels[activeSlider];
+                //startOffset = isHorizontal ? touch.Position.X : touch.Position.Y;
+                //slid = false;
+
+                //CaptureTouch(touch);
+
+                //return true;
+            //}
+            //else if (touch.TouchState == ETouchState.Moved)
+            //{
+                //float delta = ((isHorizontal ? touch.Position.X : touch.Position.Y) - startOffset) / (isHorizontal ? ContentBounds.Width : ContentBounds.Height);
+
+                //if (Math.Abs(levels[activeSlider] - startLevel) > 0.01f)
+                //{
+                    //slid = true;
+                //}
+
+                //UpdateLevel(activeSlider, startLevel + delta, EnforceOrder, sendUpdate: true);
+            //}
+            //else if (touch.TouchState == ETouchState.Released)
+            //{
+                //if (touch.TouchID == captureTouchID)
+                //{
+                    //ReleaseTouch(captureTouchID);
+
+                    //haveCapture = false;
+
+                    //return true;
+                //}
+            //}
+
+            //return base.HandleTouch(touch);
+        //}
+    //}
+
+    //public class VerticalMultiSlider : MultiSlider
+    //{
+        //public VerticalMultiSlider(int numSliders)
+            //: this("VerticalPointer", numSliders)
+        //{
+        //}
+
+        //public VerticalMultiSlider(string imageName, int numSliders)
+            //: base(imageName, numSliders, isHorizontal: false)
+        //{
+        //}
+
+        //protected override void GetContentSize(out float width, out float height)
+        //{
+            //base.GetContentSize(out width, out height);
+
+            //height = 0;
+        //}
+
+        ////public override void SetLayout(UILayout layout, UIElement parent)
+        ////{
+        ////    base.SetLayout(layout, parent);
+
+        ////    InputLayout = new UILayout(new Vector2(layout.Offset.X - (levelImage.Width * PixUI.DefaultScale), layout.Offset.Y), layout.Width + (levelImage.Width * PixUI.DefaultScale), layout.Height);
+        ////}
+    //}
+
+    //public class HorizontalMultiSlider : MultiSlider
+    //{
+        //public HorizontalMultiSlider(int numSliders)
+            //: this("HorizontalSlider", numSliders)
+        //{
+        //}
+
+        //public HorizontalMultiSlider(string imageName, int numSliders)
+            //: base(imageName, numSliders, isHorizontal: true)
+        //{
+            //Children.Insert(0, new UIElement
+            //{
+                //HorizontalAlignment = EHorizontalAlignment.Stretch,
+                //VerticalAlignment = EVerticalAlignment.Center,
+                //BackgroundColor = UIColor.Black,
+                //DesiredHeight = 4
+            //});
+        //}
+
+        //protected override void GetContentSize(out float width, out float height)
+        //{
+            //base.GetContentSize(out width, out height);
+
+            //width = 0;
+        //}
+    //}
 }

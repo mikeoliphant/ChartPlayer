@@ -1,6 +1,3 @@
-[submodule "Dependencies/UILayout"]
-	path = Dependencies/UILayout
-	url = https://github.com/mikeoliphant/UILayout
 [submodule "Dependencies/OpenSongChart"]
 	path = Dependencies/OpenSongChart
 	url = https://github.com/mikeoliphant/OpenSongChart
@@ -8,3 +5,7 @@
 [submodule "Dependencies/PitchDetect"]
 	path = Dependencies/PitchDetect
 	url = https://github.com/mikeoliphant/PitchDetect
+[submodule "Dependencies/AudioPlugSharp"]
+	path = Dependencies/AudioPlugSharp
+	url = https://github.com/mikeoliphant/AudioPlugSharp.git
+	branch = crossplatform

@@ -29,7 +29,7 @@ namespace ChartPlayer
         SongPlayerSettingsInterface settingsInterface;
 
         AudioLevelDisplay inputLevelDisplay;
-        NinePatchWrapper tunerWrapper;
+        Frame tunerWrapper;
         TextButton tunerButton;
         TunerInterface tunerInterface;
 
@@ -41,9 +41,9 @@ namespace ChartPlayer
         TextBlock songInstrumentText;
 
         TextButton speedButton;
-        VerticalSlider speedSlider;
+        Slider speedSlider;
 
-        NinePatchWrapper tuningInterface;
+        Frame tuningInterface;
         TextBlock tuningText;
 
         TextToggleButton hideNotesButton;
@@ -63,13 +63,13 @@ namespace ChartPlayer
 
         TextBlock songLengthText;
 
-        NinePatchWrapper bpmInterface;
+        Frame bpmInterface;
         StringBuilderTextBlock bpmText;
         float lastBPM = 0;
 
         int songBPM = 0;
 
-        HorizontalSlider playTimeSlider;
+        Slider playTimeSlider;
 
         ImageToggleButton pauseButton;
 
@@ -182,7 +182,7 @@ namespace ChartPlayer
             };
             bottomVstack.Children.Add(tunerInfoDock);
 
-            tunerWrapper = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            tunerWrapper = new Frame
             {
                 HorizontalAlignment = EHorizontalAlignment.Left,
                 VerticalAlignment = EVerticalAlignment.Bottom,
@@ -194,7 +194,7 @@ namespace ChartPlayer
             {
                 ChildSpacing = 5
             };
-            tunerWrapper.Child = tunerLevelStack;
+            tunerWrapper.Content = tunerLevelStack;
 
             inputLevelDisplay = new AudioLevelDisplay();
             tunerLevelStack.Children.Add(inputLevelDisplay);
@@ -240,7 +240,7 @@ namespace ChartPlayer
             };
             bottomStack.Children.Add(bottomHorizontalStack);
 
-            NinePatchWrapper leftButtonWrapper = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            Frame leftButtonWrapper = new Frame
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
@@ -250,7 +250,7 @@ namespace ChartPlayer
             {
                 ChildSpacing = 2
             };
-            leftButtonWrapper.Child = leftButtonStack;
+            leftButtonWrapper.Content = leftButtonStack;
 
             TextButton songsButton = new TextButton("Songs")
             {
@@ -264,7 +264,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                     if (songPlayer != null)
                     {
@@ -282,7 +282,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 ClickAction = delegate
                 {
-                    ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                    ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                     Layout.Current.ShowPopup(new HelpDialog(new TextBlock("<Space> to pause/resume.\n\nClick song outline at top of screen to skip to phrase.\n\nShift Click song outline to seek to exact position.\n\n" +
                         "Left/Right arrows to move forward/back.\n\n[ ] keys to toggle loop markers and loop section.")));
@@ -316,16 +316,20 @@ namespace ChartPlayer
                 }
             });
 
-            speedSlider = new VerticalSlider("VerticalSlider")
+            // 50% at the bottom to 100% at the top
+            speedSlider = new Slider(vertical: true)
             {
                 DesiredHeight = 100,
-                BackgroundColor = UIColor.Black,
-                InvertLevel = true,
-                ChangeAction = SpeedChanged
+                Value = 1,
+                DefaultValue = 1
             };
-            speedSlider.SetLevel(1.0f);
 
-            tuningInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            speedSlider.ValueChanged = delegate
+            {
+                SpeedChanged((float)speedSlider.Value);
+            };
+
+            tuningInterface = new Frame
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
@@ -335,7 +339,7 @@ namespace ChartPlayer
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
-            tuningInterface.Child = tuningStack;
+            tuningInterface.Content = tuningStack;
 
             tuningStack.Children.Add(new TextButton("-")
             {
@@ -371,7 +375,7 @@ namespace ChartPlayer
                 }
             });
 
-            bpmInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            bpmInterface = new Frame
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
@@ -381,7 +385,7 @@ namespace ChartPlayer
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
-            bpmInterface.Child = bpmStack;
+            bpmInterface.Content = bpmStack;
 
             bpmStack.Children.Add(bpmText = new StringBuilderTextBlock("BPM:")
             {
@@ -389,7 +393,7 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center
             });
 
-            NinePatchWrapper scoreInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            Frame scoreInterface = new Frame
             {
                 VerticalAlignment = EVerticalAlignment.Stretch
             };
@@ -401,7 +405,7 @@ namespace ChartPlayer
                 DesiredWidth = 210,
                 ChildSpacing = 10
             };
-            scoreInterface.Child = scoreStack;
+            scoreInterface.Content = scoreStack;
 
             scoreTextWrapper = new UIElementWrapper()
             {
@@ -417,7 +421,7 @@ namespace ChartPlayer
             };
             scoreTextWrapper.Child = scoreText;
 
-            NinePatchWrapper playTimeInterface = new NinePatchWrapper(Layout.Current.DefaultOutlineNinePatch)
+            Frame playTimeInterface = new Frame
             {
                 VerticalAlignment = EVerticalAlignment.Stretch,
                 HorizontalAlignment = EHorizontalAlignment.Stretch
@@ -430,7 +434,7 @@ namespace ChartPlayer
                 HorizontalAlignment = EHorizontalAlignment.Stretch,
                 ChildSpacing = 5
             };
-            playTimeInterface.Child = playTimeStack;
+            playTimeInterface.Content = playTimeStack;
 
             var rewindButton = new ImageButton("Rewind")
             {
@@ -443,6 +447,11 @@ namespace ChartPlayer
                     }
                 }
             };
+
+            // More room around the icon than an image button's frame gives, closer to the text buttons
+            LayoutPadding transportPadding = new LayoutPadding(10, 6);
+
+            rewindButton.Frame.ContentPadding = transportPadding;
             playTimeStack.Children.Add(rewindButton);
 
             pauseButton = new ImageToggleButton("Play", "Pause")
@@ -450,6 +459,8 @@ namespace ChartPlayer
                 VerticalAlignment = EVerticalAlignment.Center,
                 ClickAction = TogglePaused
             };
+
+            pauseButton.Frame.ContentPadding = transportPadding;
             playTimeStack.Children.Add(pauseButton);
 
             UIElementWrapper playTimeTextWrapper = new UIElementWrapper()
@@ -466,14 +477,17 @@ namespace ChartPlayer
             };
             playTimeTextWrapper.Child = playTimeText;
 
-            playTimeSlider = new HorizontalSlider("HorizontalSlider")
+            playTimeSlider = new Slider()
             {
-                VerticalAlignment = EVerticalAlignment.Center,
-                HorizontalAlignment = EHorizontalAlignment.Stretch,
-                BackgroundColor = UIColor.Black,
-                ChangeAction = PlayTimeChanged
+                Value = 0,
+                DefaultValue = 0
             };
-            playTimeSlider.SetLevel(0);
+
+            playTimeSlider.ValueChanged = delegate
+            {
+                PlayTimeChanged((float)playTimeSlider.Value);
+            };
+
             playTimeStack.Children.Add(playTimeSlider);
 
             playTimeStack.Children.Add(songLengthText = new TextBlock("0:00") { VerticalAlignment = EVerticalAlignment.Center });
@@ -495,7 +509,7 @@ namespace ChartPlayer
                 return;
             }
 
-            ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+            ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
             Layout.Current.ShowPopup(songList);
         }
@@ -641,7 +655,7 @@ namespace ChartPlayer
 
                 songPlayer.BasePath = songIndex.BasePath;
                 songPlayer.SetPlaybackSampleRate(ChartPlayerGame.Instance.Plugin.Host.SampleRate);
-                SpeedChanged(speedSlider.GetLevel());
+                SpeedChanged((float)speedSlider.Value);
                 songPlayer.SongTuningMode = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.SongTuningMode;
                 songPlayer.MutePartStems = ChartPlayerGame.Instance.Plugin.ChartPlayerSaveState.SongPlayerSettings.MutePartStems;
                 SetPitchShift(0);
@@ -779,7 +793,7 @@ namespace ChartPlayer
             {
                 mouseIdleFrames = 0;
 
-                ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = true;
+                ChartPlayerGame.Instance.Plugin.IsMouseVisible = true;
 
                 lastMousePosition = mousePosition;
             }
@@ -790,7 +804,7 @@ namespace ChartPlayer
                     mouseIdleFrames++;
 
                     if (mouseIdleFrames > 200)
-                        ChartPlayerGame.Instance.Plugin.GameHost.IsMouseVisible = false;
+                        ChartPlayerGame.Instance.Plugin.IsMouseVisible = false;
                 }
             }
 
@@ -1010,7 +1024,9 @@ namespace ChartPlayer
                     playTimeText.StringBuilder.AppendNumber(currentSecond, 2);
                 }
 
-                playTimeSlider.SetLevel(newSecondFloat / songPlayer.SongLengthSeconds);
+                // Not while the user drags it (the drag seeks)
+                if (!playTimeSlider.IsEditing)
+                    playTimeSlider.Value = newSecondFloat / songPlayer.SongLengthSeconds;
 
                 CheckLoopMarkers();
             }

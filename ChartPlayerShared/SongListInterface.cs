@@ -32,10 +32,11 @@ namespace ChartPlayer
         HorizontalStack tagStack;
         HorizontalStack arrangementStack;
         DialogInputStack buttonInputStack;
+        List<(ESongInstrumentType Type, TextButton Button)> instrumentButtons = new List<(ESongInstrumentType, TextButton)>();
         HorizontalStack filterStack;
         TextToggleButton globalTagButton;
         TextButton filterButton;
-        NinePatchWrapper bottomInterface;
+        Frame bottomInterface;
         string currentFilterTag = null;
 
         public SongListDisplay()
@@ -106,7 +107,7 @@ namespace ChartPlayer
                 SecondarySortColumn = artistColumn
             });
 
-            bottomInterface = new NinePatchWrapper(Layout.Current.GetImage("PopupBackground"))
+            bottomInterface = new Frame
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             };
@@ -116,7 +117,7 @@ namespace ChartPlayer
             {
                 HorizontalAlignment = EHorizontalAlignment.Stretch
             };
-            bottomInterface.Child = bottomStack;
+            bottomInterface.Content = bottomStack;
 
             songDisplayStack = new HorizontalStack()
             {
@@ -181,11 +182,15 @@ namespace ChartPlayer
             buttonInputStack = new DialogInputStack(this, buttonStack);
             bottomStack.Children.Add(buttonInputStack);
 
-            buttonInputStack.AddInput(new DialogInput { Text = "Lead", Action = delegate { SetCurrentInstrument(ESongInstrumentType.LeadGuitar); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Rhythm", Action = delegate { SetCurrentInstrument(ESongInstrumentType.RhythmGuitar); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Bass", Action = delegate { SetCurrentInstrument(ESongInstrumentType.BassGuitar); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Drums", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Drums); } });
-            buttonInputStack.AddInput(new DialogInput { Text = "Keys", Action = delegate { SetCurrentInstrument(ESongInstrumentType.Keys); } });
+            // The instruments: the current one's button stays on
+            AddInstrumentButton(buttonStack, "Lead", ESongInstrumentType.LeadGuitar);
+            AddInstrumentButton(buttonStack, "Rhythm", ESongInstrumentType.RhythmGuitar);
+            AddInstrumentButton(buttonStack, "Bass", ESongInstrumentType.BassGuitar);
+            AddInstrumentButton(buttonStack, "Drums", ESongInstrumentType.Drums);
+            AddInstrumentButton(buttonStack, "Keys", ESongInstrumentType.Keys);
+
+            UpdateInstrumentButtons();
+
             buttonInputStack.AddInput(new DialogInput { Text = "ReScan", Action = delegate { SongPlayerInterface.Instance.RescanSongIndex(); } });
             buttonInputStack.AddInput(new DialogInput
             {
@@ -221,7 +226,8 @@ namespace ChartPlayer
 
             filterStack.Children.Add(new TextBlock(" Instrument: ") { VerticalAlignment = EVerticalAlignment.Center });
 
-            globalTagButton = new TextToggleButton("Current", "All")
+            // A choice of two, not on or off: no highlight
+            globalTagButton = new TextToggleButton("Current", "All", highlightOn: false)
             {
                 VerticalAlignment = EVerticalAlignment.Center,
                 PressAction = delegate
@@ -415,6 +421,28 @@ namespace ChartPlayer
 
                 SetCurrentSongs();
             }
+
+            // Also when it didn't change: pressing the current instrument's button toggled it off
+            UpdateInstrumentButtons();
+        }
+
+        void AddInstrumentButton(ListUIElement container, string text, ESongInstrumentType type)
+        {
+            TextButton button = new TextButton(text)
+            {
+                IsToggleButton = true,
+                PressAction = delegate { SetCurrentInstrument(type); }
+            };
+
+            instrumentButtons.Add((type, button));
+
+            container.Children.Add(button);
+        }
+
+        void UpdateInstrumentButtons()
+        {
+            foreach ((ESongInstrumentType type, TextButton button) in instrumentButtons)
+                button.SetPressed(type == CurrentInstrument);
         }
 
         public void Play()
@@ -624,7 +652,7 @@ namespace ChartPlayer
 
                             UpdateSelectedSongDisplay();
                         }
-                    }, UIColor.Black, new UIColor(200, 200, 200));
+                    });
                 }
             });
 

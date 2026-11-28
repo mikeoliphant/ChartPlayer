@@ -1,28 +1,26 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Design;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
 using AudioPlugSharp;
-using Microsoft.Xna.Framework.Graphics;
+using AudioPlugSharpUILayout;
 using UILayout;
 using PitchDetect;
 
 namespace ChartPlayer
 {
-    public class ChartPlayerPlugin : AudioPluginBase
+    /// <summary>
+    /// The editor is a UILayout layout (ChartPlayerGame) drawn into the window the CLAP/VST3 adapter provides
+    /// (AudioPluginUILayout), rendering on a thread of its own with vsync (the host's UI timer is too coarse).
+    /// </summary>
+    public class ChartPlayerPlugin : AudioPluginUILayout
     {
         public ChartPlayerSaveState ChartPlayerSaveState { get { return (SaveStateData as ChartPlayerSaveState) ?? new ChartPlayerSaveState(); } }
         public SongPlayer SongPlayer { get; private set; } = null;
         public SampleHistory<float> SampleHistory { get; private set; } = new SampleHistory<float>();
-        public MonoGameHost GameHost { get; private set; } = null;
         public IMidiHandler MidiHandler { get; set; } = null;
         public float CurrentInputLevel { get; private set; } = 0;
 
         FloatAudioIOPort stereoInput;
         FloatAudioIOPort stereoOutput;
-        Thread gameThread = null;
         AudioPluginParameter pedalParameter;
         EnvelopeFollower levelEnv;
 
@@ -40,9 +38,14 @@ namespace ChartPlayer
 
             //Logger.ImmediateMode = true;
 
-            HasUserInterface = true;
             EditorWidth = 1024;
             EditorHeight = 720;
+
+            UseEditorRenderThread = true;
+
+            // ChartPlayer is used like an application of its own: its keys (space to pause, ...) win over the
+            // host's shortcuts while it has focus
+            EditorClaimsAllKeys = true;
 
             SampleFormatsSupported = EAudioBitsPerSample.Bits32;
 
@@ -77,26 +80,60 @@ namespace ChartPlayer
             SetHiHatPedalController(4);
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+        ChartPlayerGame game;
 
-        IntPtr parentWindow;
-
-        public override void ShowEditor(IntPtr parentWindow)
+        // The host may resize the editor window; the layout follows (AudioPluginUILayout.SetEditorSize)
+        public override bool CanResizeEditor
         {
-            Logger.Log("Show Editor");
+            get { return true; }
+        }
 
-            this.parentWindow = parentWindow;
+        protected override MonoGameLayout CreateEditorLayout()
+        {
+            Logger.Log("Create editor");
 
-            if (parentWindow == IntPtr.Zero)
+            game = new ChartPlayerGame();
+            game.Plugin = this;
+
+            return game;
+        }
+
+        protected override UIElement CreateEditorUI()
+        {
+            // ChartPlayerGame builds its interface when it gets its host (SetHost)
+            return game.RootUIElement;
+        }
+
+        protected override void EditorOpened()
+        {
+            isMouseVisible = true;
+
+            // Like the standalone app: open fullscreen if it was fullscreen when last used
+            if (ChartPlayerSaveState.IsFullscreen)
+                Host.SetEditorFullscreen(true);
+        }
+
+        protected override void EditorClosing()
+        {
+            game = null;
+        }
+
+        bool isMouseVisible = true;
+
+        /// <summary>
+        /// Cursor visibility over the editor (editor window services; applied by the host on its UI thread).
+        /// </summary>
+        public bool IsMouseVisible
+        {
+            get { return isMouseVisible; }
+            set
             {
-                RunGame();
-            }
-            else
-            {
-                gameThread = new Thread(new ThreadStart(RunGame));
-                gameThread.SetApartmentState(ApartmentState.STA);
-                gameThread.Start();
+                if (value == isMouseVisible)
+                    return;
+
+                isMouseVisible = value;
+
+                Host.SetEditorCursorVisible(value);
             }
         }
 
@@ -123,120 +160,15 @@ namespace ChartPlayer
             AddMidiControllerMapping(pedalParameter, (uint)controller);
         }
 
-        unsafe void RunGame()
-        {
-            Logger.Log("Starting Game");
-
-#if RELEASE
-            try
-            {
-#endif
-                int screenWidth = (int)EditorWidth;
-                int screenHeight = (int)EditorHeight;
-
-                ChartPlayerGame game;
-
-                if (ChartPlayerSaveState.IsFullscreen)
-                {
-                    screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-                    screenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-                }
-
-                Logger.Log("Create game host");
-
-                using (GameHost = new MonoGameHost(screenWidth, screenHeight, ChartPlayerSaveState.IsFullscreen))
-                {
-                    GameHost.UsePremultipliedAlpha = true;
-
-                    Logger.Log("Create game");
-
-                    game = new ChartPlayerGame();
-                    game.Plugin = this;
-
-                    Logger.Log("Game created");
-
-                    GameHost.IsMouseVisible = true;
-
-                    if ((parentWindow != IntPtr.Zero) && !ChartPlayerSaveState.IsFullscreen)
-                    {
-                        GameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
-                        GameHost.Window.IsBorderless = true;
-
-                        SetParent(GameHost.Window.Handle, parentWindow);
-                    }
-
-                    Logger.Log("Start game");
-                    GameHost.StartGame(game);
-                }
-
-                EditorWidth = (uint)GameHost.ScreenWidth;
-                EditorHeight = (uint)GameHost.ScreenHeight;
-
-                GameHost = null;
-#if RELEASE
-        }
-            catch (Exception ex)
-            {
-                Logger.Log("Run game failed with: " + ex.ToString());
-            }
-#endif
-        }
-
-        public override void ResizeEditor(uint newWidth, uint newHeight)
-        {
-            base.ResizeEditor(newWidth, newHeight);
-
-            if (GameHost != null)
-            {
-                GameHost.RequestResize((int)newWidth, (int)newHeight);
-            }
-        }
-
-        public override void HideEditor()
-        {
-            base.HideEditor();
-
-            if (GameHost != null)
-            {
-                GameHost.Exit();
-
-                if (gameThread != null)
-                    gameThread.Join();
-            }
-        }
-
         public void ToggleFullScreen()
         {
-            if (!GameHost.GraphicsDeviceManager.IsFullScreen)
-            {
-                SetParent(GameHost.Window.Handle, 0);
+            // The editor window moves out of the DAW into a borderless window covering the monitor, and back (editor
+            // window services; the host applies it on its UI thread and resizes the editor)
+            bool fullscreen = !Host.IsEditorFullscreen;
 
-                GameHost.GraphicsDeviceManager.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-                GameHost.GraphicsDeviceManager.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            Host.SetEditorFullscreen(fullscreen);
 
-                GameHost.GraphicsDeviceManager.HardwareModeSwitch = false;
-                GameHost.GraphicsDeviceManager.IsFullScreen = true;
-                GameHost.GraphicsDeviceManager.ApplyChanges();
-                GameHost.GraphicsDeviceManager.HardwareModeSwitch = true;
-                GameHost.GraphicsDeviceManager.ApplyChanges();
-            }
-            else
-            {
-                GameHost.GraphicsDeviceManager.PreferredBackBufferWidth = (int)EditorWidth;
-                GameHost.GraphicsDeviceManager.PreferredBackBufferHeight = (int)EditorHeight;
-
-                GameHost.GraphicsDeviceManager.ToggleFullScreen();
-
-                if (parentWindow != IntPtr.Zero)
-                {
-                    GameHost.Window.Position = new Microsoft.Xna.Framework.Point(0, 0);
-                    GameHost.Window.IsBorderless = true;
-
-                    SetParent(GameHost.Window.Handle, parentWindow);
-                }
-            }
-
-            ChartPlayerSaveState.IsFullscreen = GameHost.GraphicsDeviceManager.IsFullScreen;
+            ChartPlayerSaveState.IsFullscreen = fullscreen;
         }
 
         public void SetSongPlayer(SongPlayer songPlayer)

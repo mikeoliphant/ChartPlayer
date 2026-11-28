@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 19 18">
+  <!-- Rewind (back to the start): a bar and a triangle pointing left (white, so they take the button's tint). -->
+  <rect x="0" y="0" width="4" height="18" fill="#ffffff"/>
+  <path d="M 19 0 L 7 9 L 19 18 Z" fill="#ffffff"/>
+</svg>

@@ -29,6 +29,10 @@ You can download ChartPlayer from releases section [here](https://github.com/mik
 
 To install, unpack the .zip file and copy the extracted folder to "C:\Program Files\Common Files\VST3".
 
+# Running as a plugin in Linux
+
+ChartPlayer needs [zenity](https://gitlab.gnome.org/GNOME/zenity) installed (or kdialog on KDE) to show its file and folder dialogs, such as the one for selecting your song folder.
+
 # Running under Jack in Linux or MacOS
 
 Unpack the .zip file and run "ChartPlayerJack" from the resulting folder (you will likely have to make it executable:
@@ -59,5 +63,5 @@ git clone --recurse-submodules https://github.com/mikeoliphant/ChartPlayer
 
 Building should be straightforward using Visual Studio.
 
-**NOTE:** Build and run the "ImageProcessor" project first - it creates texture assets that are required for the main build.
+**NOTE:** Build and run the "ChartPlayerImageProcessor" project first - it creates texture assets that are required for the main build.
 
