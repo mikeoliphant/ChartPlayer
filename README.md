@@ -19,7 +19,7 @@ It runs as a VST plugin inside your DAW (or as a [Jack Audio](https://github.com
 
 # Platforms Supported
 
-ChartPlayer has been tested on Windows, Linux (x64 and arm64) and macOS.
+ChartPlayer runs on Windows and Linux.
 
 # Downloading
 
@@ -33,7 +33,7 @@ To install, unpack the .zip file and copy the extracted folder to "C:\Program Fi
 
 ChartPlayer needs [zenity](https://gitlab.gnome.org/GNOME/zenity) installed (or kdialog on KDE) to show its file and folder dialogs, such as the one for selecting your song folder.
 
-# Running under Jack in Linux or MacOS
+# Running under Jack in Linux
 
 Unpack the .zip file and run "ChartPlayerJack" from the resulting folder (you will likely have to make it executable:
 
@@ -44,10 +44,6 @@ chmod u+x ChartPlayerJack
 You need to have a running [Jack](https://jackaudio.org/) instance for it to work. It will attempt to connect to your jack input/output ports.
 
 For speed/pitch shifting to work, you need to have Rubber Band (librubberband2) installed.
-
-## MacOS Note
-
-If you are running on an Arm Mac, and the Arm64 build does not work - try the x64 build with [Rosetta](https://en.wikipedia.org/wiki/Rosetta_(software)).
 
 # Where to get songs
 
