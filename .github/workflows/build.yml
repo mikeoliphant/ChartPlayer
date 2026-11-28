@@ -1,13 +1,20 @@
 # Builds ChartPlayer's packages (the application and the plugin as CLAP and VST3, for Windows and Linux, and the
-# Windows installer) on every push and pull request, attached to the run as artifacts. See package.yml.
+# Windows installer), attached to the run as artifacts. See package.yml.
 name: Build
 
 on:
-  [workflow_dispatch, push, pull_request]
+  workflow_dispatch:
+  # Pull requests, and pushes to master only: a push to a pull request's branch runs once, as the pull request.
+  # Documentation-only changes run nothing.
+  pull_request:
+    paths-ignore: ['**.md']
+  push:
+    branches: [master]
+    paths-ignore: ['**.md']
 
-# A newer push to the same branch (or pull request) cancels the run still going for the older one
+# One run per branch or pull request: a newer push cancels the run still going for the older one
 concurrency:
-  group: build-${{ github.ref }}
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
