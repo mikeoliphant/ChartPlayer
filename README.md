@@ -63,5 +63,5 @@ git clone --recurse-submodules https://github.com/mikeoliphant/ChartPlayer
 
 Building should be straightforward using Visual Studio.
 
-**NOTE:** Build and run the "ImageProcessor" project first - it creates texture assets that are required for the main build.
+**NOTE:** Build and run the "ChartPlayerImageProcessor" project first - it creates texture assets that are required for the main build.
 

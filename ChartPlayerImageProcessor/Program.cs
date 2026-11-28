@@ -19,38 +19,23 @@ namespace ChartPlayerImageProcessor
 
             string font = Path.Combine(SrcPath, "Inter_18pt-Bold.ttf");
 
-            AddFont("MainFont", font, 16);
+            // The controls (frames, tabs, scroll bars, sliders) and the UI font are UILayout's default theme
             AddFont("LargeFont", font, 32);
 
             PushDirectory("UserInterface");
 
             Add("SingleWhitePixel");
 
-            AddWithShadow("PopupBackground");
+            AddSvg("Play");
+            AddSvg("Pause");
+            AddSvg("Rewind");
 
-            Add("TabPanelBackground");
-            Add("TabForeground");
-            Add("TabBackground");
+            AddSvg("LevelDisplay");
 
-            Add("ButtonPressed");
-            Add("ButtonUnpressed");
+            PopDirectory();
 
-            Add("Play");
-            Add("Pause");
-            Add("Rewind");
-
-            Add("LevelDisplay");
-
-            Add("ScrollBar");
-            Add("ScrollBarGutter");
-            Add("ScrollUpArrow");
-            Add("ScrollDownArrow");
-
-            Add("HorizontalSlider");
-            Add("VerticalSlider");
-
-            Add("VerticalPointer");
-            Add("VerticalPointerLeft");
+            // Drawn on the 3D note highway
+            PushDirectory("NoteHighway");
 
             Add("VerticalFretLine");
             Add("HorizontalFretLine");

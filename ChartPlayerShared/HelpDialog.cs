@@ -9,7 +9,6 @@ namespace ChartPlayer
     public class HelpDialog : InputDialog
     {
         public HelpDialog(UIElement helpElement)
-            : base(Layout.Current.GetImage("PopupBackground"))
         {
             VerticalStack contents = new VerticalStack()
             {

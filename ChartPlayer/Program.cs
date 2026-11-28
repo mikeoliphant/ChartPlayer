@@ -1,16 +1,14 @@
 ﻿using System;
-using AudioPlugSharpHost;
+using AudioPlugSharpStandalone;
 
 namespace ChartPlayer
 {
     class Program
     {
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
-            WindowsFormsHost<ChartPlayerPlugin> host = new WindowsFormsHost<ChartPlayerPlugin>(new ChartPlayerPlugin());
-
-            host.Run();
+            StandaloneHost.ForPlugin<ChartPlayerPlugin>().Run();
         }
     }
 }

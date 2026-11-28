@@ -36,17 +36,11 @@ namespace ChartPlayer
 
             LoadImageManifest(loader, "ImageManifest.xml");
 
+            // On ChartPlayer's sheet, so plain rectangles batch with its other images
             GraphicsContext.SingleWhitePixelImage = GetImage("SingleWhitePixel");
 
-            DefaultFont = GetFont("MainFont");
-            DefaultFont.SpriteFont.EmptyLinePercent = 0.5f;
-
-            DefaultForegroundColor = UIColor.White;
-
-            DefaultOutlineNinePatch = GetImage("PopupBackground");
-
-            DefaultPressedNinePatch = GetImage("ButtonPressed");
-            DefaultUnpressedNinePatch = GetImage("ButtonUnpressed");
+            // The controls' look is UILayout's default theme; the help text's blank lines are half height
+            Theme.Font.SpriteFont.EmptyLinePercent = 0.5f;
 
             InputManager.AddMapping("Exit", new KeyMapping(InputKey.Escape));
             InputManager.AddMapping("PreviousPage", new KeyMapping(InputKey.PageUp) { DoRepeat = true });

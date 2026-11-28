@@ -51,7 +51,6 @@ namespace ChartPlayer
         MidiEditor midiEditor = new MidiEditor();
 
         public SongPlayerSettingsInterface(SongPlayerSettings settings)
-            : base(Layout.Current.DefaultOutlineNinePatch)
         {
             oldSettings = settings;
 
@@ -67,9 +66,8 @@ namespace ChartPlayer
 
         void UpdateDisplay()
         {
-            TabPanel tabPanel = new TabPanel(ChartPlayerGame.PanelBackgroundColorDark, UIColor.White, Layout.Current.GetImage("TabPanelBackground"), Layout.Current.GetImage("TabForeground"), Layout.Current.GetImage("TabBackground"), 5, 5);
+            TabPanel tabPanel = new TabPanel();
             SetContents(tabPanel);
-
 
             tabPanel.AddTab("General", GeneralTab());
             tabPanel.AddTab("Guitar", GuitarTab());
@@ -99,7 +97,7 @@ namespace ChartPlayer
                 ClickAction = SelectSongPath
             });
 
-            vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed"));
+            vStack.Children.Add(CreateTextToggleOption("LeftyMode", newSettings, "Guitar Orientation:", "Left Handed", "Right Handed", highlightOn: false));
             vStack.Children.Add(CreateFloatOption("UIScale", newSettings, "User Interface Scale", 0.25f, 3.0f, 2));
             vStack.Children.Add(CreateTextToggleOption("MutePartStems", newSettings, "Mute current part stems: ", "Yes", "No"));
 
@@ -110,7 +108,7 @@ namespace ChartPlayer
         {
             VerticalStack vStack = new VerticalStack() { ChildSpacing = 10, HorizontalAlignment = EHorizontalAlignment.Stretch };
 
-            vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom"));
+            vStack.Children.Add(CreateTextToggleOption("InvertStrings", newSettings, "String Orientation:", "Low On Top", "Low On Bottom", highlightOn: false));
             vStack.Children.Add(CreateEnumOption("SongTuningMode", newSettings, "Song Re-Tuning"));
             vStack.Children.Add(CreateTextToggleOption("BassUsingGuitar", newSettings, "Play bass using a guitar: ", "Yes", "No"));
             vStack.Children.Add(CreateFloatOption("NoteDisplaySeconds", newSettings, "Note Display Length (secs):", 1, 5, 1));
@@ -147,7 +145,9 @@ namespace ChartPlayer
 
         }
 
-        UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2)
+        // highlightOn: false for a choice between two values (an orientation), true for yes or no
+        UIElement CreateTextToggleOption(string property, object obj, string description, string option1, string option2,
+            bool highlightOn = true)
         {
             PropertyInfo prop = obj.GetType().GetProperty(property);
 
@@ -161,7 +161,7 @@ namespace ChartPlayer
 
             hStack.Children.Add(new UIElement { HorizontalAlignment = EHorizontalAlignment.Stretch });
 
-            TextToggleButton button = new TextToggleButton(option1, option2) { ClickAction = delegate { prop.SetValue(obj, !(bool)prop.GetValue(obj)); } };
+            TextToggleButton button = new TextToggleButton(option1, option2, highlightOn) { ClickAction = delegate { prop.SetValue(obj, !(bool)prop.GetValue(obj)); } };
             button.SetPressed((bool)prop.GetValue(obj));
             hStack.Children.Add(button);
 
@@ -231,30 +231,31 @@ namespace ChartPlayer
 
             string format = "n" + numDecimals;
 
-            HorizontalSlider hSlider = new HorizontalSlider("HorizontalSlider")
+            Slider hSlider = new Slider()
             {
-                VerticalAlignment = EVerticalAlignment.Center,
-                DesiredWidth = 100,
-                BackgroundColor = UIColor.Black,
-                ChangeAction = delegate (float percent)
-                {
-                    float value = minValue + ((maxValue - minValue) * percent);
+                HorizontalAlignment = EHorizontalAlignment.Left,
+                DesiredWidth = 100
+            };
 
-                    float pow = (int)Math.Pow(10, numDecimals);
+            hSlider.ValueChanged = delegate
+            {
+                float value = minValue + ((maxValue - minValue) * (float)hSlider.Value);
 
-                    value = (int)(value * pow);
+                float pow = (int)Math.Pow(10, numDecimals);
 
-                    value /= pow;
+                value = (int)(value * pow);
 
-                    prop.SetValue(obj, value);
-                    numberText.Text = value.ToString(format);
-                }
+                value /= pow;
+
+                prop.SetValue(obj, value);
+                numberText.Text = value.ToString(format);
             };
 
             float currentValue = (float)prop.GetValue(obj);
 
             numberText.Text = currentValue.ToString(format);
-            hSlider.SetLevel((currentValue - minValue) / (maxValue - minValue));
+            hSlider.Value = (currentValue - minValue) / (maxValue - minValue);
+            hSlider.DefaultValue = hSlider.Value;
 
             hStack.Children.Add(hSlider);
 

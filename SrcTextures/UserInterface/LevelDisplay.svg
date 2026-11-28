@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="98" viewBox="0 0 20 98">
+  <!-- A level meter's segments: 24 bars, 2 pixels high every 4, drawn up to the level. -->
+  <rect x="2" y="2" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="6" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="10" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="14" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="18" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="22" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="26" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="30" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="34" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="38" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="42" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="46" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="50" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="54" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="58" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="62" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="66" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="70" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="74" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="78" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="82" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="86" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="90" width="16" height="2" fill="#ffffff"/>
+  <rect x="2" y="94" width="16" height="2" fill="#ffffff"/>
+</svg>
