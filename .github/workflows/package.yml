@@ -1,0 +1,148 @@
+# Builds ChartPlayer's packages on each platform, called by the Build and Release workflows: the application and the
+# plugin (CLAP and VST3), as a zip per platform, and a Windows installer. Each platform is built on its own runner: the
+# plugin's adapters are native code (AudioPlugSharp's, built here with CMake), and the standalone host's framework
+# references depend on the build machine's OS.
+#
+# A package holds:
+#   ChartPlayer/                  the application: the executable, everything else in lib/ (AppPublish.targets)
+#   clap/ChartPlayerPlugin/       the CLAP plugin
+#   vst3/ChartPlayerPlugin.vst3/  the VST3 plugin
+#   README.txt
+#
+# The artifacts are package-<rid>: ChartPlayer-<version>-<rid>.zip, and ChartPlayer-<version>-setup.exe on Windows.
+name: Package
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "The version (default: ChartPlayerPlugin.csproj's)"
+        type: string
+        required: false
+      ref:
+        description: "The commit to build (default: the workflow's)"
+        type: string
+        required: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  package:
+    name: Package (${{ matrix.rid }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-latest
+          # Ubuntu 22.04: the application and the adapters then need glibc 2.35 or newer
+          - rid: linux-x64
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      RID: ${{ matrix.rid }}
+      BRIDGE: Dependencies/AudioPlugSharp/AudioPlugSharpBridge
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref }}
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Linux packages
+      if: runner.os == 'Linux'
+      # X11 for the adapters, FreeType for the image processors' fonts, zip (keeps the executable's permissions)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libfreetype6 zip
+
+    - name: Install Inno Setup
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup --no-progress -y }
+
+    - name: Version
+      env:
+        REQUESTED_VERSION: ${{ inputs.version }}
+      run: |
+        version="$REQUESTED_VERSION"
+        if [ -z "$version" ]; then
+          version=$(dotnet msbuild ChartPlayerPlugin/ChartPlayerPlugin.csproj -nologo -getProperty:Version | tr -d '[:space:]')
+        fi
+
+        echo "Version $version"
+        echo "VERSION=$version" >> "$GITHUB_ENV"
+
+    - name: Image sheets
+      # The sheets aren't tracked: UILayout's defaults, AudioPlugSharpUILayout's textures and ChartPlayer's own
+      run: |
+        dotnet run --project Dependencies/AudioPlugSharp/Dependencies/UILayout/DefaultTexturesProcessor -c Release
+        dotnet run --project Dependencies/AudioPlugSharp/AudioPlugSharpImageProcessor -c Release
+        dotnet run --project ChartPlayerImageProcessor -c Release
+
+    - name: Adapters
+      # AudioPlugSharp's CLAP and VST3 adapters for this platform, staged in the bridge's bin/native/<rid>, where the
+      # plugin's build takes them from
+      run: |
+        cmake -S $BRIDGE/Native -B $BRIDGE/bin/native-build -DCMAKE_BUILD_TYPE=Release
+        cmake --build $BRIDGE/bin/native-build --config Release --target stage_adapters --parallel
+
+    - name: Plugin
+      run: dotnet build ChartPlayerPlugin/ChartPlayerPlugin.csproj -c Release -p:Version="$VERSION" -p:ContinuousIntegrationBuild=true
+
+    - name: Application
+      run: |
+        dotnet publish ChartPlayer/ChartPlayer.csproj -c Release -r $RID --self-contained true -o stage/ChartPlayer \
+          -p:Version="$VERSION" -p:ContinuousIntegrationBuild=true
+
+    - name: Assemble
+      # The bundles carry every platform's native libraries (MonoGame's): keep this platform's only
+      run: |
+        out=ChartPlayerPlugin/bin/Release/net10.0
+        [ -d $out/clap/ChartPlayerPlugin ] && [ -d $out/vst3/ChartPlayerPlugin.vst3 ] || { echo "no plugin bundles in $out"; exit 1; }
+
+        mkdir -p stage/clap stage/vst3
+        cp -r $out/clap/ChartPlayerPlugin stage/clap/
+        cp -r $out/vst3/ChartPlayerPlugin.vst3 stage/vst3/
+
+        for runtimes in stage/clap/ChartPlayerPlugin/runtimes stage/vst3/ChartPlayerPlugin.vst3/Contents/*/runtimes; do
+          find "$runtimes" -mindepth 1 -maxdepth 1 -type d ! -name "$RID" -exec rm -rf {} +
+          ls "$runtimes"
+        done
+
+        cp Packaging/README.txt stage/
+
+    - name: Zip
+      working-directory: stage
+      run: |
+        zipfile="../packages/ChartPlayer-$VERSION-$RID.zip"
+        mkdir -p ../packages
+
+        if [ "$RUNNER_OS" = "Windows" ]; then 7z a -tzip "$zipfile" .; else zip -qr "$zipfile" .; fi
+
+    - name: Installer
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /Q "/DAppVersion=$env:VERSION" "/DSourceDir=$PWD\stage" "/DOutputDir=$PWD\packages" Packaging\ChartPlayer.iss
+        if ($LASTEXITCODE -ne 0) { throw "ISCC failed ($LASTEXITCODE)" }
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: package-${{ matrix.rid }}
+        path: packages/
+        if-no-files-found: error

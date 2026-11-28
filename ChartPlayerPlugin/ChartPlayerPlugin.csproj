@@ -1,7 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<!--
+	  The ChartPlayer plugin. Each build makes the DAW bundles in the output folder, clap/ChartPlayerPlugin and
+	  vst3/ChartPlayerPlugin.vst3, once AudioPlugSharp's native adapters have been built (CMake, as the workflows do);
+	  without them it builds the plugin and warns.
+	-->
+	<Import Project="..\Dependencies\AudioPlugSharp\AudioPlugSharpBridge\build\InRepo.props" />
+
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<Version>0.1.25</Version>
+		<Version>0.2.0</Version>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<TieredCompilation>false</TieredCompilation>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -31,4 +38,5 @@
 	</Target>
 	<Import Project="..\ChartPlayerShared\ChartPlayerShared.projitems" Label="Shared" />
 	<Import Project="..\Dependencies\OpenSongChart\SongFormat\SongFormat.projitems" Label="Shared" />
+	<Import Project="..\Dependencies\AudioPlugSharp\AudioPlugSharpBridge\build\InRepo.targets" />
 </Project>

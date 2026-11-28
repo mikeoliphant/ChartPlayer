@@ -1,127 +1,158 @@
+# Makes a release, by hand (Actions > Release > Run workflow): builds ChartPlayer's packages (package.yml: the
+# application and the plugin as CLAP and VST3, a zip for Windows and one for Linux, and the Windows installer) and
+# creates a draft GitHub release on the tag v<version>, with the packages attached and no notes. Write the notes and
+# publish it on GitHub.
+#
+# The version is the plugin project's (<Version> in ChartPlayerPlugin/ChartPlayerPlugin.csproj): set it and commit it
+# before running this. Every assembly in the release gets it, the application's too. The tag input is optional; if
+# given, it must be v<version>. A version with a suffix (0.1.0-beta.1) makes a pre-release.
+#
+# The tag is made on the commit the workflow runs on, and pushed only once every platform is built, so a failed run
+# leaves nothing behind. A tag already on this commit is reused; one on another commit is refused (the version wasn't
+# bumped). To release an existing tag, choose the tag in "Use workflow from". A tag that already has a release (a
+# draft or published) is refused: delete a draft on GitHub to run again, so its notes aren't lost to a rerun.
 name: Release
 
 on:
   workflow_dispatch:
-  
-jobs:
-  create_release:
-    name: Create release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{steps.create_release.outputs.upload_url}}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3.3.0
-        with:
-          submodules: recursive
+    inputs:
+      tag:
+        description: "Release tag: leave empty for v<project version>, or give it to check (v0.1.0)"
+        required: false
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-          draft: true
-          tag_name: ${{github.ref}}
-          release_name: Release ${{github.ref}}
-     
-  build-windows:
-    name: Build Windows
-    needs: create_release
-    runs-on: windows-latest
+# One release at a time
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  REQUESTED_TAG: ${{ inputs.tag }}
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  # The version, the tag and the release checked before anything is built
+  check:
+    name: Check the version and the tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      tag: ${{ steps.check.outputs.tag }}
+      sha: ${{ steps.check.outputs.sha }}
+      new_tag: ${{ steps.check.outputs.new_tag }}
+
     steps:
-    - uses: actions/checkout@v3.3.0
+    - name: Checkout
+      uses: actions/checkout@v7
       with:
+        fetch-depth: 0
+        # The project imports OpenSongChart's shared items
         submodules: recursive
 
-    - name: Run Image Processor
-      working-directory: ${{github.workspace}}
-      run: |
-        dotnet build -c Release ChartPlayerImageProcessor
-        cd ChartPlayerImageProcessor\bin\Release\net10.0
-        .\ChartPlayerImageProcessor.exe
-        
-    - name: Build VST Plugin
-      working-directory: ${{github.workspace}}
-      run: dotnet build -c Release ChartPlayerPlugin
-      
-    - name: Add Plugin Archive
-      working-directory: ${{github.workspace}}
-      run: |
-        mkdir plugin-build
-        move ChartPlayerPlugin\bin\Release\net10.0-windows plugin-build\ChartPlayer
-        cp ChartPlayerPlugin\README.txt plugin-build
-        Compress-Archive -Path plugin-build\* -Destination ChartPlayerVST3Plugin.zip
-    
-    - name: Upload Plugin Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
       with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./ChartPlayerVST3Plugin.zip
-        asset_name: ChartPlayerVST3Plugin.zip
-        asset_content_type: application/zip
+        dotnet-version: 10.0.x
 
-    - name: Publish Linux-x64
-      working-directory: ${{github.workspace}}
-      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime linux-x64 -p:PublishSingleFile=true --self-contained true
-
-    - name: Add Linux-x64 Archive
-      working-directory: ${{github.workspace}}
+    - name: Check the version and the tag
+      id: check
       run: |
-        mkdir linux-x64-build
-        move ChartPlayerJack\bin\Release\net10.0\linux-x64\publish linux-x64-build\ChartPlayer
-        Compress-Archive -Path linux-x64-build\* -Destination ChartPlayerLinux.zip
+        version=$(dotnet msbuild ChartPlayerPlugin/ChartPlayerPlugin.csproj -nologo -getProperty:Version | tr -d '[:space:]')
+        if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+          echo "The project's version '$version' isn't like 0.1.0 (or 0.1.0-beta.1)."; exit 1
+        fi
 
-    - name: Upload Linux-x64 Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        tag="v$version"
+        if [ -n "$REQUESTED_TAG" ] && [ "$REQUESTED_TAG" != "$tag" ]; then
+          echo "The tag asked for is $REQUESTED_TAG, but the project's version makes it $tag."; exit 1
+        fi
+
+        # gh release view finds drafts too
+        if gh release view "$tag" --json isDraft > release.json 2> /dev/null; then
+          if [ "$(jq -r .isDraft release.json)" = "true" ]; then
+            echo "There's a draft release $tag. Delete it on GitHub, then run this again."
+          else
+            echo "$tag is already released: bump the project's version."
+          fi
+          exit 1
+        fi
+
+        rm release.json
+
+        sha=$(git rev-parse HEAD)
+        if existing=$(git rev-parse -q --verify "refs/tags/$tag^{commit}"); then
+          if [ "$existing" != "$sha" ]; then
+            echo "$tag is on $existing, not this commit ($sha): bump the project's version, or run this from the tag."
+            exit 1
+          fi
+
+          echo "$tag is already on this commit: reusing it."
+          new_tag=false
+        else
+          echo "$tag is new: it will be made on $sha."
+          new_tag=true
+        fi
+
+        {
+          echo "version=$version"
+          echo "tag=$tag"
+          echo "sha=$sha"
+          echo "new_tag=$new_tag"
+        } >> "$GITHUB_OUTPUT"
+
+  # The packages, as Build makes them (package.yml), of the commit checked, with the version checked
+  package:
+    needs: check
+    uses: ./.github/workflows/package.yml
+    with:
+      version: ${{ needs.check.outputs.version }}
+      ref: ${{ needs.check.outputs.sha }}
+
+  release:
+    name: Release (${{ needs.check.outputs.tag }})
+    needs: [check, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+      TAG: ${{ needs.check.outputs.tag }}
+      SHA: ${{ needs.check.outputs.sha }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
       with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./ChartPlayerLinux.zip
-        asset_name: ChartPlayerLinux.zip
-        asset_content_type: application/zip
-      
-    - name: Publish OSX-x64
-      working-directory: ${{github.workspace}}
-      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime osx-x64 -p:PublishSingleFile=true --self-contained true
+        fetch-depth: 0
 
-    - name: Add OSX-x64 Archive
-      working-directory: ${{github.workspace}}
+    - name: Download the packages
+      uses: actions/download-artifact@v4
+      with:
+        pattern: package-*
+        path: packages
+        merge-multiple: true
+
+    - name: Push the tag
+      if: needs.check.outputs.new_tag == 'true'
       run: |
-        mkdir osx-x64-build
-        move ChartPlayerJack\bin\Release\net10.0\osx-x64\publish osx-x64-build\ChartPlayer
-        Compress-Archive -Path osx-x64-build\* -Destination ChartPlayerMacX64.zip
+        git tag "$TAG" "$SHA"
 
-    - name: Upload OSX-x64 Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./ChartPlayerMacX64.zip
-        asset_name: ChartPlayerMacX64.zip
-        asset_content_type: application/zip
+        git push origin "refs/tags/$TAG"
 
-    - name: Publish OSX-arm64
-      working-directory: ${{github.workspace}}
-      run: dotnet publish .\ChartPlayerJack\ChartPlayerJack.csproj --runtime osx-arm64 -p:PublishSingleFile=true --self-contained true
-
-    - name: Add OSX-arm64 Archive
-      working-directory: ${{github.workspace}}
+    - name: Create the draft release
       run: |
-        mkdir osx-arm64-build
-        move ChartPlayerJack\bin\Release\net10.0\osx-arm64\publish osx-arm64-build\ChartPlayer
-        Compress-Archive -Path osx-arm64-build\* -Destination ChartPlayerMacArm64.zip
-        
-    - name: Upload OSX-arm64 Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./ChartPlayerMacArm64.zip
-        asset_name: ChartPlayerMacArm64.zip
-        asset_content_type: application/zip
+        flags=()
+        if [[ "$VERSION" == *-* ]]; then flags+=(--prerelease); fi
+
+        assets=(packages/ChartPlayer-"$VERSION"-win-x64.zip packages/ChartPlayer-"$VERSION"-linux-x64.zip
+                packages/ChartPlayer-"$VERSION"-setup.exe)
+        for f in "${assets[@]}"; do
+          [ -f "$f" ] || { echo "missing $f"; ls packages; exit 1; }
+        done
+
+        gh release create "$TAG" "${assets[@]}" \
+          --verify-tag --draft --title "ChartPlayer $VERSION" --notes "" "${flags[@]}"

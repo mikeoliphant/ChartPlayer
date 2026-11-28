@@ -16,4 +16,6 @@
 		<ProjectReference Include="..\Dependencies\AudioPlugSharp\AudioPlugSharpStandalone\AudioPlugSharpStandalone.csproj" />
 		<ProjectReference Include="..\ChartPlayerPlugin\ChartPlayerPlugin.csproj" />
 	</ItemGroup>
+	<!-- A publish puts only the executable in the publish folder, everything else in lib -->
+	<Import Project="..\Dependencies\AudioPlugSharp\AudioPlugSharpStandalone\build\AppPublish.targets" />
 </Project>
